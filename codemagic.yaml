@@ -12,6 +12,14 @@ workflows:
     environment:
       flutter: stable
     scripts:
+      - name: Decode keystore
+        script: echo $CM_KEYSTORE | base64 --decode > $FCI_BUILD_DIR/keystore.jks
+      - name: Generate key.properties
+        script: |
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" > android/key.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$CM_KEY_ALIAS" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
       - name: Install packages
         script: flutter pub get
       - name: Analyze code
@@ -20,14 +28,8 @@ workflows:
         script: flutter test
       - name: Build APK
         script: flutter build apk --release
-      - name: Decode keystore
-        script: echo $CM_KEYSTORE | base64 --decode > $FCI_BUILD_DIR/keystore.jks
-      - name: Build release
-        script: |
-          flutter build appbundle \
-            --release \
-            --dart-define=KEY_ALIAS=$CM_KEY_ALIAS \
-            --dart-define=KEY_PASSWORD=$CM_KEY_PASSWORD \
-            --dart-define=KEYSTORE_PASSWORD=$CM_KEYSTORE_PASSWORD
+      - name: Build AAB
+        script: flutter build appbundle --release
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
