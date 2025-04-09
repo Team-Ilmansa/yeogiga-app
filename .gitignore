@@ -43,3 +43,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Android keystore
+*.jks
+*.keystore
+
+# iOS code signing
+*.p12
+*.mobileprovision
+
+# API keys
+*.json
+
+# 기타 비밀 정보
+.env
+*.pem
