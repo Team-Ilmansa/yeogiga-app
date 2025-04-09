@@ -1,0 +1,24 @@
+workflows:
+  flutter-app-ci:
+    name: yeogiga Android CI
+    instance_type: mac_mini_m2
+    max_build_duration: 20
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    environment:
+      flutter: stable
+    scripts:
+      - name: Install packages
+        script: flutter pub get
+      - name: Analyze code
+        script: flutter analyze
+      - name: Run tests
+        script: flutter test
+      - name: Build APK
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
