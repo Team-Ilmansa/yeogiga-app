@@ -20,5 +20,14 @@ workflows:
         script: flutter test
       - name: Build APK
         script: flutter build apk --release
+      - name: Decode keystore
+        script: echo $CM_KEYSTORE | base64 --decode > $FCI_BUILD_DIR/keystore.jks
+      - name: Build release
+        script: |
+          flutter build appbundle \
+            --release \
+            --dart-define=KEY_ALIAS=$CM_KEY_ALIAS \
+            --dart-define=KEY_PASSWORD=$CM_KEY_PASSWORD \
+            --dart-define=KEYSTORE_PASSWORD=$CM_KEYSTORE_PASSWORD
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
