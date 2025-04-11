@@ -1,7 +1,7 @@
 workflows:
-  flutter-app-ci:
-    name: yeogiga Android CI
-    instance_type: mac_mini_m2
+  flutter-android:
+    name: Yeogiga Android Build
+    instance_type: mac_mini_m2  # Codemagic이 쓸 맥 머신
     max_build_duration: 20
     triggering:
       events:
@@ -9,16 +9,37 @@ workflows:
       branch_patterns:
         - pattern: main
           include: true
+
     environment:
       flutter: stable
+
     scripts:
-      - name: Install packages
+      - name: 🔐 Decode keystore
+        script: echo $CM_KEYSTORE | base64 --decode > $FCI_BUILD_DIR/keystore.jks
+
+      - name: 📄 Generate key.properties
+        script: |
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" > android/key.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$CM_KEY_ALIAS" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      - name: 📦 Install dependencies
         script: flutter pub get
-      - name: Analyze code
+
+      - name: ✅ Analyze code
         script: flutter analyze
-      - name: Run tests
+
+      - name: 🧪 Run tests
         script: flutter test
-      - name: Build APK
-        script: flutter build apk --release
+
+      - name: 🛠 Build AAB
+        script: flutter build appbundle --release
+
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
