@@ -12,6 +12,8 @@ workflows:
 
     environment:
       flutter: stable
+      groups:
+        - android_release_signing
 
     scripts:
       - name: 🔐 Decode keystore
