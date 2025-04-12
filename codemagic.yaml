@@ -43,11 +43,11 @@ workflows:
           VERSION_LINE=$(grep '^version:' pubspec.yaml)
           VERSION_NAME=$(echo $VERSION_LINE | cut -d '+' -f 1 | awk '{print $2}')
           VERSION_CODE=$(echo $VERSION_LINE | cut -d '+' -f 2)
-          
+
           flutter build appbundle --build-name=$VERSION_NAME --build-number=$VERSION_CODE
 
-    artifacts:
-      - build/app/outputs/bundle/release/app-release.aab
+    # artifacts:
+    #   - build/app/outputs/bundle/release/app-release.aab
 
     publishing:
       google_play:
