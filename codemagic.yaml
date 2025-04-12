@@ -17,7 +17,7 @@ workflows:
 
     scripts:
       - name: 🔐 Decode keystore
-        script: echo $CM_KEYSTORE | base64 --decode > $FCI_BUILD_DIR/keystore.jks
+        script: echo $CM_KEYSTORE | base64 --decode > android/app/keystore.jks
 
       - name: 📄 Generate key.properties
         script: |
