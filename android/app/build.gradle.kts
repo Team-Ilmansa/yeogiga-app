@@ -1,9 +1,9 @@
 import java.util.Properties
-import java.io.FileInputStream
 
 // 🔐 keystore 설정 로딩
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
+
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
@@ -25,9 +25,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
+    kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
 
     defaultConfig {
         applicationId = "com.ilmansa.yeogiga.yeogiga"
@@ -56,6 +54,4 @@ android {
     }
 }
 
-flutter {
-    source = "../.."
-}
+flutter { source = "../.." }
