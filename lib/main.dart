@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:yeogiga/common/view/splash_screnn.dart';
+import 'package:yeogiga/user/view/home_screen.dart';
+import 'package:yeogiga/user/view/screen_wrapper.dart';
 
 void main() {
-  runApp(const SplashScrenn());
+  runApp(MaterialApp(home: ScreenWrapper(), debugShowCheckedModeBanner: false));
 }
