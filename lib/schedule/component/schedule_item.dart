@@ -29,9 +29,9 @@ class ScheduleItem extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 SvgPicture.asset(
-                  'asset/icon/category spot.svg',
-                  width: 25,
-                  height: 25,
+                  'asset/icon/category icon.svg',
+                  width: 26,
+                  height: 26,
                 ),
                 Positioned(
                   bottom: 0,
@@ -66,6 +66,7 @@ class ScheduleItem extends StatelessWidget {
                       color: textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      height: 1,
                     ),
                   ),
                   if (done)
