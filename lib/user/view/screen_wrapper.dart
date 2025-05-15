@@ -72,6 +72,7 @@ class _ScreenWrapperState extends State<ScreenWrapper> {
     );
   }
 
+  // 하단 바 버튼 UI
   Widget _buildTabButton(int index, String assetPath, String title) {
     final isSelected = _selectedIndex == index;
     return GestureDetector(

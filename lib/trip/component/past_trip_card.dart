@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:yeogiga/common/component/trip_name_card.dart';
 
 class PastTripCardList extends StatelessWidget {
   const PastTripCardList({super.key});
@@ -54,44 +55,17 @@ class PastTripCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 5),
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'asset/icon/marker-pin-01.svg',
-                    width: 17,
-                    height: 17,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    "경주시, 포항시",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
+              TripNameCardByAsset(
+                assetUrl: 'asset/icon/marker-pin-01.svg',
+                name: '경주시, 포항시',
+                color: Colors.white,
               ),
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'asset/icon/calendar.svg',
-                    width: 17,
-                    height: 17,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    "2025.03.17 - 2025.03.20",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
+              TripNameCardByAsset(
+                assetUrl: 'asset/icon/calendar.svg',
+                name: "2025.03.17 - 2025.03.20",
+                color: Colors.white,
               ),
+
               SizedBox(height: 3),
               Row(
                 children: [

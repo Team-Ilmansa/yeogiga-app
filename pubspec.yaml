@@ -38,6 +38,7 @@ dependencies:
   dio: ^5.8.0+1
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.0.7
+  flutter_sliding_up_panel: ^2.1.1
 
 dev_dependencies:
   flutter_test:
