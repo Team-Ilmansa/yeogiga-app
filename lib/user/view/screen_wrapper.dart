@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yeogiga/user/view/home_screen.dart';
+import 'package:yeogiga/user/view/my_page.dart';
 
 class ScreenWrapper extends StatefulWidget {
+  static String get routeName => 'screenWrapper';
+
   const ScreenWrapper({super.key});
 
   @override
@@ -67,7 +70,7 @@ class _ScreenWrapperState extends State<ScreenWrapper> {
 
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [HomeScreen(), Center(child: Text('마이페이지'))],
+        children: const [HomeScreen(), MyPage()],
       ),
     );
   }

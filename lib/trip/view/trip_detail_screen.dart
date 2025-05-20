@@ -90,13 +90,12 @@ class _TripDetailScreenState extends State<TripDetailScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 1)],
-          color: Colors.transparent,
+          color: Colors.white,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: BottomAppBar(
-            elevation: 0,
-            color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 25),
             child: Builder(
               builder: (context) {
                 if (bottomAppBarState == 1) {
