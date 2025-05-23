@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/main_trip/view/home_screen.dart';
-import 'package:yeogiga/trip/repository/trip_repository.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/view/my_page.dart';
 import 'package:yeogiga/trip/component/trip_name_dialog.dart';
 
@@ -34,23 +35,18 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
           child: FloatingActionButton(
             onPressed: () async {
               final nameController = TextEditingController();
-              final destinationController = TextEditingController();
               await showDialog(
                 context: context,
                 barrierDismissible: true,
                 builder:
                     (context) => TripNameDialog(
                       nameController: nameController,
-                      destinationController: destinationController,
                       onConfirm: () async {
-                        bool didPost = await ref
-                            .read(tripRepositoryProvider)
-                            .postTrip(
-                              title: nameController.text,
-                              city: destinationController.text,
-                            );
+                        TripBaseModel trip = await ref
+                            .read(tripProvider.notifier)
+                            .postTrip(title: nameController.text);
                         //혹시나 해서 실패했을 경우 만듬
-                        if (!didPost) {
+                        if (trip is! SettingTripModel) {
                           GoRouter.of(context).pop(); // 기존 다이얼로그 닫기
                           await showDialog(
                             context: context,

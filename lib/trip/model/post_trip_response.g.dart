@@ -6,34 +6,22 @@ part of 'post_trip_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PostTripResponse<T> _$PostTripResponseFromJson<T>(
-  Map<String, dynamic> json,
-  T Function(Object? json) fromJsonT,
-) => PostTripResponse<T>(
-  response: ResponseModel<T?>.fromJson(
-    json['response'] as Map<String, dynamic>,
-    (value) => _$nullableGenericFromJson(value, fromJsonT),
-  ),
-);
+PostTripResponse _$PostTripResponseFromJson(Map<String, dynamic> json) =>
+    PostTripResponse(
+      code: json['code'],
+      message: json['message'] as String,
+      data:
+          json['data'] == null
+              ? null
+              : PostTripData.fromJson(json['data'] as Map<String, dynamic>),
+    );
 
-Map<String, dynamic> _$PostTripResponseToJson<T>(
-  PostTripResponse<T> instance,
-  Object? Function(T value) toJsonT,
-) => <String, dynamic>{
-  'response': instance.response.toJson(
-    (value) => _$nullableGenericToJson(value, toJsonT),
-  ),
-};
-
-T? _$nullableGenericFromJson<T>(
-  Object? input,
-  T Function(Object? json) fromJson,
-) => input == null ? null : fromJson(input);
-
-Object? _$nullableGenericToJson<T>(
-  T? input,
-  Object? Function(T value) toJson,
-) => input == null ? null : toJson(input);
+Map<String, dynamic> _$PostTripResponseToJson(PostTripResponse instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'message': instance.message,
+      'data': instance.data,
+    };
 
 PostTripData _$PostTripDataFromJson(Map<String, dynamic> json) =>
     PostTripData(tripId: (json['tripId'] as num).toInt());

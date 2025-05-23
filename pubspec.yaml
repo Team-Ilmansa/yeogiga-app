@@ -59,12 +59,13 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.0
   json_serializable: ^6.7.1
+  retrofit_generator: 9.2.0
 
-# json_serializable 설정
+# json_serializable 설정 중요!!!!!!!!!!!!!!!
 json_serializable:
   generic_argument_factories: true
 
-  retrofit_generator: ^9.2.0
+  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

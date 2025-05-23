@@ -3,13 +3,11 @@ import 'package:go_router/go_router.dart';
 
 class TripNameDialog extends StatefulWidget {
   final TextEditingController nameController;
-  final TextEditingController destinationController;
   final VoidCallback? onConfirm;
 
   const TripNameDialog({
     super.key,
     required this.nameController,
-    required this.destinationController,
     this.onConfirm,
   });
 
@@ -18,21 +16,17 @@ class TripNameDialog extends StatefulWidget {
 }
 
 class _TripNameDialogState extends State<TripNameDialog> {
-  bool get _canConfirm =>
-      widget.nameController.text.trim().isNotEmpty &&
-      widget.destinationController.text.trim().isNotEmpty;
+  bool get _canConfirm => widget.nameController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
     widget.nameController.addListener(_onTextChanged);
-    widget.destinationController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
     widget.nameController.removeListener(_onTextChanged);
-    widget.destinationController.removeListener(_onTextChanged);
     super.dispose();
   }
 
@@ -102,29 +96,6 @@ class _TripNameDialogState extends State<TripNameDialog> {
                       borderSide: BorderSide.none,
                     ),
                     hintText: '여행 이름',
-                    hintStyle: const TextStyle(
-                      color: Colors.black38,
-                      fontSize: 20,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                  ),
-                  style: const TextStyle(fontSize: 20),
-                  maxLength: 20,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: widget.destinationController,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color(0xFFf0f0f0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
-                    ),
-                    hintText: '여행 목적지',
                     hintStyle: const TextStyle(
                       color: Colors.black38,
                       fontSize: 20,
