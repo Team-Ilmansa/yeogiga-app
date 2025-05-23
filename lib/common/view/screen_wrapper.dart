@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:yeogiga/user/view/home_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yeogiga/main_trip/view/home_screen.dart';
+import 'package:yeogiga/trip/repository/trip_repository.dart';
 import 'package:yeogiga/user/view/my_page.dart';
+import 'package:yeogiga/trip/component/trip_name_dialog.dart';
 
-class ScreenWrapper extends StatefulWidget {
+class ScreenWrapper extends ConsumerStatefulWidget {
   static String get routeName => 'screenWrapper';
 
   const ScreenWrapper({super.key});
 
   @override
-  State<ScreenWrapper> createState() => _ScreenWrapperState();
+  ConsumerState<ScreenWrapper> createState() => _ScreenWrapperState();
 }
 
-class _ScreenWrapperState extends State<ScreenWrapper> {
+class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
   int _selectedIndex = 0;
 
   @override
@@ -28,8 +32,57 @@ class _ScreenWrapperState extends State<ScreenWrapper> {
           width: 80,
           height: 80,
           child: FloatingActionButton(
-            onPressed: () {
-              print('중앙 버튼 눌림');
+            onPressed: () async {
+              final nameController = TextEditingController();
+              final destinationController = TextEditingController();
+              await showDialog(
+                context: context,
+                barrierDismissible: true,
+                builder:
+                    (context) => TripNameDialog(
+                      nameController: nameController,
+                      destinationController: destinationController,
+                      onConfirm: () async {
+                        bool didPost = await ref
+                            .read(tripRepositoryProvider)
+                            .postTrip(
+                              title: nameController.text,
+                              city: destinationController.text,
+                            );
+                        //혹시나 해서 실패했을 경우 만듬
+                        if (!didPost) {
+                          GoRouter.of(context).pop(); // 기존 다이얼로그 닫기
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder:
+                                (context) => Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: SizedBox(
+                                    height: 150,
+                                    child: Center(
+                                      child: Text(
+                                        '여행 생성에 실패했어요! ㅠㅠ',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                          );
+                        } else {
+                          GoRouter.of(
+                            context,
+                          ).pushReplacement('/dateRangePicker');
+                        }
+                      },
+                    ),
+              );
             },
             backgroundColor: const Color(0xFF8287FF),
             shape: const CircleBorder(),

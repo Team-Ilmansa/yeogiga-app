@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/common/model/login_response.dart';
+import 'package:yeogiga/common/model/login_response_wrapper.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final dio = ref.watch(dioProvider);
@@ -16,8 +17,7 @@ class AuthRepository {
 
   AuthRepository({required this.baseUrl, required this.dio});
 
-  //로그인
-  Future<LoginResponse> login({
+  Future<LoginResponseWrapper> login({
     required String username,
     required String password,
   }) async {
@@ -30,10 +30,9 @@ class AuthRepository {
       data: {'username': username, 'password': password},
     );
 
-    return LoginResponse.fromJson(resp.data['data']);
+    return LoginResponseWrapper.fromJson(resp.data);
   }
 
-  // 토큰들 재발급
   Future<LoginResponse> token() async {
     final resp = await dio.post(
       '$baseUrl/api/v1/auth/reissue',

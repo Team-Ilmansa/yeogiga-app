@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/secure_storage/secure_storage.dart';
+import 'package:yeogiga/user/provider/user_me_provider.dart';
 
 // 디오 항상 살아있도록
 final dioProvider = Provider<Dio>((ref) {
@@ -76,6 +77,23 @@ class CustomInterceptor extends Interceptor {
     // 다시 새로운 토큰으로 요청을한다.
     print('[ERR] [${err.requestOptions.method}] ${err.requestOptions.uri}');
 
+    print('[DioException] status: ${err.response?.statusCode}');
+    print('[DioException] headers: ${err.response?.headers}');
+    print('[DioException] data: ${err.response?.data}');
+
+    // onError에서 처리하고 싶지 않은 것들은 여기에 하나씩 추가
+    //아이디 중복, 닉네임 중복
+    final path = err.requestOptions.path;
+    if (path == '/api/v1/auth/dup-check/username' ||
+        path == '/api/v1/auth/dup-check/nickname' ||
+        path == '/api/v1/auth/sign-up' ||
+        path == '/api/v1/users' ||
+        path == '/api/v1/trip') {
+      // 응답 전체 출력 (디버깅용)
+
+      return handler.reject(err);
+    }
+
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
 
     // refreshToken 아예 없으면
@@ -86,10 +104,11 @@ class CustomInterceptor extends Interceptor {
     }
     print(1);
 
-    final isStatus401 = err.response?.statusCode == 401;
+    final isStatus404 = err.response?.statusCode == 404;
+    final isStatus500 = err.response?.statusCode == 500;
     final isPathRefresh = err.requestOptions.path == '/api/v1/auth/reissue';
 
-    if (isStatus401 && !isPathRefresh) {
+    if (isStatus404 && isStatus500 && !isPathRefresh) {
       final dio = Dio();
 
       print(3);
@@ -126,7 +145,7 @@ class CustomInterceptor extends Interceptor {
         // A는 B의 친구구나
         // A -> B -> A -> B -> A -> B
         // ump -> dio -> ump -> dio
-        // ref.read(authProvider.notifier).logout();
+        ref.read(userMeProvider.notifier).logout();
 
         return handler.reject(e);
       }
