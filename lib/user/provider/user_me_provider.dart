@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:yeogiga/common/const/data.dart';
@@ -44,9 +45,12 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       return;
     }
 
-    final resp = await repository.getMe();
-
-    state = resp;
+    try {
+      final resp = await repository.getMe();
+      state = resp;
+    } on DioException catch (e) {
+      state = UserModelError(message: '유저 정보 불러오기 실패');
+    }
   }
 
   //로그인하기
@@ -55,6 +59,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
     required String password,
   }) async {
     try {
+      print('login start');
       state = UserModelLoading();
 
       final resp = await authRepository.login(
@@ -62,18 +67,22 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         password: password,
       );
 
-      await storage.write(key: REFRESH_TOKEN_KEY, value: resp.refreshToken);
-      await storage.write(key: ACCESS_TOKEN_KEY, value: resp.accessToken);
+      // code와 data로 성공/실패 판단
+      if (resp.code != 200 || resp.data == null) {
+        state = UserModelError(message: resp.message);
+        return state!;
+      }
 
+      await storage.write(
+        key: REFRESH_TOKEN_KEY,
+        value: resp.data!.refreshToken,
+      );
+      await storage.write(key: ACCESS_TOKEN_KEY, value: resp.data!.accessToken);
+
+      print('start get me');
       final userResp = await repository.getMe();
-      // // 여기서 반드시 체크!
-      // if (userResp.data == null) {
-      //   state = UserModelError(message: '유저 정보 없음');
-      //   return state!;
-      // }
-
-      print(userResp.data!.email);
       state = userResp;
+      print('login end');
       return userResp;
     } catch (e) {
       state = UserModelError(message: '로그인에 실패했습니다.');
