@@ -1,0 +1,42 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/trip/repository/trip_repository.dart';
+
+//프로바이더 등록!!
+final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
+  ref,
+) {
+  final tripRepository = ref.watch(tripRepositoryProvider);
+
+  return TripStateNotifier(tripRepository: tripRepository);
+});
+
+//프로바이더 구성요소!!
+class TripStateNotifier extends StateNotifier<TripBaseModel?> {
+  final TripRepository tripRepository;
+
+  TripStateNotifier({required this.tripRepository}) : super(null);
+
+  /// 포스트하고 결과 돌려받고,
+  /// 결과로 여행 불러오고, 상태등록 까지
+  Future<TripBaseModel> postTrip({required String title}) async {
+    try {
+      final postTripResponse = await tripRepository.postTrip(title: title);
+
+      if (postTripResponse.data != null) {
+        final getTripResponse = await tripRepository.getTripByTripId(
+          tripId: postTripResponse.data!.tripId,
+        );
+
+        //생성하면 어차피 무조건 Setting 상태여서 바로 적용
+        state = SettingTripModel(trip: getTripResponse.data!);
+        return state!;
+      } else {
+        state = NoTripModel();
+        return state!;
+      }
+    } on Exception catch (e) {
+      return NoTripModel();
+    }
+  }
+}
