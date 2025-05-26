@@ -10,6 +10,7 @@ TripModel _$TripModelFromJson(Map<String, dynamic> json) => TripModel(
   tripId: (json['tripId'] as num).toInt(),
   title: json['title'] as String,
   city: json['city'] as String?,
+  leaderId: (json['leaderId'] as num).toInt(),
   startedAt: json['startedAt'] as String?,
   endedAt: json['endedAt'] as String?,
   status: $enumDecode(_$TripStatusEnumMap, json['status']),
@@ -23,6 +24,7 @@ Map<String, dynamic> _$TripModelToJson(TripModel instance) => <String, dynamic>{
   'tripId': instance.tripId,
   'title': instance.title,
   'city': instance.city,
+  'leaderId': instance.leaderId,
   'startedAt': instance.startedAt,
   'endedAt': instance.endedAt,
   'status': _$TripStatusEnumMap[instance.status]!,
@@ -33,12 +35,13 @@ const _$TripStatusEnumMap = {
   TripStatus.SETTING: 'SETTING',
   TripStatus.PLANNED: 'PLANNED',
   TripStatus.IN_PROGRESS: 'IN_PROGRESS',
+  TripStatus.COMPLETED: 'COMPLETED',
 };
 
 TripMember _$TripMemberFromJson(Map<String, dynamic> json) => TripMember(
   userId: (json['userId'] as num).toInt(),
   nickname: json['nickname'] as String,
-  imageUrl: json['imageUrl'] as String,
+  imageUrl: json['imageUrl'] as String?,
 );
 
 Map<String, dynamic> _$TripMemberToJson(TripMember instance) =>

@@ -47,42 +47,46 @@ class _TripNameDialogState extends State<TripNameDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //다이얼로그 헤더
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 1),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 28),
-                      onPressed: () => GoRouter.of(context).pop(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 1),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 28),
+                        onPressed: () => GoRouter.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    '여행 이름을 설정해주세요',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff313131),
+                      letterSpacing: -0.4,
+                      height: -0.0,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  '여행 이름을 설정해주세요',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff313131),
-                    letterSpacing: -0.4,
-                    height: -0.0,
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '추후 수정이 가능해요',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Color(0xff7d7d7d),
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: -0.3,
+                  const SizedBox(height: 8),
+                  const Text(
+                    '추후 수정이 가능해요',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color(0xff7d7d7d),
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.3,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 26),
             //텍스트 필드 부분
             Column(
               children: [
@@ -110,14 +114,14 @@ class _TripNameDialogState extends State<TripNameDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
             //버튼 부분
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 SizedBox(
                   width: 140,
-                  height: 60,
+                  height: 65,
                   child: ElevatedButton(
                     onPressed: _canConfirm ? widget.onConfirm : null,
                     style: ElevatedButton.styleFrom(
