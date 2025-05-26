@@ -69,7 +69,7 @@ class _TripDateRangePickerScreenState
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
             // 2. 무한 스크롤 달력 영역
             Expanded(
               child: ListView.builder(
@@ -137,7 +137,7 @@ class _TripDateRangePickerScreenState
                               ? const Color(0xff6d8fff)
                               : const Color(0xffbdbdbd)),
                   fontWeight: FontWeight.w600,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -186,7 +186,7 @@ class _TripDateRangePickerScreenState
                   });
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 3),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration:
                       isSelected
                           ? BoxDecoration(
@@ -221,8 +221,19 @@ class _TripDateRangePickerScreenState
                             color:
                                 isRangeEdge
                                     ? Colors.white
-                                    : const Color(0xff313131),
-                            fontSize: 18,
+                                    : ( // range 내부(시작/끝 제외)
+                                    (_startDate != null &&
+                                            _endDate != null &&
+                                            thisDay.isAfter(_startDate!) &&
+                                            thisDay.isBefore(_endDate!))
+                                        ? const Color(0xff8287ff)
+                                        : (thisDay.weekday == DateTime.sunday
+                                            ? const Color(0xfff65a5a)
+                                            : (thisDay.weekday ==
+                                                    DateTime.saturday
+                                                ? const Color(0xff6d8fff)
+                                                : const Color(0xff313131)))),
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -246,7 +257,7 @@ class _TripDateRangePickerScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 30),
             child: Text(
               '${month.year}년 ${month.month}월',
               style: const TextStyle(

@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'trip_model.g.dart';
 
-enum TripStatus { SETTING, PLANNED, IN_PROGRESS }
+enum TripStatus { SETTING, PLANNED, IN_PROGRESS, COMPLETED }
 
 class TripBaseModel {}
 
@@ -16,6 +16,7 @@ class SettingTripModel extends TripModel {
         tripId: trip.tripId,
         title: trip.title,
         city: trip.city,
+        leaderId: trip.leaderId,
         startedAt: trip.startedAt,
         endedAt: trip.endedAt,
         status: trip.status,
@@ -30,6 +31,7 @@ class PlannedTripModel extends TripModel {
         tripId: trip.tripId,
         title: trip.title,
         city: trip.city,
+        leaderId: trip.leaderId,
         startedAt: trip.startedAt,
         endedAt: trip.endedAt,
         status: trip.status,
@@ -44,6 +46,22 @@ class InProgressTripModel extends TripModel {
         tripId: trip.tripId,
         title: trip.title,
         city: trip.city,
+        leaderId: trip.leaderId,
+        startedAt: trip.startedAt,
+        endedAt: trip.endedAt,
+        status: trip.status,
+        members: trip.members,
+      );
+}
+
+// 끝난 여행
+class CompletedTripModel extends TripModel {
+  CompletedTripModel({required TripModel trip})
+    : super(
+        tripId: trip.tripId,
+        title: trip.title,
+        city: trip.city,
+        leaderId: trip.leaderId,
         startedAt: trip.startedAt,
         endedAt: trip.endedAt,
         status: trip.status,
@@ -57,6 +75,7 @@ class TripModel extends TripBaseModel {
   final int tripId;
   final String title;
   final String? city;
+  final int leaderId;
   final String? startedAt;
   final String? endedAt;
   final TripStatus status;
@@ -66,6 +85,7 @@ class TripModel extends TripBaseModel {
     required this.tripId,
     required this.title,
     required this.city,
+    required this.leaderId,
     required this.startedAt,
     required this.endedAt,
     required this.status,
@@ -83,7 +103,7 @@ class TripModel extends TripBaseModel {
 class TripMember {
   final int userId;
   final String nickname;
-  final String imageUrl;
+  final String? imageUrl;
 
   TripMember({
     required this.userId,

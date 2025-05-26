@@ -4,7 +4,6 @@ import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/trip/model/get_trip_response.dart';
 import 'package:yeogiga/trip/model/post_trip_response.dart';
-import 'package:yeogiga/trip/model/trip_model.dart';
 
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   final dio = ref.watch(dioProvider);

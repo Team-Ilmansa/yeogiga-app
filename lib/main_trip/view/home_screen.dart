@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       color: Color.fromARGB(255, 248, 248, 248),
       child: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
         child: SafeArea(
           top: false,
           bottom: true,
