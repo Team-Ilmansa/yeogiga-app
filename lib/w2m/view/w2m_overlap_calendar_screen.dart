@@ -4,6 +4,7 @@ import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
 // 필요시: import 'package:yeogiga/user/provider/user_me_provider.dart';
 
 class W2MOverlapCalendarScreen extends ConsumerStatefulWidget {
+  static String get routeName => 'W2mConfirmScreen';
   const W2MOverlapCalendarScreen({super.key});
 
   @override

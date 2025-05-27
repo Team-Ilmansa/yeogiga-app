@@ -31,7 +31,7 @@ class UserW2mStateNotifier extends StateNotifier<UserW2mBaseModel?> {
         return state!;
       }
     } on Exception catch (e) {
-      state = UserW2mBaseModel();
+      state = NoUserW2mModel();
       return state!;
     }
   }
