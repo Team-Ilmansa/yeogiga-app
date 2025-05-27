@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/repository/trip_repository.dart';
+import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
+import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 
 //프로바이더 등록!!
 final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
@@ -8,14 +10,16 @@ final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
 ) {
   final tripRepository = ref.watch(tripRepositoryProvider);
 
-  return TripStateNotifier(tripRepository: tripRepository);
+  return TripStateNotifier(tripRepository: tripRepository, ref: ref);
 });
 
 //프로바이더 구성요소!!
 class TripStateNotifier extends StateNotifier<TripBaseModel?> {
+  final Ref ref;
   final TripRepository tripRepository;
 
-  TripStateNotifier({required this.tripRepository}) : super(null);
+
+  TripStateNotifier({required this.tripRepository, required this.ref}) : super(null);
 
   /// 포스트하고 결과 돌려받고,
   /// 결과로 여행 불러오고, 상태등록 까지
@@ -37,6 +41,44 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
       }
     } on Exception catch (e) {
       return NoTripModel();
+    }
+  }
+
+  /// 여행 불러오기.
+  /// 여행 정보, 본인의 w2m, 여행의 w2m 불러와서 각각 상태저장
+  Future<TripBaseModel> getTrip({required int tripId}) async {
+    try{
+      final getTripResponse = await tripRepository.getTripByTripId(tripId: tripId);
+      if (getTripResponse.data == null) {
+        state = NoTripModel();
+        return state!;
+      }
+
+      final tripData = getTripResponse.data!;
+      switch (tripData.status) {
+        case TripStatus.SETTING:
+          state = SettingTripModel(trip: tripData);
+          break;
+        case TripStatus.PLANNED:
+          state = PlannedTripModel(trip: tripData);
+          break;
+        case TripStatus.IN_PROGRESS:
+          state = InProgressTripModel(trip: tripData);
+          break;
+        case TripStatus.COMPLETED:
+          state = CompletedTripModel(trip: tripData);
+          break;
+        default:
+          state = NoTripModel();
+      }
+
+      final userW2mResponse = await ref.read(userW2mProvider.notifier).getUserW2m(tripId: tripId);
+      final tripW2mResponse = await ref.read(tripW2mProvider(tripId).future);
+      return state!;
+
+    } on Exception catch (e) {
+      state = NoTripModel();
+      return state!;
     }
   }
 }

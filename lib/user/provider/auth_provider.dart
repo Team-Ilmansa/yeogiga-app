@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/trip/view/trip_date_range_picker_screen.dart';
+import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/user/view/login_screen.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/view/register_flow_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
+import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider(ref: ref);
@@ -51,6 +53,16 @@ class AuthProvider extends ChangeNotifier {
       name: TripDateRangePickerScreen.routeName,
       builder: (_, __) => TripDateRangePickerScreen(),
     ),
+    GoRoute(
+      path: '/tripDetailScreen',
+      name: TripDetailScreen.routeName,
+      builder: (_, __) => TripDetailScreen(),
+    ),
+    GoRoute(
+      path:'/W2mConfirmScreen',
+      name: W2MOverlapCalendarScreen.routeName,
+      builder: (_, __) => W2MOverlapCalendarScreen(),
+    )
   ];
 
   // SplashScreen
