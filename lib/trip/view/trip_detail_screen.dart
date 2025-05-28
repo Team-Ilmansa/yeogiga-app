@@ -8,6 +8,7 @@ import 'package:yeogiga/trip/component/notice_card_ping.dart';
 import 'package:yeogiga/common/component/trip_name_card.dart';
 
 class TripDetailScreen extends StatefulWidget {
+  static String get routeName => 'tripDetailScreen';
   const TripDetailScreen({super.key});
 
   @override

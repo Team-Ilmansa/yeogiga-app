@@ -228,7 +228,7 @@ class _ScheduleItemListState extends State<ScheduleItemList>
             ),
           ),
           Transform.translate(
-            offset: const Offset(0, -20),
+            offset: const Offset(0, -25),
             child: ElevatedButton(
               onPressed: _toggleExpanded,
               style: ElevatedButton.styleFrom(
