@@ -37,6 +37,7 @@ class _TripDateRangePickerScreenState
         });
       }
     });
+
     // 한국 로케일로 날짜 포맷 적용
     Intl.defaultLocale = 'ko_KR';
     final now = DateTime.now();
