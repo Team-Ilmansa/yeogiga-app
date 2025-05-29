@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/component/expansion_panel.dart';
-import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/trip/component/notice_card.dart';
 import 'package:yeogiga/trip/component/notice_card_ping.dart';
 import 'package:yeogiga/common/component/trip_name_card.dart';
@@ -57,7 +56,7 @@ class _TripDetailScreenState extends State<TripDetailScreen>
       backgroundColor: Color(0xfffafafa),
       appBar: AppBar(
         toolbarHeight: 120.h,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xfffafafa),
         shadowColor: Colors.transparent, // 그림자도 제거
         foregroundColor: Colors.black,
         elevation: 0,
@@ -119,56 +118,56 @@ class _TripDetailScreenState extends State<TripDetailScreen>
         child: NestedScrollView(
           headerSliverBuilder:
               (context, innerBoxIsScrolled) => [
-            // 탑 패널
-            SliverToBoxAdapter(child: TopPanel()),
-            // TODO: 알림이 있으면!
-            if (true) SliverToBoxAdapter(child: NoticePanel()),
-            // 탭바
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _TabBarHeaderDelegate(
-                child: SizedBox(
-                  height: 108.h,
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Color(0xFF8287FF),
-                          width: 6.w,
+                // 탑 패널
+                SliverToBoxAdapter(child: TopPanel()),
+                // TODO: 알림이 있으면!
+                if (true) SliverToBoxAdapter(child: NoticePanel()),
+                // 탭바
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _TabBarHeaderDelegate(
+                    child: SizedBox(
+                      height: 108.h,
+                      child: TabBar(
+                        controller: _tabController,
+                        indicator: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Color(0xFF8287FF),
+                              width: 6.w,
+                            ),
+                          ),
                         ),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        labelColor: Color(0xFF8287FF),
+                        unselectedLabelColor: Colors.grey,
+                        tabs: [
+                          Tab(
+                            child: Text(
+                              '일정 대시보드',
+                              style: TextStyle(
+                                fontSize: 48.sp,
+                                letterSpacing: -0.3,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Tab(
+                            child: Text(
+                              '갤러리',
+                              style: TextStyle(
+                                fontSize: 48.sp,
+                                letterSpacing: -0.3,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Color(0xFF8287FF),
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(
-                        child: Text(
-                          '일정 대시보드',
-                          style: TextStyle(
-                            fontSize: 48.sp,
-                            letterSpacing: -0.3,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          '갤러리',
-                          style: TextStyle(
-                            fontSize: 48.sp,
-                            letterSpacing: -0.3,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
           // 탭바 뷰
           body: TabBarView(
             controller: _tabController,
@@ -484,12 +483,7 @@ class _GalleryTabState extends State<GalleryTab> {
                                   color:
                                       selectionMode
                                           ? Color(0xff8287ff)
-                                          : Color.fromARGB(
-                                              255,
-                                              193,
-                                              193,
-                                              193,
-                                            ),
+                                          : Color.fromARGB(255, 193, 193, 193),
                                 ),
                               ),
                               SizedBox(width: 6.w),
@@ -500,12 +494,7 @@ class _GalleryTabState extends State<GalleryTab> {
                                 color:
                                     selectionMode
                                         ? Color(0xff8287ff)
-                                        : Color.fromARGB(
-                                            255,
-                                            193,
-                                            193,
-                                            193,
-                                          ),
+                                        : Color.fromARGB(255, 193, 193, 193),
                               ),
                             ],
                           ),
@@ -518,13 +507,12 @@ class _GalleryTabState extends State<GalleryTab> {
                     padding: EdgeInsets.symmetric(horizontal: 48.w),
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5,
-                          crossAxisSpacing: 12.w,
-                          mainAxisSpacing: 12.h,
-                          childAspectRatio: 1,
-                        ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 5,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
+                      childAspectRatio: 1,
+                    ),
                     itemCount: numberOfPicture,
                     itemBuilder: (context, idx) {
                       final isSelected = selectedPictures.contains(idx);
@@ -532,14 +520,14 @@ class _GalleryTabState extends State<GalleryTab> {
                         onTap:
                             selectionMode
                                 ? () {
-                                    setState(() {
-                                      if (isSelected) {
-                                        selectedPictures.remove(idx);
-                                      } else {
-                                        selectedPictures.add(idx);
-                                      }
-                                    });
-                                  }
+                                  setState(() {
+                                    if (isSelected) {
+                                      selectedPictures.remove(idx);
+                                    } else {
+                                      selectedPictures.add(idx);
+                                    }
+                                  });
+                                }
                                 : null,
                         child: AspectRatio(
                           aspectRatio: 1,
@@ -556,9 +544,7 @@ class _GalleryTabState extends State<GalleryTab> {
                               if (selectionMode && isSelected)
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Color(
-                                      0xff8287ff,
-                                    ).withOpacity(0.3),
+                                    color: Color(0xff8287ff).withOpacity(0.3),
                                     borderRadius: BorderRadius.circular(48.r),
                                   ),
                                 ),
@@ -590,7 +576,9 @@ class AddScheduleState extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xff8287ff),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(42.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(42.r),
+        ),
         minimumSize: Size.fromHeight(156.h),
         elevation: 0,
         padding: EdgeInsets.zero,
@@ -633,7 +621,9 @@ class AddPictureState extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xff8287ff),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(42.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(42.r),
+        ),
         minimumSize: Size.fromHeight(156.h),
         elevation: 0,
         padding: EdgeInsets.zero,
@@ -644,7 +634,11 @@ class AddPictureState extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset('asset/icon/add_picture.svg', width: 72.w, height: 72.h),
+          SvgPicture.asset(
+            'asset/icon/add_picture.svg',
+            width: 72.w,
+            height: 72.h,
+          ),
           SizedBox(width: 18.w),
           Padding(
             padding: EdgeInsets.only(top: 18.h),
