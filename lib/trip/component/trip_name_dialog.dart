@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TripNameDialog extends StatefulWidget {
   final TextEditingController nameController;
@@ -38,46 +39,46 @@ class _TripNameDialogState extends State<TripNameDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      insetPadding: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(72.r)),
+      insetPadding: EdgeInsets.all(48.w),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 60.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //다이얼로그 헤더
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(width: 1),
+                      SizedBox(width: 3.w),
                       IconButton(
-                        icon: const Icon(Icons.close, size: 28),
+                        icon: Icon(Icons.close, size: 84.sp),
                         onPressed: () => GoRouter.of(context).pop(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 30.h),
+                  Text(
                     '여행 이름을 설정해주세요',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 72.sp,
                       fontWeight: FontWeight.bold,
                       color: Color(0xff313131),
                       letterSpacing: -0.4,
                       height: -0.0,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
+                  SizedBox(height: 24.h),
+                  Text(
                     '추후 수정이 가능해요',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 54.sp,
                       color: Color(0xff7d7d7d),
                       fontWeight: FontWeight.w400,
                       letterSpacing: -0.3,
@@ -86,7 +87,7 @@ class _TripNameDialogState extends State<TripNameDialog> {
                 ],
               ),
             ),
-            const SizedBox(height: 26),
+            SizedBox(height: 78.h),
             //텍스트 필드 부분
             Column(
               children: [
@@ -96,46 +97,46 @@ class _TripNameDialogState extends State<TripNameDialog> {
                     filled: true,
                     fillColor: const Color(0xFFf0f0f0),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(60.r),
                       borderSide: BorderSide.none,
                     ),
                     hintText: '여행 이름',
-                    hintStyle: const TextStyle(
+                    hintStyle: TextStyle(
                       color: Colors.black38,
-                      fontSize: 20,
+                      fontSize: 60.sp,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 60.w,
+                      vertical: 54.h,
                     ),
                   ),
-                  style: const TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 60.sp),
                   maxLength: 20,
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 120.h),
             //버튼 부분
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 SizedBox(
-                  width: 140,
-                  height: 65,
+                  width: 420.w,
+                  height: 195.h,
                   child: ElevatedButton(
                     onPressed: _canConfirm ? widget.onConfirm : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff8287ff),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(48.r),
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       '확인',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 60.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

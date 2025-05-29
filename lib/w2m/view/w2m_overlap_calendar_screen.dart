@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 // 필요시: import 'package:yeogiga/user/provider/user_me_provider.dart';
 
 class W2MOverlapCalendarScreen extends ConsumerStatefulWidget {
@@ -47,7 +48,7 @@ class _W2MOverlapCalendarScreenState extends ConsumerState<W2MOverlapCalendarScr
           int daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
 
           return Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(36.w),
             child: Column(
               children: [
                 // 요일 헤더
@@ -59,29 +60,29 @@ class _W2MOverlapCalendarScreenState extends ConsumerState<W2MOverlapCalendarScr
                       : (i == 6 ? const Color(0xff6d8fff) : const Color(0xffbdbdbd));
                     return Expanded(
                       child: Center(
-                        child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+                        child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 42.sp)),
                       ),
                     );
                   }),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 24.h),
                 // 달력 날짜
                 ..._buildCalendarRows(month, daysInMonth, overlapCountMap),
                 // 하단 range 요약
                 if (_startDate != null && _endDate != null)
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(48.w),
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: const Color(0xff8287ff),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(48.r),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: 48.h),
                       child: Center(
                         child: Text(
                           _rangeSummary(_startDate!, _endDate!),
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 42.sp),
                         ),
                       ),
                     ),
@@ -140,17 +141,17 @@ class _W2MOverlapCalendarScreenState extends ConsumerState<W2MOverlapCalendarScr
                           // 겹침 배경
                           if (overlapCount > 0)
                             Container(
-                              margin: const EdgeInsets.symmetric(vertical: 12),
+                              margin: EdgeInsets.symmetric(vertical: 36.h),
                               decoration: BoxDecoration(
                                 color: getOverlapColor(overlapCount),
-                                borderRadius: BorderRadius.circular(19),
+                                borderRadius: BorderRadius.circular(57.r),
                               ),
                             ),
                           // range의 시작/끝 날짜에만 원(circle) 그림
                           if (isRangeEdge)
                             Container(
-                              width: 38,
-                              height: 38,
+                              width: 114.w,
+                              height: 114.h,
                               decoration: const BoxDecoration(
                                 color: Color(0xff8287ff),
                                 shape: BoxShape.circle,
@@ -169,7 +170,7 @@ class _W2MOverlapCalendarScreenState extends ConsumerState<W2MOverlapCalendarScr
                                           : (thisDay.weekday == DateTime.saturday
                                               ? const Color(0xff6d8fff)
                                               : const Color(0xff313131)))),
-                              fontSize: 14,
+                              fontSize: 42.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
