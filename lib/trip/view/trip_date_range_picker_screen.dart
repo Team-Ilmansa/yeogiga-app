@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/w2m/model/user_w2m_model.dart';
@@ -15,8 +16,6 @@ class TripDateRangePickerScreen extends ConsumerStatefulWidget {
   ConsumerState<TripDateRangePickerScreen> createState() =>
       _TripDateRangePickerScreenState();
 }
-
-
 
 class _TripDateRangePickerScreenState
     extends ConsumerState<TripDateRangePickerScreen> {
@@ -33,7 +32,9 @@ class _TripDateRangePickerScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_error!), backgroundColor: Colors.red),
         );
-        setState(() { _error = null; });
+        setState(() {
+          _error = null;
+        });
       }
     });
     // 한국 로케일로 날짜 포맷 적용
@@ -60,13 +61,13 @@ class _TripDateRangePickerScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. 상단 안내 영역
-            const SizedBox(height: 12),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            SizedBox(height: 36.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 60.w),
               child: Text(
                 '여행날짜를\n선택해주세요',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 84.sp,
                   fontWeight: FontWeight.bold,
                   color: Color(0xff222222),
                   height: 1.2,
@@ -74,28 +75,28 @@ class _TripDateRangePickerScreenState
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            SizedBox(height: 30.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 60.w),
               child: Text(
                 '아직 확정된 날짜는 아니며, 추후 수정이 가능해요',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 48.sp,
                   color: Color(0xff818181),
                   fontWeight: FontWeight.w400,
                   letterSpacing: -0.2,
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 120.h),
             // 2. 무한 스크롤 달력 영역
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 36.w),
                 itemBuilder: (context, index) {
                   final month = DateTime(now.year, now.month + index);
                   return Padding(
-                    padding: EdgeInsets.only(bottom: 28),
+                    padding: EdgeInsets.only(bottom: 84.h),
                     child: _buildMonthCalendar(month),
                   );
                 },
@@ -108,72 +109,100 @@ class _TripDateRangePickerScreenState
       bottomNavigationBar:
           (_startDate != null && _endDate != null)
               ? Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 25),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff8287ff),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      minimumSize: const Size.fromHeight(60),
-                      elevation: 0,
+                padding: EdgeInsets.fromLTRB(36.w, 0, 36.w, 75.h),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xff8287ff),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(48.r),
                     ),
-                    onPressed: _isLoading ? null : () async {
-                      if (_startDate == null || _endDate == null) return;
-                      setState(() { _isLoading = true; _error = null; });
-                      try {
-                        // tripProvider에서 tripId 가져오기
-                        final tripState = ref.read(tripProvider);
-                        int? tripId;
-                        if (tripState is TripModel) {
-                          tripId = tripState.tripId;
-                        } else if (tripState is SettingTripModel) {
-                          tripId = tripState.tripId;
-                        } else if (tripState is PlannedTripModel) {
-                          tripId = tripState.tripId;
-                        } else if (tripState is InProgressTripModel) {
-                          tripId = tripState.tripId;
-                        } else if (tripState is CompletedTripModel) {
-                          tripId = tripState.tripId;
-                        }
-                        if (tripId == null) {
-                          setState(() { _error = '잘못된 접근입니다.'; _isLoading = false; });
-                          return;
-                        }
-                        // 날짜 리스트 생성
-                        final days = _endDate!.difference(_startDate!).inDays + 1;
-                        final availableDates = List.generate(days, (i) {
-                          final d = _startDate!.add(Duration(days: i));
-                          return DateFormat('yyyy-MM-dd').format(d);
-                        });
-                        final userW2m = await ref.read(userW2mProvider.notifier).postUserW2m(
-                          tripId: tripId,
-                          availableDates: availableDates,
-                        );
-                        if (userW2m is UserW2mModel) {
-                          GoRouter.of(context).pushReplacement('/tripDetailScreen');
-                        } else {
-                          setState(() { _error = '날짜 저장에 실패했습니다.'; });
-                        }
-                      } catch (e) {
-                        setState(() { _error = '에러가 발생했습니다.'; });
-                      } finally {
-                        setState(() { _isLoading = false; });
-                      }
-                    },
-                    child: _isLoading
-                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                        : Text(
+                    minimumSize: Size.fromHeight(180.h),
+                    elevation: 0,
+                  ),
+                  onPressed:
+                      _isLoading
+                          ? null
+                          : () async {
+                            if (_startDate == null || _endDate == null) return;
+                            setState(() {
+                              _isLoading = true;
+                              _error = null;
+                            });
+                            try {
+                              // tripProvider에서 tripId 가져오기
+                              final tripState = ref.read(tripProvider);
+                              int? tripId;
+                              if (tripState is TripModel) {
+                                tripId = tripState.tripId;
+                              } else if (tripState is SettingTripModel) {
+                                tripId = tripState.tripId;
+                              } else if (tripState is PlannedTripModel) {
+                                tripId = tripState.tripId;
+                              } else if (tripState is InProgressTripModel) {
+                                tripId = tripState.tripId;
+                              } else if (tripState is CompletedTripModel) {
+                                tripId = tripState.tripId;
+                              }
+                              if (tripId == null) {
+                                setState(() {
+                                  _error = '잘못된 접근입니다.';
+                                  _isLoading = false;
+                                });
+                                return;
+                              }
+                              // 날짜 리스트 생성
+                              final days =
+                                  _endDate!.difference(_startDate!).inDays + 1;
+                              final availableDates = List.generate(days, (i) {
+                                final d = _startDate!.add(Duration(days: i));
+                                return DateFormat('yyyy-MM-dd').format(d);
+                              });
+                              final userW2m = await ref
+                                  .read(userW2mProvider.notifier)
+                                  .postUserW2m(
+                                    tripId: tripId,
+                                    availableDates: availableDates,
+                                  );
+                              if (userW2m is UserW2mModel) {
+                                GoRouter.of(
+                                  context,
+                                ).pushReplacement('/tripDetailScreen');
+                              } else {
+                                setState(() {
+                                  _error = '날짜 저장에 실패했습니다.';
+                                });
+                              }
+                            } catch (e) {
+                              setState(() {
+                                _error = '에러가 발생했습니다.';
+                              });
+                            } finally {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          },
+                  child:
+                      _isLoading
+                          ? SizedBox(
+                            height: 72.h,
+                            width: 72.w,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                          : Text(
                             '${DateFormat('yyyy.MM.dd').format(_startDate!)} - ${DateFormat('yyyy.MM.dd').format(_endDate!)} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 54.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                  ),
-                )
+                ),
+              )
               : null,
     );
   }
@@ -202,7 +231,7 @@ class _TripDateRangePickerScreenState
                               ? const Color(0xff6d8fff)
                               : const Color(0xffbdbdbd)),
                   fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                  fontSize: 42.sp,
                 ),
               ),
             ),
@@ -251,7 +280,7 @@ class _TripDateRangePickerScreenState
                   });
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  margin: EdgeInsets.symmetric(vertical: 24.h),
                   decoration:
                       isSelected
                           ? BoxDecoration(
@@ -259,19 +288,19 @@ class _TripDateRangePickerScreenState
                             borderRadius: BorderRadius.horizontal(
                               left:
                                   isRangeEdge && thisDay == _startDate
-                                      ? const Radius.circular(50)
+                                      ? Radius.circular(150.r)
                                       : Radius.zero,
                               right:
                                   isRangeEdge && thisDay == _endDate
-                                      ? const Radius.circular(50)
+                                      ? Radius.circular(150.r)
                                       : Radius.zero,
                             ),
                           )
                           : null,
                   child: Center(
                     child: Container(
-                      width: 38,
-                      height: 38,
+                      width: 114.w,
+                      height: 114.h,
                       decoration:
                           isRangeEdge
                               ? BoxDecoration(
@@ -298,7 +327,7 @@ class _TripDateRangePickerScreenState
                                                     DateTime.saturday
                                                 ? const Color(0xff6d8fff)
                                                 : const Color(0xff313131)))),
-                            fontSize: 14,
+                            fontSize: 42.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -325,8 +354,8 @@ class _TripDateRangePickerScreenState
             padding: const EdgeInsets.only(left: 8, right: 8, bottom: 30),
             child: Text(
               '${month.year}년 ${month.month}월',
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: 54.sp,
                 fontWeight: FontWeight.w700,
                 color: Color(0xff222222),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 class TripNameCardByAsset extends StatelessWidget {
@@ -17,11 +18,11 @@ class TripNameCardByAsset extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SvgPicture.asset(assetUrl, width: 17, height: 17, color: color),
-        SizedBox(width: 6),
+        SvgPicture.asset(assetUrl, width: 51.w, height: 51.h, color: color),
+        SizedBox(width: 18.w),
         Text(
           name,
-          style: TextStyle(color: color, fontSize: 14, letterSpacing: -0.3),
+          style: TextStyle(color: color, fontSize: 42.sp, letterSpacing: -0.3),
         ),
       ],
     );

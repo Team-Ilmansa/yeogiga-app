@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/user/model/user_model.dart';
@@ -42,11 +43,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // 로그인하기 버튼 섹션
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
+          48.w,
+          36.h,
+          48.w,
           // 키보드 높이만큼 여백 추가
-          MediaQuery.of(context).viewInsets.bottom + 20,
+          MediaQuery.of(context).viewInsets.bottom + 60.h,
         ),
 
         child: ElevatedButton(
@@ -67,15 +68,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ? const Color(0xff8287ff)
                     : Colors.grey[400],
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 48.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(36.r),
             ),
             elevation: 0,
           ),
-          child: const Text(
+          child: Text(
             '로그인하기',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
           ),
         ),
       ),
@@ -89,13 +90,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.symmetric(horizontal: 48.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 80),
+                  SizedBox(height: 240.h),
                   Logo(),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 120.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -104,15 +105,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         '아이디',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 48.sp,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.3,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 24.h),
                       CustomTextFormField(
                         controller: _idController,
                         onChanged: (String value) {
@@ -125,7 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25),
+                  SizedBox(height: 75.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -134,15 +135,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         '비밀번호',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 48.sp,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.3,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 24.h),
                       CustomTextFormField(
                         controller: _passwordController,
                         hintText: '비밀번호를 입력해주세요.',
@@ -156,17 +157,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       // 에러 메시지 출력
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                        padding: EdgeInsets.only(top: 24.h, left: 12.w),
                         child: SizedBox(
                           width: double.infinity,
-                          height: 20,
+                          height: 60.h,
                           child:
                               loginFailed
                                   ? Text(
                                     '아이디와 비밀번호를 정확히 입력해 주세요.',
                                     style: TextStyle(
                                       color: Colors.red,
-                                      fontSize: 13,
+                                      fontSize: 39.sp,
                                     ),
                                     textAlign: TextAlign.end,
                                   )
@@ -175,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 90.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -186,48 +187,69 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       TextButton(
                         onPressed: () {},
-                        child: const Text(
+                        child: Text(
                           '아이디 찾기',
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 42.sp,
+                          ),
                         ),
                       ),
-                      const Text('|', style: TextStyle(color: Colors.black38)),
+                      Text(
+                        '|',
+                        style: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 42.sp,
+                        ),
+                      ),
                       TextButton(
                         onPressed: () {},
-                        child: const Text(
+                        child: Text(
                           '비밀번호 찾기',
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 42.sp,
+                          ),
                         ),
                       ),
-                      const Text('|', style: TextStyle(color: Colors.black38)),
+                      Text(
+                        '|',
+                        style: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 42.sp,
+                        ),
+                      ),
                       TextButton(
                         onPressed: () {
                           context.push('/register');
                         },
-                        child: const Text(
+                        child: Text(
                           '회원가입',
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 42.sp,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 180),
+                  SizedBox(height: 540.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
                   // SNS 로그인 섹션
-                  const Center(
+                  Center(
                     child: Text(
                       'SNS계정으로 간편로그인하기',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 36.sp,
                         color: Colors.black54,
                         letterSpacing: -0.3,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 48.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -245,7 +267,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Image.asset('asset/img/oauth/kakao.png'),
                         ),
                       ),
-                      const SizedBox(width: 15),
+                      SizedBox(width: 45.w),
 
                       // 네이버 로그인 버튼
                       GestureDetector(
@@ -256,7 +278,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Image.asset('asset/img/oauth/naver.png'),
                         ),
                       ),
-                      const SizedBox(width: 15),
+                      SizedBox(width: 45.w),
 
                       // 애플 로그인 버튼
                       GestureDetector(
@@ -270,7 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 40),
+                  SizedBox(height: 120.h),
                 ],
               ),
             ),
@@ -288,7 +310,11 @@ class Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SvgPicture.asset('asset/img/logo/tem_logo.svg', width: 170, height: 75),
+        SvgPicture.asset(
+          'asset/img/logo/tem_logo.svg',
+          width: 510.w,
+          height: 225.h,
+        ),
       ],
     );
   }

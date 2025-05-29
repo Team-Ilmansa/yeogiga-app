@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/schedule/component/tag_card.dart';
 
 class RecommendScheduleCardList extends StatelessWidget {
@@ -8,12 +9,12 @@ class RecommendScheduleCardList extends StatelessWidget {
   Widget build(BuildContext context) {
     final tags = ['태그', '태그', '태그'];
     return SizedBox(
-      height: 180,
+      height: 540.h,
       child: ListView.builder(
         primary: false, // <- 세로 스크롤 우선
         shrinkWrap: true, // <- 높이 맞춤
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 48.w),
         itemCount: 5,
         itemBuilder:
             (_, i) => RecommendScheduleCard(
@@ -38,19 +39,19 @@ class RecommendScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380,
-      margin: const EdgeInsets.only(right: 12),
+      width: 1140.w,
+      margin: EdgeInsets.only(right: 36.w),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(48.r),
         child: Stack(
           children: [
             Positioned.fill(child: Image.asset(imagePath, fit: BoxFit.cover)),
             Positioned(
-              bottom: 10,
-              left: 12,
-              right: 12,
+              bottom: 30.h,
+              left: 36.w,
+              right: 36.w,
               child: Wrap(
-                spacing: 6,
+                spacing: 18.w,
                 children: tags.map((tag) => TagCard(label: "#$tag")).toList(),
               ),
             ),

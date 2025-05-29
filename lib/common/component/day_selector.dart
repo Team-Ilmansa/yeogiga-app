@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DaySelector extends StatelessWidget {
   final int itemCount;
@@ -15,12 +16,12 @@ class DaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 30,
+      height: 90.h,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 48.w),
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(width: 4),
+        separatorBuilder: (_, __) => SizedBox(width: 12.w),
         itemBuilder: (context, index) {
           final isSelected = index == selectedIndex;
           final label = index == 0 ? '여행 전체' : 'DAY $index';
@@ -32,9 +33,9 @@ class DaySelector extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 30.w),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(90.r),
                 border: Border.all(color: const Color(0xffd9d9d9)),
                 color: isSelected ? const Color(0xff8287ff) : Colors.white,
               ),
@@ -44,12 +45,12 @@ class DaySelector extends StatelessWidget {
                 curve: Curves.easeInOut,
                 style: TextStyle(
                   color: isSelected ? Colors.white : const Color(0xff7d7d7d),
-                  fontSize: 14,
+                  fontSize: 42.sp,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.6,
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 1),
+                  padding: EdgeInsets.only(top: 3.h),
                   child: Text(label),
                 ),
               ),
