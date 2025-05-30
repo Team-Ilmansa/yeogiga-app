@@ -100,7 +100,7 @@ class ConfirmedDayScheduleModel {
 //확정 이후 각각 여행별 day스케줄들
 @JsonSerializable(explicitToJson: true)
 class ConfirmedScheduleModel {
-  final String tripId;
+  final int tripId;
   final List<ConfirmedDayScheduleModel> schedules;
 
   ConfirmedScheduleModel({required this.tripId, required this.schedules});
@@ -109,4 +109,86 @@ class ConfirmedScheduleModel {
       _$ConfirmedScheduleModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ConfirmedScheduleModelToJson(this);
+}
+
+//ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+//ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+// 여행별 data 묶음
+@JsonSerializable(explicitToJson: true)
+class CompletedTripDayPlaceListModel {
+  final int tripId;
+  final List<CompletedTripDayPlaceModel> data;
+
+  CompletedTripDayPlaceListModel({required this.tripId, required this.data});
+
+  factory CompletedTripDayPlaceListModel.fromJson(Map<String, dynamic> json) =>
+      _$CompletedTripDayPlaceListModelFromJson(json);
+  Map<String, dynamic> toJson() => _$CompletedTripDayPlaceListModelToJson(this);
+}
+
+// (일차별 묶음) 목적지 묶음 및 매칭 안된 사진들
+@JsonSerializable(explicitToJson: true)
+class CompletedTripDayPlaceModel {
+  final String id;
+  final int day;
+  final List<CompletedTripPlaceModel> places;
+  final CompletedTripImageModel? unmatchedImage;
+
+  CompletedTripDayPlaceModel({
+    required this.id,
+    required this.day,
+    required this.places,
+    required this.unmatchedImage,
+  });
+
+  factory CompletedTripDayPlaceModel.fromJson(Map<String, dynamic> json) =>
+      _$CompletedTripDayPlaceModelFromJson(json);
+  Map<String, dynamic> toJson() => _$CompletedTripDayPlaceModelToJson(this);
+}
+
+// 목적지
+@JsonSerializable(explicitToJson: true)
+class CompletedTripPlaceModel {
+  final String id;
+  final String name;
+  final double latitude;
+  final double longitude;
+  final String type;
+  final CompletedTripImageModel? image;
+
+  CompletedTripPlaceModel({
+    required this.id,
+    required this.name,
+    required this.latitude,
+    required this.longitude,
+    required this.type,
+    required this.image,
+  });
+
+  factory CompletedTripPlaceModel.fromJson(Map<String, dynamic> json) =>
+      _$CompletedTripPlaceModelFromJson(json);
+  Map<String, dynamic> toJson() => _$CompletedTripPlaceModelToJson(this);
+}
+
+// 목적지에 매칭된 이미지
+@JsonSerializable()
+class CompletedTripImageModel {
+  final String id;
+  final String url;
+  final double? latitude;
+  final double? longitude;
+  final DateTime? date;
+
+  CompletedTripImageModel({
+    required this.id,
+    required this.url,
+    required this.latitude,
+    required this.longitude,
+    required this.date,
+  });
+
+  factory CompletedTripImageModel.fromJson(Map<String, dynamic> json) =>
+      _$CompletedTripImageModelFromJson(json);
+  Map<String, dynamic> toJson() => _$CompletedTripImageModelToJson(this);
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
+import 'package:yeogiga/schedule/model/schedule_model.dart';
 
 final confirmScheduleRepositoryProvider = Provider<ConfirmScheduleRepository>((
   ref,
@@ -16,4 +17,140 @@ class ConfirmScheduleRepository {
   final Dio dio;
 
   ConfirmScheduleRepository({required this.baseUrl, required this.dio});
+
+  /// 여행 확정 이후 전체 일정 조회
+  /// 반환: ConfirmedScheduleModel
+  Future<ConfirmedScheduleModel?> fetchConfirmedSchedule({
+    required int tripId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/api/v1/trip/$tripId/day-place/places',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        final List<dynamic> data = response.data['data'];
+        final schedules =
+            data
+                .map(
+                  (e) => ConfirmedDayScheduleModel.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
+                .toList();
+        return ConfirmedScheduleModel(tripId: tripId, schedules: schedules);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 여행 확정 이후, 특정 일차의 목적지 리스트 조회
+  /// 반환: ConfirmedDayScheduleModel
+  Future<ConfirmedDayScheduleModel?> fetchConfirmedDaySchedule({
+    required int tripId,
+    required String dayScheduleId,
+    required int day,
+  }) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/api/v1/trip/$tripId/day-place/$dayScheduleId/places',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        final List<dynamic> data = response.data['data'];
+        final places =
+            data
+                .map(
+                  (e) =>
+                      ConfirmedPlaceModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList();
+        return ConfirmedDayScheduleModel(
+          id: dayScheduleId,
+          day: day,
+          places: places,
+        );
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 여행 확정 이후, 특정 일차에 목적지 추가
+  /// 성공 시 true, 실패 시 false 반환
+  Future<bool> addConfirmedPlace({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String name,
+    required double latitude,
+    required double longitude,
+    required String placeType,
+  }) async {
+    try {
+      final response = await dio.post(
+        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places',
+        options: Options(headers: {"accessToken": 'true'}),
+        data: {
+          "name": name,
+          "latitude": latitude,
+          "longitude": longitude,
+          "placeType": placeType,
+        },
+      );
+      return response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 여행 확정 이후, 특정 일차에서 목적지 삭제
+  /// 성공 시 true, 실패 시 false 반환
+  Future<bool> deleteConfirmedPlace({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String placeId,
+  }) async {
+    try {
+      final response = await dio.delete(
+        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      return response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+  //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+  /// completed 상태에서만 사용하는 day-place 전체 조회 API
+  /// 반환: CompletedTripDayPlaceListModel
+  Future<CompletedTripDayPlaceListModel?> fetchCompletedTripDayPlaces({
+    required int tripId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '$baseUrl/api/v1/trip/$tripId/day-place',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        final List<dynamic> data = response.data['data'];
+        final dayPlaces = data
+            .map((e) => CompletedTripDayPlaceModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return CompletedTripDayPlaceListModel(tripId: tripId, data: dayPlaces);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
