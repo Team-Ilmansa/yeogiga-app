@@ -41,42 +41,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
       // 로그인하기 버튼 섹션
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          48.w,
-          36.h,
-          48.w,
-          // 키보드 높이만큼 여백 추가
-          MediaQuery.of(context).viewInsets.bottom + 60.h,
-        ),
-
-        child: ElevatedButton(
-          onPressed:
-              state is UserModelLoading
-                  ? null
-                  : () async {
-                    final user = await ref
-                        .read(userMeProvider.notifier)
-                        .login(username: username, password: password);
-                    setState(() {
-                      loginFailed = user is UserModelError;
-                    });
-                  },
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                (username.isNotEmpty && password.isNotEmpty)
-                    ? const Color(0xff8287ff)
-                    : Colors.grey[400],
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(vertical: 48.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(36.r),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(72.r),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              offset: const Offset(0, -2),
+              blurRadius: 1,
+              spreadRadius: 0,
             ),
-            elevation: 0,
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            36.w,
+            36.h,
+            36.w,
+            // 키보드 높이만큼 여백 추가
+            MediaQuery.of(context).viewInsets.bottom + 75.h,
           ),
-          child: Text(
-            '로그인하기',
-            style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+
+          child: ElevatedButton(
+            onPressed:
+                state is UserModelLoading
+                    ? null
+                    : () async {
+                      final user = await ref
+                          .read(userMeProvider.notifier)
+                          .login(username: username, password: password);
+                      setState(() {
+                        loginFailed = user is UserModelError;
+                      });
+                    },
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  (username.isNotEmpty && password.isNotEmpty)
+                      ? const Color(0xff8287ff)
+                      : Colors.grey[400],
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 48.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(36.r),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              '로그인하기',
+              style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+            ),
           ),
         ),
       ),

@@ -109,99 +109,115 @@ class _TripDateRangePickerScreenState
       //하단 바 (날짜 선택 시 노출)
       bottomNavigationBar:
           (_startDate != null && _endDate != null)
-              ? Padding(
-                padding: EdgeInsets.fromLTRB(36.w, 0, 36.w, 75.h),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff8287ff),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(48.r),
+              ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(72.r),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      offset: const Offset(0, -2),
+                      blurRadius: 1,
+                      spreadRadius: 0,
                     ),
-                    minimumSize: Size.fromHeight(180.h),
-                    elevation: 0,
-                  ),
-                  onPressed:
-                      _isLoading
-                          ? null
-                          : () async {
-                            if (_startDate == null || _endDate == null) return;
-                            setState(() {
-                              _isLoading = true;
-                              _error = null;
-                            });
-                            try {
-                              // tripProvider에서 tripId 가져오기
-                              final tripState = ref.read(tripProvider);
-                              int? tripId;
-                              if (tripState is TripModel) {
-                                tripId = tripState.tripId;
-                              } else if (tripState is SettingTripModel) {
-                                tripId = tripState.tripId;
-                              } else if (tripState is PlannedTripModel) {
-                                tripId = tripState.tripId;
-                              } else if (tripState is InProgressTripModel) {
-                                tripId = tripState.tripId;
-                              } else if (tripState is CompletedTripModel) {
-                                tripId = tripState.tripId;
-                              }
-                              if (tripId == null) {
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(36.w, 36.h, 36.w, 75.h),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff8287ff),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(48.r),
+                      ),
+                      minimumSize: Size.fromHeight(180.h),
+                      elevation: 0,
+                    ),
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () async {
+                              if (_startDate == null || _endDate == null)
+                                return;
+                              setState(() {
+                                _isLoading = true;
+                                _error = null;
+                              });
+                              try {
+                                // tripProvider에서 tripId 가져오기
+                                final tripState = ref.read(tripProvider);
+                                int? tripId;
+                                if (tripState is TripModel) {
+                                  tripId = tripState.tripId;
+                                } else if (tripState is SettingTripModel) {
+                                  tripId = tripState.tripId;
+                                } else if (tripState is PlannedTripModel) {
+                                  tripId = tripState.tripId;
+                                } else if (tripState is InProgressTripModel) {
+                                  tripId = tripState.tripId;
+                                } else if (tripState is CompletedTripModel) {
+                                  tripId = tripState.tripId;
+                                }
+                                if (tripId == null) {
+                                  setState(() {
+                                    _error = '잘못된 접근입니다.';
+                                    _isLoading = false;
+                                  });
+                                  return;
+                                }
+                                // 날짜 리스트 생성
+                                final days =
+                                    _endDate!.difference(_startDate!).inDays +
+                                    1;
+                                final availableDates = List.generate(days, (i) {
+                                  final d = _startDate!.add(Duration(days: i));
+                                  return DateFormat('yyyy-MM-dd').format(d);
+                                });
+                                final userW2m = await ref
+                                    .read(userW2mProvider.notifier)
+                                    .postUserW2m(
+                                      tripId: tripId,
+                                      availableDates: availableDates,
+                                    );
+                                if (userW2m is UserW2mModel) {
+                                  GoRouter.of(
+                                    context,
+                                  ).pushReplacement('/tripDetailScreen');
+                                } else {
+                                  setState(() {
+                                    _error = '날짜 저장에 실패했습니다.';
+                                  });
+                                }
+                              } catch (e) {
                                 setState(() {
-                                  _error = '잘못된 접근입니다.';
+                                  _error = '에러가 발생했습니다.';
+                                });
+                              } finally {
+                                setState(() {
                                   _isLoading = false;
                                 });
-                                return;
                               }
-                              // 날짜 리스트 생성
-                              final days =
-                                  _endDate!.difference(_startDate!).inDays + 1;
-                              final availableDates = List.generate(days, (i) {
-                                final d = _startDate!.add(Duration(days: i));
-                                return DateFormat('yyyy-MM-dd').format(d);
-                              });
-                              final userW2m = await ref
-                                  .read(userW2mProvider.notifier)
-                                  .postUserW2m(
-                                    tripId: tripId,
-                                    availableDates: availableDates,
-                                  );
-                              if (userW2m is UserW2mModel) {
-                                GoRouter.of(
-                                  context,
-                                ).pushReplacement('/tripDetailScreen');
-                              } else {
-                                setState(() {
-                                  _error = '날짜 저장에 실패했습니다.';
-                                });
-                              }
-                            } catch (e) {
-                              setState(() {
-                                _error = '에러가 발생했습니다.';
-                              });
-                            } finally {
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            }
-                          },
-                  child:
-                      _isLoading
-                          ? SizedBox(
-                            height: 72.h,
-                            width: 72.w,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
+                            },
+                    child:
+                        _isLoading
+                            ? SizedBox(
+                              height: 72.h,
+                              width: 72.w,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            )
+                            : Text(
+                              '${DateFormat('yyyy.MM.dd').format(_startDate!)} - ${DateFormat('yyyy.MM.dd').format(_endDate!)} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 54.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
-                          : Text(
-                            '${DateFormat('yyyy.MM.dd').format(_startDate!)} - ${DateFormat('yyyy.MM.dd').format(_endDate!)} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 54.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                  ),
                 ),
               )
               : null,
