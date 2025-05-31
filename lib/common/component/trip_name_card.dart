@@ -17,6 +17,7 @@ class TripNameCardByAsset extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SvgPicture.asset(assetUrl, width: 51.w, height: 51.h, color: color),
         SizedBox(width: 18.w),

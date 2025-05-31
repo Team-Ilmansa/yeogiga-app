@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/common/provider/go_router.dart';
+import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   //한국 날짜 적용
   WidgetsFlutterBinding.ensureInitialized();
+  // await dotenv.load(fileName: ".env");
   await initializeDateFormatting('ko_KR', null);
 
   runApp(ProviderScope(child: MyApp()));
@@ -18,11 +21,12 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
     final router = ref.watch(routerProvider);
 
     //고 라우터 적용
     return ScreenUtilInit(
-      designSize: const Size(2868, 1320),
+      designSize: const Size(1320, 2868),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {

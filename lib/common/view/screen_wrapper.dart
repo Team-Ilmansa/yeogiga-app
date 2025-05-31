@@ -8,6 +8,8 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/view/my_page.dart';
 import 'package:yeogiga/trip/component/trip_name_dialog.dart';
+import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
+import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 
 class ScreenWrapper extends ConsumerStatefulWidget {
   static String get routeName => 'screenWrapper';
@@ -99,17 +101,26 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(60.r),
-          child: BottomAppBar(
-            elevation: 0, // Material 그림자 제거, 커스텀 그림자만 사용
-            color: Colors.white,
-            clipBehavior: Clip.antiAlias,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(72.r),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  offset: Offset(0, -6.h),
+                  blurRadius: 3.r,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
             child: SizedBox(
-              height: 210.h,
+              height: 260.h,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildTabButton(0, 'asset/icon/home.svg', '홈'),
-                  SizedBox(width: 240.w), // FAB와 동일한 공간 확보
+                  SizedBox(width: 200.w), // FAB 공간을 줄임
                   _buildTabButton(1, 'asset/icon/user-02.svg', '마이페이지'),
                 ],
               ),
@@ -130,21 +141,31 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _selectedIndex = index),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        if (index == 1) {
+          // 마이페이지 탭을 누를 때마다 새로고침
+          ref.read(tripListProvider.notifier).fetchAndSetTrips();
+        }
+        if (index == 0) {
+          // 홈 탭을 누를 때마다 메인트립 새로고침
+          ref.refresh(mainTripFutureProvider);
+        }
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 24.h, bottom: 0.0),
+            padding: EdgeInsets.only(top: 8.h, bottom: 0.0),
             child: SvgPicture.asset(
               assetPath,
-              width: 84.w,
-              height: 84.h,
+              width: 96.w,
+              height: 96.h,
               color: isSelected ? const Color(0xFF8287FF) : Colors.grey,
             ),
           ),
-          SizedBox(height: 9.h),
+          SizedBox(height: 3.h),
           Text(
             title,
             style: TextStyle(
