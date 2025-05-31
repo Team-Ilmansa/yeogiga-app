@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>이 앱이 현재 위치 정보를 사용하도록 허용해주세요.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>이 앱이 항상 위치 정보를 사용하도록 허용해주세요.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>이 앱은 개발 및 디버깅을 위해 로컬 네트워크에 접근합니다.</string>
 	<key>CFBundleDevelopmentRegion</key>
