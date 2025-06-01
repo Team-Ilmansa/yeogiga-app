@@ -47,7 +47,10 @@ class W2mRepository {
       );
 
       final data = response.data;
-      return data['availableDates'];
+      final availableDates = data['data']['availableDates'];
+      print('availableDates: $availableDates');
+      if (availableDates == null) return null;
+      return List<String>.from(availableDates);
     } on DioException catch (e) {
       return null;
     }

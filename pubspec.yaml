@@ -93,6 +93,7 @@ flutter:
     - asset/img/weather/
     - asset/img/logo/
     - asset/img/oauth/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
