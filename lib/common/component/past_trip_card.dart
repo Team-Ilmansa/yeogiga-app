@@ -7,7 +7,8 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 
 class PastTripCardList extends StatelessWidget {
   final List<TripModel?> trips;
-  const PastTripCardList({super.key, required this.trips});
+  final void Function(int tripId)? onTap;
+  const PastTripCardList({super.key, required this.trips, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +38,11 @@ class PastTripCardList extends StatelessWidget {
             startedAt: trip.startedAt,
             endedAt: trip.endedAt,
             memberCount: trip.members.length,
+            onTap: () {
+              if (onTap != null && trip.tripId != null) {
+                onTap!(trip.tripId!);
+              }
+            },
           );
         },
       ),
@@ -50,6 +56,7 @@ class PastTripCard extends StatelessWidget {
   final String? startedAt;
   final String? endedAt;
   final int memberCount;
+  final VoidCallback? onTap;
 
   const PastTripCard({
     super.key,
@@ -58,6 +65,7 @@ class PastTripCard extends StatelessWidget {
     required this.startedAt,
     required this.endedAt,
     required this.memberCount,
+    this.onTap,
   });
 
   String _formatDate(String date) {
@@ -81,67 +89,70 @@ class PastTripCard extends StatelessWidget {
     } else {
       dateText = '${_formatDate(startedAt!)} - ${_formatDate(endedAt!)}';
     }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(60.r),
-      child: Container(
-        width: 960.w,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('asset/img/home/sky.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(60.r),
         child: Container(
-          padding: EdgeInsets.all(48.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 84.sp,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              SizedBox(height: 15.h),
-              TripNameCardByAsset(
-                assetUrl: 'asset/icon/marker-pin-01.svg',
-                name: cityText,
-                color: Colors.white,
-              ),
-              TripNameCardByAsset(
-                assetUrl: 'asset/icon/calendar.svg',
-                name: dateText,
-                color: Colors.white,
-              ),
-
-              SizedBox(height: 9.h),
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'asset/icon/user-02.svg',
-                    width: 51.w,
-                    height: 51.h,
+          width: 960.w,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('asset/img/home/sky.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(48.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
                     color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 84.sp,
+                    letterSpacing: -0.3,
                   ),
-                  SizedBox(width: 15.w),
-                  ...List.generate(
-                    memberCount,
-                    (_) => Padding(
-                      padding: EdgeInsets.only(right: 3.w),
-                      child: Icon(
-                        Icons.circle,
-                        size: 54.sp,
-                        color: Colors.white,
+                ),
+                SizedBox(height: 15.h),
+                TripNameCardByAsset(
+                  assetUrl: 'asset/icon/marker-pin-01.svg',
+                  name: cityText,
+                  color: Colors.white,
+                ),
+                TripNameCardByAsset(
+                  assetUrl: 'asset/icon/calendar.svg',
+                  name: dateText,
+                  color: Colors.white,
+                ),
+
+                SizedBox(height: 9.h),
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      'asset/icon/user-02.svg',
+                      width: 51.w,
+                      height: 51.h,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 15.w),
+                    ...List.generate(
+                      memberCount,
+                      (_) => Padding(
+                        padding: EdgeInsets.only(right: 3.w),
+                        child: Icon(
+                          Icons.circle,
+                          size: 54.sp,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

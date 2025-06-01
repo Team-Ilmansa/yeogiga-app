@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
-import 'package:yeogiga/trip/component/past_trip_card.dart';
+import 'package:yeogiga/common/component/past_trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/common/provider/weather_provider.dart';
@@ -97,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     (context, ref, _) =>
                         PastTripCardList(trips: ref.watch(tripListProvider)),
               ),
-              SizedBox(height: 60.h),
+              SizedBox(height: 100.h),
             ],
           ),
         ),
@@ -181,8 +181,9 @@ class _HomeAppBar extends ConsumerWidget {
                               style: TextStyle(
                                 color: Color(0xff313131),
                                 fontSize: 84.sp,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: -0.3,
+                                height: 1.4,
                               ),
                             );
                           } else {
@@ -193,8 +194,9 @@ class _HomeAppBar extends ConsumerWidget {
                               style: TextStyle(
                                 color: Color(0xff313131),
                                 fontSize: 84.sp,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: -0.3,
+                                height: 1.4,
                               ),
                             );
                           }
@@ -238,7 +240,7 @@ class AppBarTop extends StatelessWidget {
           Row(
             children: [
               Icon(getWeatherIcon(weatherMain), size: 72.sp, color: iconColor),
-              SizedBox(width: 15.w),
+              SizedBox(width: 10.w),
               Text(
                 '$temp°',
                 style: TextStyle(

@@ -7,9 +7,13 @@ import 'package:yeogiga/main_trip/view/home_screen.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/view/my_page.dart';
-import 'package:yeogiga/trip/component/trip_name_dialog.dart';
+import 'package:yeogiga/trip/component/create_trip/trip_name_dialog.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
+import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
+import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 
 class ScreenWrapper extends ConsumerStatefulWidget {
   static String get routeName => 'screenWrapper';
@@ -22,6 +26,22 @@ class ScreenWrapper extends ConsumerStatefulWidget {
 
 class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ScreenWrapper 진입 시, 로그인/유저정보(mainTripFutureProvider, userMeProvider) 제외 모든 provider refresh
+    Future.microtask(() {
+      ref.refresh(tripProvider);
+      ref.refresh(tripListProvider);
+      ref.refresh(userW2mProvider);
+      ref.refresh(confirmScheduleProvider);
+      ref.refresh(pendingScheduleProvider);
+      ref.refresh(completedScheduleProvider);
+      ref.refresh(mainTripFutureProvider);
+      // 필요시 추가 provider도 여기에!
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,9 +139,23 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildTabButton(0, 'asset/icon/home.svg', '홈'),
+                  _buildTabButton(
+                    0,
+                    'asset/icon/home.svg',
+                    '홈',
+                    refresh: () => ref.refresh(mainTripFutureProvider),
+                  ),
                   SizedBox(width: 200.w), // FAB 공간을 줄임
-                  _buildTabButton(1, 'asset/icon/user-02.svg', '마이페이지'),
+                  _buildTabButton(
+                    1,
+                    'asset/icon/user-02.svg',
+                    '마이페이지',
+                    refresh:
+                        () =>
+                            ref
+                                .read(tripListProvider.notifier)
+                                .fetchAndSetTrips(),
+                  ),
                 ],
               ),
             ),
@@ -137,20 +171,18 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
   }
 
   // 하단 바 버튼 UI
-  Widget _buildTabButton(int index, String assetPath, String title) {
+  Widget _buildTabButton(
+    int index,
+    String assetPath,
+    String title, {
+    VoidCallback? refresh,
+  }) {
     final isSelected = _selectedIndex == index;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         setState(() => _selectedIndex = index);
-        if (index == 1) {
-          // 마이페이지 탭을 누를 때마다 새로고침
-          ref.read(tripListProvider.notifier).fetchAndSetTrips();
-        }
-        if (index == 0) {
-          // 홈 탭을 누를 때마다 메인트립 새로고침
-          ref.refresh(mainTripFutureProvider);
-        }
+        if (refresh != null) refresh();
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -45,6 +45,7 @@ class _TripDateRangePickerScreenState
       //헤더 공간
       backgroundColor: Colors.white,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -134,11 +135,12 @@ class _TripDateRangePickerScreenState
                       elevation: 0,
                     ),
                     onPressed:
+                        //TODO: w2m을 수정하는 상황도 만들어야함.
                         _isLoading
                             ? null
                             : () async {
-                              if (_startDate == null || _endDate == null)
-                                return;
+                              if (_startDate == null || _endDate == null) {}
+
                               setState(() {
                                 _isLoading = true;
                                 _error = null;

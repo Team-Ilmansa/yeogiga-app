@@ -18,8 +18,8 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
   final Ref ref;
   final TripRepository tripRepository;
 
-
-  TripStateNotifier({required this.tripRepository, required this.ref}) : super(null);
+  TripStateNotifier({required this.tripRepository, required this.ref})
+    : super(null);
 
   /// 포스트하고 결과 돌려받고,
   /// 결과로 여행 불러오고, 상태등록 까지
@@ -47,8 +47,10 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
   /// 여행 불러오기.
   /// 여행 정보, 본인의 w2m, 여행의 w2m 불러와서 각각 상태저장
   Future<TripBaseModel> getTrip({required int tripId}) async {
-    try{
-      final getTripResponse = await tripRepository.getTripByTripId(tripId: tripId);
+    try {
+      final getTripResponse = await tripRepository.getTripByTripId(
+        tripId: tripId,
+      );
       if (getTripResponse.data == null) {
         state = NoTripModel();
         return state!;
@@ -72,10 +74,11 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
           state = NoTripModel();
       }
 
-      final userW2mResponse = await ref.read(userW2mProvider.notifier).getUserW2m(tripId: tripId);
+      final userW2mResponse = await ref
+          .read(userW2mProvider.notifier)
+          .getUserW2m(tripId: tripId);
       final tripW2mResponse = await ref.read(tripW2mProvider(tripId).future);
       return state!;
-
     } on Exception catch (e) {
       state = NoTripModel();
       return state!;

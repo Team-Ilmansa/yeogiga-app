@@ -21,10 +21,10 @@ class UserW2mStateNotifier extends StateNotifier<UserW2mBaseModel?> {
   //유저의 w2m 불러오고, 상태 변경 및 반환
   Future<UserW2mBaseModel> getUserW2m({required int tripId}) async {
     try {
-      final response = await w2mRepository.getUserW2m(tripId: tripId);
+      final availableDates = await w2mRepository.getUserW2m(tripId: tripId);
 
-      if (response != null) {
-        state = UserW2mModel(availableDates: response);
+      if (availableDates != null) {
+        state = UserW2mModel(availableDates: availableDates);
         return state!;
       } else {
         state = NoUserW2mModel();

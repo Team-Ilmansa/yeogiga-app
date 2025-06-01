@@ -162,7 +162,9 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
         final start = mainTrip.staredAt;
         String titleText;
         if (now.isBefore(start)) {
-          titleText = '여행 첫날의 일정';
+          final formatter = DateFormat('M월 d일');
+          final startText = formatter.format(start);
+          titleText = '$startText 여행 첫날의 일정';
         } else {
           final formatter = DateFormat('M월 d일');
           titleText = '${formatter.format(now)} 오늘의 일정';
@@ -190,7 +192,7 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(36.w, 12.h, 36.w, 12.h),
+                      padding: EdgeInsets.fromLTRB(0, 12.h, 36.w, 0),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(
@@ -198,10 +200,10 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                           child: Text(
                             titleText,
                             style: TextStyle(
-                              fontSize: 51.sp,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 48.sp,
+                              fontWeight: FontWeight.w500,
                               color: Color(0xff7d7d7d),
-                              letterSpacing: -0.3,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),
@@ -220,44 +222,57 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                               itemCount: places.isEmpty ? 2 : places.length + 1,
                               itemBuilder: (context, index) {
                                 if (places.isEmpty && index == 0) {
-                                  // 안내문구
-                                  return Center(
-                                    child: Text(
-                                      '아직 예정된 일정이 없어요.',
-                                      style: TextStyle(
-                                        fontSize: 48.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFB0B0B0),
-                                      ),
-                                    ),
-                                  );
-                                } else if (index ==
-                                    (places.isEmpty ? 1 : places.length)) {
-                                  // 마지막: 일정 담으러 가기 버튼
-                                  return Padding(
-                                    padding: EdgeInsets.only(bottom: 35.h),
-                                    child: Center(
-                                      child: TextButton(
-                                        onPressed: () {},
+                                  // 안내문구 + 일정 담으러 가기 버튼 (둘 다 보여줌)
+                                  return Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Center(
                                         child: Text(
-                                          '+ 일정 담으러 가기',
+                                          '아직 예정된 일정이 없어요.',
                                           style: TextStyle(
                                             fontSize: 48.sp,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF8287ff),
+                                            color: Color(0xFFB0B0B0),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                      SizedBox(height: 32.h),
+                                      Center(
+                                        child: TextButton(
+                                          onPressed: () {},
+                                          child: Text(
+                                            '+ 일정 담으러 가기',
+                                            style: TextStyle(
+                                              fontSize: 48.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF8287ff),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   );
                                 } else if (index < places.length &&
                                     places.isNotEmpty) {
                                   final place = places[index];
-                                  return ScheduleItem(
-                                    title: place.name,
-                                    time: null,
-                                    done: place.isVisited,
-                                  );
+                                  if (index == places.length - 1) {
+                                    return Column(
+                                      children: [
+                                        ScheduleItem(
+                                          title: place.name,
+                                          time: null,
+                                          done: place.isVisited,
+                                        ),
+                                        SizedBox(height: 70.h),
+                                      ],
+                                    );
+                                  } else {
+                                    return ScheduleItem(
+                                      title: place.name,
+                                      time: null,
+                                      done: place.isVisited,
+                                    );
+                                  }
                                 } else {
                                   return const SizedBox.shrink();
                                 }

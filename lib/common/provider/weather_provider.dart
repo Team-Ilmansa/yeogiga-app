@@ -45,6 +45,6 @@ Future<Map<String, dynamic>> fetchWeather(
 
 final weatherProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final position = await getCurrentPosition();
-  final apiKey = "ccb5c8dd74fd149643a029d4f58b486a";
+  final apiKey = dotenv.env['WEATHER_API_KEY']!;
   return await fetchWeather(position.latitude, position.longitude, apiKey);
 });
