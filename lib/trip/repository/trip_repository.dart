@@ -62,4 +62,30 @@ class TripRepository {
       return getTripResponse;
     }
   }
+
+  //여행 일정 수정하기
+  Future<bool> patchTripTime({
+    required int tripId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    try {
+      // yyyy-mm-dd만 들어온다는 가정 하에, 원하는 시간 붙이기
+      final startStr =
+          "${start.year.toString().padLeft(4, '0')}-${start.month.toString().padLeft(2, '0')}-${start.day.toString().padLeft(2, '0')}T06:00:00";
+      final endStr =
+          "${end.year.toString().padLeft(4, '0')}-${end.month.toString().padLeft(2, '0')}-${end.day.toString().padLeft(2, '0')}T23:00:00";
+
+      await dio.put(
+        '$baseUrl/api/v1/trip/$tripId/time',
+        data: {"start": startStr, "end": endStr},
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      // 성공적으로 요청이 끝나면 true 반환
+      return true;
+    } catch (e) {
+      // 에러 발생 시 false 반환 (원한다면 예외 throw도 가능)
+      return false;
+    }
+  }
 }

@@ -42,7 +42,15 @@ class TopPanel extends StatelessWidget {
         if (tripState is TripModel &&
             tripState.startedAt != null &&
             tripState.endedAt != null) {
-          tripDate = '${tripState.startedAt!} - ${tripState.endedAt!}';
+          final startStr =
+              tripState.startedAt!.length >= 10
+                  ? tripState.startedAt!.substring(0, 10)
+                  : tripState.startedAt!;
+          final endStr =
+              tripState.endedAt!.length >= 10
+                  ? tripState.endedAt!.substring(0, 10)
+                  : tripState.endedAt!;
+          tripDate = '$startStr - $endStr';
         }
         // 멤버 수
         int memberCount = 0;

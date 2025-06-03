@@ -125,28 +125,25 @@ class _HomeAppBar extends ConsumerWidget {
           final weatherImage = getWeatherImageAsset(weatherMain);
           return Stack(
             children: [
-              Positioned.fill(
+              ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color.fromARGB(1, 255, 255, 255), // 거의 투명한 흰색
+                      Color.fromARGB(200, 255, 255, 255), // 55% 흰색
+                    ],
+                    stops: [0.8, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.srcOver,
                 child: Image.asset(
                   weatherImage,
                   fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
                   alignment: Alignment.topCenter,
-                ),
-              ),
-              // 자연스러운 하얀 그라데이션 → 투명 → 살짝 어두움
-              Positioned.fill(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Color.fromARGB(20, 255, 255, 255), // 8% 흰색
-                        Color.fromARGB(60, 255, 255, 255), // 24% 흰색
-                      ],
-                      stops: [0.7, 0.85, 1.0],
-                    ),
-                  ),
                 ),
               ),
 

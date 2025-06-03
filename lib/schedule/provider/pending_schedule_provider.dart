@@ -12,9 +12,15 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
   PendingScheduleNotifier(this.repo) : super(null);
 
   /// 전체 pending 일정 조회 (여행별)
-  Future<void> fetchAll(String tripId) async {
-    // PendingScheduleModel 전체를 불러오는 메소드가 필요하다면 여기에 구현(현재 레포에는 없음)
-    // state = await repo.getPendingSchedule(tripId: tripId);
+  /// days: 여행 시작~끝 일차 리스트 (예: [1,2,3,4,5])
+  Future<void> fetchAll(String tripId, List<int> days) async {
+    // 각 day마다 fetchDay를 병렬로 실행
+    final futures = days.map((day) => fetchDay(tripId: tripId, day: day));
+    final daySchedules = await Future.wait(futures);
+    // null인 day는 제외
+    final validSchedules = daySchedules.whereType<PendingDayScheduleModel>().toList();
+    // PendingScheduleModel로 만들어 상태에 저장
+    state = PendingScheduleModel(tripId: int.parse(tripId), schedules: validSchedules);
   }
 
   /// 특정 일차(day)의 일정만 조회

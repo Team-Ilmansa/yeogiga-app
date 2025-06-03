@@ -84,4 +84,17 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
       return state!;
     }
   }
+
+  // 여행 시간 수정 및 상태 갱신
+  Future<bool> updateTripTime({required DateTime start, required DateTime end}) async {
+    if (state is! TripModel) return false;
+    final tripId = (state as TripModel).tripId;
+
+    final result = await tripRepository.patchTripTime(tripId: tripId, start: start, end: end);
+    if (result) {
+      // 성공 시 trip 정보 갱신
+      await getTrip(tripId: tripId);
+    }
+    return result;
+  }
 }

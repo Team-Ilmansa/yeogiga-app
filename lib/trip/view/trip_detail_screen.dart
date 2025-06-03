@@ -94,7 +94,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           ],
         ),
       ),
-      bottomNavigationBar: getBottomNavigationBar(tripState, userMe, bottomAppBarState),
+      bottomNavigationBar: getBottomNavigationBar(
+        tripState,
+        userMe,
+        bottomAppBarState,
+      ),
       body: DefaultTabController(
         length: 2,
         child: NestedScrollView(
@@ -103,7 +107,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 // 탑 패널
                 SliverToBoxAdapter(child: TopPanel()),
                 // TODO: 알림이 있으면!
-                if (true) SliverToBoxAdapter(child: NoticePanel()),
+                // if (true) SliverToBoxAdapter(child: NoticePanel()),
                 // 탭바
                 SliverPersistentHeader(
                   pinned: true,
@@ -156,6 +160,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           // 탭바 뷰
           body: TabBarView(
             controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
             children: [
               ScheduleDashboardTab(),
               GalleryTab(
@@ -211,13 +216,9 @@ Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
       myNickname = userMe.data?.nickname;
     }
     final leaderId = tripState.leaderId;
-    final leaderList = tripState.members.where(
-      (m) => m.userId == leaderId,
-    );
+    final leaderList = tripState.members.where((m) => m.userId == leaderId);
     final leader = leaderList.isNotEmpty ? leaderList.first : null;
-    if (leader != null &&
-        myNickname != null &&
-        leader.nickname == myNickname) {
+    if (leader != null && myNickname != null && leader.nickname == myNickname) {
       return const BottomAppBarLayout(child: ConfirmCalendarState());
     }
     return null;
@@ -231,7 +232,6 @@ Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
     return null;
   }
 }
-
 
 // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
