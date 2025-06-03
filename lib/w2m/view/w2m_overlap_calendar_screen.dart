@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -26,14 +27,6 @@ class _W2MOverlapCalendarScreenState
     final tripState = ref.watch(tripProvider);
     int tripId;
     if (tripState is TripModel) {
-      tripId = tripState.tripId;
-    } else if (tripState is SettingTripModel) {
-      tripId = tripState.tripId;
-    } else if (tripState is PlannedTripModel) {
-      tripId = tripState.tripId;
-    } else if (tripState is InProgressTripModel) {
-      tripId = tripState.tripId;
-    } else if (tripState is CompletedTripModel) {
       tripId = tripState.tripId;
     } else {
       // tripProvider가 비어있을 일은 없으나, 안전하게 처리
@@ -165,11 +158,35 @@ class _W2MOverlapCalendarScreenState
                           minimumSize: Size.fromHeight(180.h),
                           elevation: 0,
                         ),
-                        onPressed: () {
-                          // TODO: 실제 저장/서버 전송 로직으로 교체
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('날짜 저장 또는 다음 단계 동작!')),
-                          );
+                        onPressed: () async {
+                          if (_startDate != null && _endDate != null) {
+                            final result = await ref
+                                .read(tripProvider.notifier)
+                                .updateTripTime(
+                                  start: _startDate!,
+                                  end: _endDate!,
+                                );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result ? '여행 일정이 저장되었습니다.' : '저장에 실패했습니다.',
+                                  ),
+                                  backgroundColor:
+                                      result ? Colors.green : Colors.red,
+                                ),
+                              );
+                              GoRouter.of(context).pop();
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('시작/종료 날짜를 선택해주세요.'),
+                                ),
+                              );
+                            }
+                          }
                         },
                         child: Text(
                           '${_startDate != null && _endDate != null ? '${_startDate!.year}.${_startDate!.month.toString().padLeft(2, '0')}.${_startDate!.day.toString().padLeft(2, '0')} - ${_endDate!.year}.${_endDate!.month.toString().padLeft(2, '0')}.${_endDate!.day.toString().padLeft(2, '0')} / ${_endDate!.difference(_startDate!).inDays + 1}박 ${_endDate!.difference(_startDate!).inDays}일' : ''}',
@@ -330,20 +347,20 @@ class _W2MOverlapCalendarScreenState
                     decoration:
                         overlapMap[thisDay] != null && overlapMap[thisDay]! > 0
                             ? BoxDecoration(
-                                color: const Color(0xffe3e5ff).withOpacity(
-                                  _getOverlapOpacity(overlapMap[thisDay]!),
-                                ),
-                                borderRadius: BorderRadius.horizontal(
-                                  left:
-                                      _isOverlapRangeStart(thisDay, overlapMap)
-                                          ? Radius.circular(150.r)
-                                          : Radius.zero,
-                                  right:
-                                      _isOverlapRangeEnd(thisDay, overlapMap)
-                                          ? Radius.circular(150.r)
-                                          : Radius.zero,
-                                ),
-                              )
+                              color: const Color(0xffe3e5ff).withOpacity(
+                                _getOverlapOpacity(overlapMap[thisDay]!),
+                              ),
+                              borderRadius: BorderRadius.horizontal(
+                                left:
+                                    _isOverlapRangeStart(thisDay, overlapMap)
+                                        ? Radius.circular(150.r)
+                                        : Radius.zero,
+                                right:
+                                    _isOverlapRangeEnd(thisDay, overlapMap)
+                                        ? Radius.circular(150.r)
+                                        : Radius.zero,
+                              ),
+                            )
                             : null,
                     child: Center(
                       child: Container(

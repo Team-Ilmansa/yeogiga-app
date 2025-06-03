@@ -151,16 +151,7 @@ class _TripDateRangePickerScreenState
                                 int? tripId;
                                 if (tripState is TripModel) {
                                   tripId = tripState.tripId;
-                                } else if (tripState is SettingTripModel) {
-                                  tripId = tripState.tripId;
-                                } else if (tripState is PlannedTripModel) {
-                                  tripId = tripState.tripId;
-                                } else if (tripState is InProgressTripModel) {
-                                  tripId = tripState.tripId;
-                                } else if (tripState is CompletedTripModel) {
-                                  tripId = tripState.tripId;
-                                }
-                                if (tripId == null) {
+                                } else {
                                   setState(() {
                                     _error = '잘못된 접근입니다.';
                                     _isLoading = false;
