@@ -5,14 +5,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import '../component/slider/pending_place_card_slider_panel.dart';
+import '../component/slider/place_card_slider_panel.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/schedule/model/schedule_model.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 
 class NaverPlaceMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'naverPlaceMapScreen';
   final int day; // 여행 몇일 차 정보
   final String? dayId; // 확정 일정의 dayId(고유 식별자)
-  const NaverPlaceMapScreen({Key? key, required this.day, this.dayId}) : super(key: key);
+  const NaverPlaceMapScreen({Key? key, required this.day, this.dayId})
+    : super(key: key);
 
   @override
   ConsumerState<NaverPlaceMapScreen> createState() =>
@@ -30,18 +36,33 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
   NaverMapController? mapController;
   String _searchQuery = '';
 
+  bool _showSliderBar = false;
+
   @override
   void initState() {
     super.initState();
     day = widget.day;
     dayId = widget.dayId;
+    // 슬라이드 애니메이션 트리거
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          _showSliderBar = true;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Scaffold(
-        bottomNavigationBar: _buildSliderBarHead(),
+        // bottomNavigationBar: AnimatedSlide(
+        //   offset: _showSliderBar ? Offset(0, 0) : Offset(0, 1),
+        //   duration: const Duration(milliseconds: 400),
+        //   curve: Curves.easeOutCubic,
+        //   child: _buildSliderBarHead(),
+        // ),
         body: Stack(
           children: [
             // 네이버 지도 위젯 (실제 연동 시 아래 주석 해제 및 교체)
@@ -54,8 +75,17 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                 },
                 onMapTapped: (point, latLng) {
                   FocusScope.of(context).unfocus();
+                  // [애니메이션] 패널을 슬라이드다운(숨김) 애니메이션 시작
                   setState(() {
-                    _selectedPlace = null;
+                    _showSliderBar = false;
+                  });
+                  // [애니메이션] AnimatedSlide의 duration(400ms)만큼 기다렸다가, 패널 위젯 자체를 제거
+                  Future.delayed(const Duration(milliseconds: 400), () {
+                    if (mounted) {
+                      setState(() {
+                        _selectedPlace = null;
+                      });
+                    }
                   });
                 },
               ),
@@ -154,6 +184,25 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
             //   bottom: 0,
             //   child: _buildSliderBarHead(),
             // ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedSlide(
+                // [애니메이션] 패널이 보일 조건: _selectedPlace가 null이 아니고, _showSliderBar가 true일 때만 슬라이드업
+                // 그렇지 않으면 슬라이드다운(숨김) 애니메이션
+                // 이 조건은 마커 클릭 시, 지도 탭 시, 패널이 보일 때와 숨길 때 애니메이션을 트리거하는 데 사용됨
+                offset:
+                    _selectedPlace != null && _showSliderBar
+                        ? Offset(0, 0)
+                        : Offset(0, 1),
+                duration: const Duration(
+                  milliseconds: 400,
+                ), // 애니메이션 속도: 400ms로 설정하여 부드러운 슬라이드 효과를 냄
+                curve: Curves.easeOutCubic, // 부드러운 슬라이드 효과를 위한 곡선
+                child: _buildSliderBarHead(),
+              ),
+            ),
           ],
         ),
       ),
@@ -194,15 +243,78 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
   Widget _buildSliderBarHead() {
     // 선택된 마커가 있을 때만 패널 표시
     if (_selectedPlace == null) return SizedBox.shrink();
-    return PendingPlaceCardSliderPanel(
+    return PlaceCardSliderPanel(
       place: _selectedPlace,
       imageUrl: null, // 썸네일 이미지 URL 또는 null
       buttonText: '일정에 추가하기',
-      onAddPressed: () {
-        // TODO: 일정에 추가하기 동작 구현
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('일정에 추가되었습니다!')));
+      onAddPressed: () async {
+        final tripState = ref.read(tripProvider);
+        if (tripState is TripModel) {
+          bool success = false;
+          String? errorMsg;
+          try {
+            if (tripState.status == TripStatus.SETTING) {
+              // Pending 일정에 추가 (provider만 사용)
+              success = await ref
+                  .read(pendingScheduleProvider.notifier)
+                  .addPlace(
+                    tripId: tripState.tripId.toString(),
+                    day: day,
+                    place: PendingPlaceModel(
+                      id: _selectedPlace!.link,
+                      name: _selectedPlace!.title,
+                      latitude: _selectedPlace!.mapyCoord,
+                      longitude: _selectedPlace!.mapxCoord,
+                      // placeCategory: _selectedPlace!.category,
+                      placeCategory: '기타',
+                    ),
+                  );
+            } else {
+              // Confirmed 일정에 추가 (provider만 사용)
+              if (dayId != null) {
+                success = await ref
+                    .read(confirmScheduleProvider.notifier)
+                    .addPlace(
+                      tripId: tripState.tripId,
+                      tripDayPlaceId: dayId!,
+                      name: _selectedPlace!.title,
+                      latitude: _selectedPlace!.mapyCoord,
+                      longitude: _selectedPlace!.mapxCoord,
+                      // placeType: _selectedPlace!.category,
+                      placeType: '기타',
+                    );
+              }
+            }
+          } catch (e) {
+            success = false;
+            if (e is Exception && e.toString().contains('Exception:')) {
+              errorMsg = e.toString().replaceFirst('Exception:', '').trim();
+            } else {
+              errorMsg = e.toString();
+            }
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                success
+                    ? '일정에 성공적으로 추가되었습니다!'
+                    : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
+                style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w600),
+              ),
+              backgroundColor:
+                  success
+                      ? const Color.fromARGB(212, 56, 212, 121)
+                      : const Color.fromARGB(229, 226, 81, 65),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.all(16.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(48.r),
+              ),
+              elevation: 0, // 그림자 제거
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
     );
   }
@@ -231,8 +343,19 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
               ),
             );
             marker.setOnTapListener((NMarker tappedMarker) {
+              // [애니메이션] 같은 마커를 연속 클릭해도 항상 슬라이드 애니메이션이 동작하도록
               setState(() {
-                _selectedPlace = item;
+                _showSliderBar = false;
+                _selectedPlace = null; // 먼저 null로 바꿔 AnimatedSlide를 완전히 숨김
+              });
+              // 10ms 후 실제 마커 데이터로 다시 할당해 슬라이드업 애니메이션 트리거
+              Future.delayed(const Duration(milliseconds: 10), () {
+                if (mounted) {
+                  setState(() {
+                    _selectedPlace = item;
+                    _showSliderBar = true;
+                  });
+                }
               });
             });
             return marker;

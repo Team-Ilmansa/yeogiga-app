@@ -237,19 +237,19 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                         ),
                                       ),
                                       SizedBox(height: 32.h),
-                                      Center(
-                                        child: TextButton(
-                                          onPressed: () {},
-                                          child: Text(
-                                            '+ 일정 담으러 가기',
-                                            style: TextStyle(
-                                              fontSize: 48.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF8287ff),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // Center(
+                                      //   child: TextButton(
+                                      //     onPressed: () {},
+                                      //     child: Text(
+                                      //       '+ 일정 담으러 가기',
+                                      //       style: TextStyle(
+                                      //         fontSize: 48.sp,
+                                      //         fontWeight: FontWeight.bold,
+                                      //         color: Color(0xFF8287ff),
+                                      //       ),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                     ],
                                   );
                                 } else if (index < places.length &&

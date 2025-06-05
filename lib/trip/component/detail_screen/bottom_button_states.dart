@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../schedule/provider/confirm_schedule_provider.dart';
 
 class AddScheduleState extends StatelessWidget {
   const AddScheduleState({super.key});
@@ -10,44 +12,44 @@ class AddScheduleState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xff8287ff),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42.r),
-              ),
-              minimumSize: Size.fromHeight(156.h),
-              elevation: 0,
-              padding: EdgeInsets.zero,
-            ),
-            onPressed: () {
-              // TODO: 일정 추가 액션
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  'asset/icon/add_schedule.svg',
-                  width: 72.w,
-                  height: 72.h,
-                ),
-                SizedBox(width: 30.w),
-                Text(
-                  '일정 추가하기',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 48.sp,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(width: 36.w),
+        // Expanded(
+        //   child: ElevatedButton(
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: Color(0xff8287ff),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(42.r),
+        //       ),
+        //       minimumSize: Size.fromHeight(156.h),
+        //       elevation: 0,
+        //       padding: EdgeInsets.zero,
+        //     ),
+        //     onPressed: () {
+        //       // TODO: 일정 추가 액션
+        //     },
+        //     child: Row(
+        //       mainAxisAlignment: MainAxisAlignment.center,
+        //       crossAxisAlignment: CrossAxisAlignment.center,
+        //       children: [
+        //         SvgPicture.asset(
+        //           'asset/icon/add_schedule.svg',
+        //           width: 72.w,
+        //           height: 72.h,
+        //         ),
+        //         SizedBox(width: 30.w),
+        //         Text(
+        //           '일정 추가하기',
+        //           style: TextStyle(
+        //             color: Colors.white,
+        //             fontSize: 48.sp,
+        //             fontWeight: FontWeight.w600,
+        //             letterSpacing: -0.3,
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        // SizedBox(width: 36.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -260,6 +262,218 @@ class PictureOptionState extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ConfirmScheduleState extends ConsumerWidget {
+  final int tripId;
+  final int lastDay;
+  const ConfirmScheduleState({
+    super.key,
+    required this.tripId,
+    required this.lastDay,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF8287FF),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(42.r),
+        ),
+        elevation: 0,
+        minimumSize: Size.fromHeight(156.h),
+        padding: EdgeInsets.zero,
+      ),
+      onPressed: () async {
+        final scaffoldContext = context;
+        final confirm = await showDialog<bool>(
+          context: scaffoldContext,
+          builder:
+              (context) => Dialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(48.r),
+                ),
+                insetPadding: EdgeInsets.all(48.w),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 40.h,
+                    horizontal: 40.w,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Color(0xFF8287FF),
+                        size: 120.w,
+                      ),
+                      SizedBox(height: 48.h),
+                      Text(
+                        '정말 여행 일정을 확정하시겠습니까?',
+                        style: TextStyle(
+                          fontSize: 56.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xff313131),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 50.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xffc6c6c6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(42.r),
+                                ),
+                                elevation: 0,
+                                minimumSize: Size.fromHeight(156.h),
+                                padding: EdgeInsets.zero,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text(
+                                '취소',
+                                style: TextStyle(
+                                  fontSize: 48.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 32.w),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF8287FF),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(42.r),
+                                ),
+                                elevation: 0,
+                                minimumSize: Size.fromHeight(156.h),
+                                padding: EdgeInsets.zero,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text(
+                                '확정',
+                                style: TextStyle(
+                                  fontSize: 48.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        );
+        if (confirm != true) return;
+
+        bool success = false;
+        String? errorMsg;
+        try {
+          final notifier = ref.read(confirmScheduleProvider.notifier);
+          success = await notifier.confirmAndRefreshTrip(
+            tripId: tripId,
+            lastDay: lastDay,
+            ref: ref,
+          );
+        } catch (e) {
+          success = false;
+          if (e is Exception && e.toString().contains('Exception:')) {
+            errorMsg = e.toString().replaceFirst('Exception:', '').trim();
+          } else {
+            errorMsg = e.toString();
+          }
+        }
+        if (scaffoldContext.mounted) {
+          await showDialog(
+            context: scaffoldContext,
+            builder:
+                (context) => Dialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(48.r),
+                  ),
+                  insetPadding: EdgeInsets.all(48.w),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 40.h,
+                      horizontal: 40.w,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          success
+                              ? Icons.check_circle_outline
+                              : Icons.error_outline,
+                          color: success ? const Color(0xFF8287FF) : Colors.red,
+                          size: 120.w,
+                        ),
+                        SizedBox(height: 48.h),
+                        Text(
+                          success
+                              ? '여행 일정이 확정되었습니다!'
+                              : '일정 확정에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
+                          style: TextStyle(
+                            fontSize: 56.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff313131),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 50.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  success
+                                      ? const Color(0xFF8287FF)
+                                      : Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(42.r),
+                              ),
+                              elevation: 0,
+                              minimumSize: Size.fromHeight(156.h),
+                              padding: EdgeInsets.zero,
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(
+                              '확인',
+                              style: TextStyle(
+                                fontSize: 48.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          );
+        }
+      },
+      child: Text(
+        '여행 일정 확정하기',
+        style: TextStyle(
+          fontSize: 48.sp,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
     );
   }

@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 
-
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/view/no_schedule_view.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/view/pending_schedule_view.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/view/confirmed_schedule_view.dart';
+import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/view/completed_schedule_view.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
-
 
 class ScheduleDashboardTab extends ConsumerStatefulWidget {
   const ScheduleDashboardTab({super.key});
@@ -23,6 +23,7 @@ class ScheduleDashboardTab extends ConsumerStatefulWidget {
 class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
   bool _pendingFetched = false;
   bool _confirmedFetched = false;
+  bool _completedFetched = false;
 
   @override
   void didChangeDependencies() {
@@ -42,14 +43,19 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
       });
       _pendingFetched = true;
     } else if ((tripState is PlannedTripModel ||
-            tripState is InProgressTripModel ||
-            tripState is CompletedTripModel) &&
+            tripState is InProgressTripModel) &&
         !_confirmedFetched) {
       final tripId = (tripState as TripModel).tripId;
       Future.microtask(() {
         ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
       });
       _confirmedFetched = true;
+    } else if (tripState is CompletedTripModel && !_completedFetched) {
+      final tripId = tripState.tripId;
+      Future.microtask(() {
+        ref.read(completedScheduleProvider.notifier).fetch(tripId);
+      });
+      _completedFetched = true;
     }
   }
 
@@ -85,10 +91,20 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
         },
       );
     } else if (tripState is PlannedTripModel ||
-        tripState is InProgressTripModel ||
-        tripState is CompletedTripModel) {
+        tripState is InProgressTripModel) {
       final dynamicDays = getDaysForTrip(tripState);
       return ConfirmedScheduleView(
+        dynamicDays: dynamicDays,
+        selectedDayIndex: selectedDayIndex,
+        onDaySelected: (index) {
+          setState(() {
+            selectedDayIndex = index;
+          });
+        },
+      );
+    } else if (tripState is CompletedTripModel) {
+      final dynamicDays = getDaysForTrip(tripState);
+      return CompletedScheduleView(
         dynamicDays: dynamicDays,
         selectedDayIndex: selectedDayIndex,
         onDaySelected: (index) {

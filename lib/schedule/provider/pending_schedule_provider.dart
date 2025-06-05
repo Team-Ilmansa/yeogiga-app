@@ -2,7 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/repository/pending_schedule_repository.dart';
 
-final pendingScheduleProvider = StateNotifierProvider.autoDispose<PendingScheduleNotifier, PendingScheduleModel?>((ref) {
+final pendingScheduleProvider = StateNotifierProvider.autoDispose<
+  PendingScheduleNotifier,
+  PendingScheduleModel?
+>((ref) {
   final repo = ref.watch(pendingScheduleRepositoryProvider);
   return PendingScheduleNotifier(repo);
 });
@@ -18,9 +21,13 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
     final futures = days.map((day) => fetchDay(tripId: tripId, day: day));
     final daySchedules = await Future.wait(futures);
     // null인 day는 제외
-    final validSchedules = daySchedules.whereType<PendingDayScheduleModel>().toList();
+    final validSchedules =
+        daySchedules.whereType<PendingDayScheduleModel>().toList();
     // PendingScheduleModel로 만들어 상태에 저장
-    state = PendingScheduleModel(tripId: int.parse(tripId), schedules: validSchedules);
+    state = PendingScheduleModel(
+      tripId: int.parse(tripId),
+      schedules: validSchedules,
+    );
   }
 
   /// 특정 일차(day)의 일정만 조회
@@ -32,7 +39,7 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
   }
 
   /// 특정 일차에 목적지 추가
-  Future<void> addPlace({
+  Future<bool> addPlace({
     required String tripId,
     required int day,
     required PendingPlaceModel place,
@@ -49,6 +56,7 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
         _updateDayInState(tripId, updatedDay);
       }
     }
+    return success;
   }
 
   /// 특정 일차에서 목적지 삭제
@@ -93,11 +101,16 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
   void _updateDayInState(String tripId, PendingDayScheduleModel updatedDay) {
     final current = state;
     if (current == null) return;
-    final newSchedules = current.schedules.map((d) => d.day == updatedDay.day ? updatedDay : d).toList();
-    state = PendingScheduleModel(tripId: current.tripId, schedules: newSchedules);
+    final newSchedules =
+        current.schedules
+            .map((d) => d.day == updatedDay.day ? updatedDay : d)
+            .toList();
+    state = PendingScheduleModel(
+      tripId: current.tripId,
+      schedules: newSchedules,
+    );
   }
 
   /// 상태 초기화 (clear)
   void clear() => state = null;
 }
-

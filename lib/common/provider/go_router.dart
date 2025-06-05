@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/user/provider/auth_provider.dart';
+import 'package:yeogiga/common/route_observer.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // watch - 값이 변경될때마다 다시 빌드
@@ -12,5 +13,6 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     refreshListenable: provider,
     redirect: provider.redirectLogic,
+    observers: [myPageRouteObserver, homeRouteObserver],
   );
 });

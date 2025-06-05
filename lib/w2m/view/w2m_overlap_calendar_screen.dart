@@ -171,9 +171,32 @@ class _W2MOverlapCalendarScreenState
                                 SnackBar(
                                   content: Text(
                                     result ? '여행 일정이 저장되었습니다.' : '저장에 실패했습니다.',
+                                    style: TextStyle(
+                                      fontSize: 48.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   backgroundColor:
-                                      result ? Colors.green : Colors.red,
+                                      result
+                                          ? const Color.fromARGB(
+                                            212,
+                                            56,
+                                            212,
+                                            121,
+                                          )
+                                          : const Color.fromARGB(
+                                            229,
+                                            226,
+                                            81,
+                                            65,
+                                          ),
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: EdgeInsets.all(16.w),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(48.r),
+                                  ),
+                                  elevation: 0,
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                               GoRouter.of(context).pop();
@@ -181,8 +204,22 @@ class _W2MOverlapCalendarScreenState
                           } else {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('시작/종료 날짜를 선택해주세요.'),
+                                SnackBar(
+                                  content: Text(
+                                    '시작/종료 날짜를 선택해주세요.',
+                                    style: TextStyle(
+                                      fontSize: 48.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: EdgeInsets.all(16.w),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(48.r),
+                                  ),
+                                  elevation: 0,
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }

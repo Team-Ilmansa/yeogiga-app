@@ -12,6 +12,7 @@ import 'package:yeogiga/common/utils/weather_icon_util.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
+import 'package:yeogiga/common/route_observer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +21,27 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    homeRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    homeRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // 홈 화면 복귀 시 필요한 새로고침 로직 추가
+    // 예시: ref.invalidate(mainTripFutureProvider);
+    // print('HomeScreen didPopNext');
+    super.didPopNext();
+  }
+
   @override
   void initState() {
     super.initState();

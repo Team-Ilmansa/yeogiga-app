@@ -42,6 +42,9 @@ class PendingScheduleRepository {
           response.statusCode! >= 200 &&
           response.statusCode! < 300;
     } catch (e) {
+      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
       return false;
     }
   }

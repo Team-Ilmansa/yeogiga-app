@@ -104,6 +104,11 @@ class ConfirmScheduleRepository {
           response.statusCode! >= 200 &&
           response.statusCode! < 300;
     } catch (e) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
       return false;
     }
   }
@@ -143,14 +148,47 @@ class ConfirmScheduleRepository {
       );
       if (response.statusCode == 200 && response.data['data'] != null) {
         final List<dynamic> data = response.data['data'];
-        final dayPlaces = data
-            .map((e) => CompletedTripDayPlaceModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final dayPlaces =
+            data
+                .map(
+                  (e) => CompletedTripDayPlaceModel.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
+                .toList();
         return CompletedTripDayPlaceListModel(tripId: tripId, data: dayPlaces);
       }
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /// pending 상태의 목적지들을 confirmed로 전환하는 API
+  /// 성공시 true, 실패시 false 반환
+  /// 서버 응답 메시지까지 함께 반환 (성공 여부 + 에러 메시지)
+  Future<bool> confirmTripSchedule({
+    required int tripId,
+    required int lastDay,
+  }) async {
+    try {
+      final response = await dio.post(
+        '$baseUrl/api/v1/trip/$tripId/complete',
+        options: Options(headers: {"accessToken": 'true'}),
+        data: {"lastDay": lastDay},
+      );
+      if (response.statusCode == 201) {
+        return true;
+      }
+      // 서버에서 에러 메시지 반환 시 Exception throw
+      final msgRaw = response.data?['message'] ?? response.data?['error'];
+      final msg = msgRaw is String ? msgRaw : msgRaw?.toString();
+      throw Exception(msg ?? '일정 확정에 실패했습니다');
+    } catch (e) {
+      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
+      throw Exception(e.toString());
     }
   }
 }

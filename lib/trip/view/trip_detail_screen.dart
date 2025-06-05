@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:yeogiga/trip/component/detail_screen/top_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/component/detail_screen/notice_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/schedule_dashboard_tab.dart';
+import 'package:yeogiga/trip/component/trip_more_menu_sheet.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -83,10 +83,19 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       //TODO: 지도로 이동
                     },
                   ),
+                // TODO: 메뉴 보여주기
                 IconButton(
                   icon: Icon(Icons.more_vert, color: Colors.black),
                   onPressed: () {
-                    //TODO: 메뉴 펼치기
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: false,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.black.withOpacity(0.7),
+                      builder: (context) {
+                        return const TripMoreMenuSheet();
+                      },
+                    );
                   },
                 ),
               ],
@@ -111,7 +120,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 // 탭바
                 SliverPersistentHeader(
                   pinned: true,
-                  delegate: _TabBarHeaderDelegate(
+                  delegate: TabBarHeaderDelegate(
                     child: SizedBox(
                       height: 108.h,
                       child: Container(
@@ -208,20 +217,43 @@ class BottomAppBarLayout extends StatelessWidget {
 
 Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
   // 여행 상태가 SETTING이고 날짜 미지정이면 '여행 날짜 확정하기' 버튼
-  if (tripState is SettingTripModel &&
-      ((tripState as SettingTripModel).startedAt == null ||
-          (tripState as SettingTripModel).endedAt == null)) {
+  if (tripState is SettingTripModel) {
+    final settingTrip = tripState as SettingTripModel;
+    final startedAt = settingTrip.startedAt;
+    final endedAt = settingTrip.endedAt;
     String? myNickname;
     if (userMe is UserResponseModel) {
       myNickname = userMe.data?.nickname;
     }
-    final leaderId = tripState.leaderId;
-    final leaderList = tripState.members.where((m) => m.userId == leaderId);
+    final leaderId = settingTrip.leaderId;
+    final leaderList = settingTrip.members.where((m) => m.userId == leaderId);
     final leader = leaderList.isNotEmpty ? leaderList.first : null;
+    // 리더만 버튼 노출
     if (leader != null && myNickname != null && leader.nickname == myNickname) {
-      return const BottomAppBarLayout(child: ConfirmCalendarState());
+      if (startedAt == null || endedAt == null) {
+        // 날짜 미지정: 여행 날짜 확정하기
+        return const BottomAppBarLayout(child: ConfirmCalendarState());
+      } else {
+        // 날짜 지정: 여행 일정 확정하기
+        final tripId = settingTrip.tripId;
+        int lastDay = 1;
+        if (startedAt != null && endedAt != null) {
+          try {
+            final start = DateTime.parse(startedAt.toString().substring(0, 10));
+            final end = DateTime.parse(endedAt.toString().substring(0, 10));
+            lastDay = end.difference(start).inDays + 1;
+            if (lastDay < 1) lastDay = 1;
+          } catch (e) {
+            lastDay = 1;
+          }
+        }
+        return BottomAppBarLayout(
+          child: ConfirmScheduleState(tripId: tripId, lastDay: lastDay),
+        );
+      }
+    } else {
+      return null;
     }
-    return null;
   } else if (bottomAppBarState == 1) {
     return const BottomAppBarLayout(child: AddScheduleState());
   } else if (bottomAppBarState == 2) {
@@ -237,9 +269,9 @@ Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
 // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
 // SliverPersistentHeaderDelegate for the pinned TabBar
-class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+class TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
-  _TabBarHeaderDelegate({required this.child});
+  TabBarHeaderDelegate({required this.child});
 
   @override
   Widget build(
@@ -255,5 +287,5 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get minExtent => 108.h;
   @override
-  bool shouldRebuild(covariant _TabBarHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant TabBarHeaderDelegate oldDelegate) => false;
 }
