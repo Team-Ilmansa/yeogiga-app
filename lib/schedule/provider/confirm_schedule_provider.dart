@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/repository/confirm_schedule_repository.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
 
 final confirmScheduleProvider = StateNotifierProvider.autoDispose<
   ConfirmScheduleNotifier,
@@ -41,12 +42,18 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
   void _updateDayInState(int tripId, ConfirmedDayScheduleModel updatedDay) {
     final current = state;
     if (current == null) return;
-    final newSchedules = current.schedules.map((d) => d.day == updatedDay.day ? updatedDay : d).toList();
-    state = ConfirmedScheduleModel(tripId: current.tripId, schedules: newSchedules);
+    final newSchedules =
+        current.schedules
+            .map((d) => d.day == updatedDay.day ? updatedDay : d)
+            .toList();
+    state = ConfirmedScheduleModel(
+      tripId: current.tripId,
+      schedules: newSchedules,
+    );
   }
 
   /// 특정 일차에 목적지 추가
-  Future<void> addPlace({
+  Future<bool> addPlace({
     required int tripId,
     required String tripDayPlaceId,
     required String name,
@@ -65,6 +72,7 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
     if (success) {
       await fetchAll(tripId);
     }
+    return success;
   }
 
   /// 특정 일차에서 목적지 삭제
@@ -81,6 +89,23 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
     if (success) {
       await fetchAll(tripId);
     }
+  }
+
+  Future<bool> confirmAndRefreshTrip({
+    required int tripId,
+    required int lastDay,
+    required WidgetRef ref,
+  }) async {
+    final repo = ref.read(confirmScheduleRepositoryProvider);
+    final result = await repo.confirmTripSchedule(
+      tripId: tripId,
+      lastDay: lastDay,
+    );
+    if (result) {
+      // tripProvider의 getTrip 실행 (상태 최신화)
+      await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
+    }
+    return result;
   }
 
   /// 상태 초기화 (clear)

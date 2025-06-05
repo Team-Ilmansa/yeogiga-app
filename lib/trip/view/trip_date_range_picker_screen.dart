@@ -54,7 +54,14 @@ class _TripDateRangePickerScreenState
             color: Colors.black,
             size: 22,
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // GoRouter 6.x 이상이면 context.canPop/context.pop 사용, 아니면 Navigator fallback
+            if (GoRouter.of(context).canPop()) {
+              GoRouter.of(context).pop();
+            } else {
+              Navigator.of(context).maybePop();
+            }
+          },
         ),
       ),
       //달력 선택 공간

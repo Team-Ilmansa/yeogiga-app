@@ -4,6 +4,7 @@ import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/trip/model/get_trip_response.dart';
 import 'package:yeogiga/trip/model/post_trip_response.dart';
+import 'dart:convert';
 
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   final dio = ref.watch(dioProvider);
@@ -35,8 +36,23 @@ class TripRepository {
       // TODO: 이거에 대한 화면처리도 해야함.
       throw Exception('알 수 없는 오류: ${response.data['message']}');
     } on DioException catch (e) {
-      final postTripResponse = PostTripResponse.fromJson(e.response?.data);
+      dynamic data = e.response?.data;
+      Map<String, dynamic>? jsonData;
 
+      if (data is String) {
+        try {
+          jsonData = json.decode(data) as Map<String, dynamic>;
+        } catch (_) {
+          // 파싱 불가: 서버가 HTML, plain text 등 반환한 경우
+          throw Exception('서버 오류: \\${data.toString()}');
+        }
+      } else if (data is Map<String, dynamic>) {
+        jsonData = data;
+      } else {
+        throw Exception('알 수 없는 오류: \\${data.toString()}');
+      }
+
+      final postTripResponse = PostTripResponse.fromJson(jsonData!);
       return postTripResponse;
     }
   }
@@ -85,6 +101,64 @@ class TripRepository {
       return true;
     } catch (e) {
       // 에러 발생 시 false 반환 (원한다면 예외 throw도 가능)
+      return false;
+    }
+  }
+
+  /// 여행 제목 수정하기
+  Future<bool> updateTripTitle({
+    required int tripId,
+    required String title,
+  }) async {
+    try {
+      await dio.put(
+        '$baseUrl/api/v1/trip/$tripId',
+        data: {"title": title},
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      return true;
+    } catch (e) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
+      return false;
+    }
+  }
+
+  /// 여행 삭제하기
+  Future<bool> deleteTrip({required int tripId}) async {
+    try {
+      await dio.delete(
+        '$baseUrl/api/v1/trip/$tripId',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      return true;
+    } catch (e) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
+      return false;
+    }
+  }
+
+  /// 여행 참가하기
+  Future<bool> joinTrip({
+    required int tripId,
+  }) async {
+    try {
+      await dio.post(
+        '$baseUrl/api/v1/trip/$tripId/members',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      return true;
+    } catch (e) {
+      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
       return false;
     }
   }

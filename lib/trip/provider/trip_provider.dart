@@ -3,6 +3,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/repository/trip_repository.dart';
 import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
+import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 
 //프로바이더 등록!!
 final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
@@ -86,15 +87,73 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
   }
 
   // 여행 시간 수정 및 상태 갱신
-  Future<bool> updateTripTime({required DateTime start, required DateTime end}) async {
+  Future<bool> updateTripTime({
+    required DateTime start,
+    required DateTime end,
+  }) async {
     if (state is! TripModel) return false;
     final tripId = (state as TripModel).tripId;
 
-    final result = await tripRepository.patchTripTime(tripId: tripId, start: start, end: end);
+    final result = await tripRepository.patchTripTime(
+      tripId: tripId,
+      start: start,
+      end: end,
+    );
     if (result) {
       // 성공 시 trip 정보 갱신
       await getTrip(tripId: tripId);
     }
     return result;
+  }
+
+  /// 여행 제목 수정
+  Future<bool> updateTripTitle({required String title}) async {
+    if (state is! TripModel) return false;
+    final tripId = (state as TripModel).tripId;
+    try {
+      final result = await tripRepository.updateTripTitle(
+        tripId: tripId,
+        title: title,
+      );
+      if (result) {
+        await getTrip(tripId: tripId);
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 여행 삭제
+  Future<bool> deleteTrip() async {
+    if (state is! TripModel) return false;
+    final tripId = (state as TripModel).tripId;
+    try {
+      final result = await tripRepository.deleteTrip(tripId: tripId);
+      if (result) {
+        // 여행 삭제 후 tripListProvider 갱신
+        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 여행 참가
+  Future<bool> joinTrip(int tripId) async {
+    try {
+      final result = await tripRepository.joinTrip(tripId: tripId);
+      if (result) {
+        // 여행 참가 성공 시 tripListProvider 갱신
+        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+        return true;
+      } else {
+        // 실패 시 예외 발생
+        throw Exception('여행 참가에 실패했습니다.');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -3,13 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
 
-class PendingPlaceCardSliderPanel extends StatelessWidget {
+class PlaceCardSliderPanel extends StatelessWidget {
   final NaverPlaceItem? place;
   final String? imageUrl;
   final VoidCallback? onAddPressed;
   final String buttonText;
 
-  const PendingPlaceCardSliderPanel({
+  const PlaceCardSliderPanel({
     Key? key,
     required this.place,
     this.imageUrl,

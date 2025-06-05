@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
-import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
+import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/completed_trip_mini_map.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/schedule/component/schedule_item.dart';
 
-class ConfirmedScheduleView extends StatelessWidget {
+class CompletedScheduleView extends StatelessWidget {
   final List<String> dynamicDays;
   final int selectedDayIndex;
   final void Function(int) onDaySelected;
 
-  const ConfirmedScheduleView({
+  const CompletedScheduleView({
     super.key,
     required this.dynamicDays,
     required this.selectedDayIndex,
@@ -25,21 +24,23 @@ class ConfirmedScheduleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final confirmed = ref.watch(confirmScheduleProvider);
-        if (confirmed == null) {
-          // 최초 진입 시 state가 null이면 fetchAll을 한 번만 호출
+        final completed = ref.watch(completedScheduleProvider);
+        if (completed == null) {
+          // 최초 진입 시 state가 null이면 fetch를 한 번만 호출
           final tripState = ref.read(tripProvider);
           if (tripState is TripModel) {
             final tripId = tripState.tripId;
             Future.microtask(() {
-              ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
+              ref.read(completedScheduleProvider.notifier).fetch(tripId);
             });
           }
           return const Center(child: CircularProgressIndicator());
         }
+        final schedules = completed.data;
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+            //TODO: 날짜 선택기
             SliverToBoxAdapter(
               child: DaySelector(
                 itemCount: dynamicDays.length + 1, // +1 for 전체
@@ -47,21 +48,28 @@ class ConfirmedScheduleView extends StatelessWidget {
                 onChanged: onDaySelected,
               ),
             ),
+            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+            //TODO: 미니맵
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 42.w),
+                child: CompletedTripMiniMap(dayPlaceModels: schedules),
+              ),
+            ),
             SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-            //여기
-            SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+            //TODO: 일정들
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                final schedules = confirmed.schedules;
                 if (selectedDayIndex == 0) {
                   // 전체 보기: 모든 Day
                   final daySchedule = schedules.firstWhere(
                     (s) => s.day == index + 1,
                     orElse:
-                        () => ConfirmedDayScheduleModel(
+                        () => CompletedTripDayPlaceModel(
                           id: '',
                           day: index + 1,
                           places: [],
+                          unmatchedImage: null,
                         ),
                   );
                   return _buildExpansionTile(daySchedule, 'Day ${index + 1}');
@@ -69,15 +77,19 @@ class ConfirmedScheduleView extends StatelessWidget {
                   // 선택된 Day만 보기
                   if (index == selectedDayIndex - 1) {
                     final daySchedule = schedules.firstWhere(
-                      (s) => s.day == index + 1,
+                      (s) => s.day == selectedDayIndex,
                       orElse:
-                          () => ConfirmedDayScheduleModel(
+                          () => CompletedTripDayPlaceModel(
                             id: '',
-                            day: index + 1,
+                            day: selectedDayIndex,
                             places: [],
+                            unmatchedImage: null,
                           ),
                     );
-                    return _buildExpansionTile(daySchedule, dynamicDays[index]);
+                    return _buildExpansionTile(
+                      daySchedule,
+                      'Day $selectedDayIndex',
+                    );
                   } else {
                     return const SizedBox.shrink();
                   }
@@ -91,7 +103,7 @@ class ConfirmedScheduleView extends StatelessWidget {
   }
 
   Widget _buildExpansionTile(
-    ConfirmedDayScheduleModel daySchedule,
+    CompletedTripDayPlaceModel daySchedule,
     String dayLabel,
   ) {
     final hasPlaces = daySchedule.places.isNotEmpty;
@@ -127,65 +139,37 @@ class ConfirmedScheduleView extends StatelessWidget {
             ),
           ),
         ),
-        children: [
-          if (hasPlaces)
-            ...daySchedule.places.map(
-              (place) => ScheduleItem(
-                key: ValueKey(place.id), // id를 key로 부여
-                title: place.name,
-                time: null, // 필요시 시간 필드 추가
-                done: place.isVisited,
-              ),
-            )
-          else
-            Center(
-              child: Text(
-                '등록된 일정이 없습니다.',
-                style: TextStyle(
-                  fontSize: 48.sp,
-                  color: const Color(0xffc6c6c6),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          Consumer(
-            builder: (context, ref, _) {
-              final tripState = ref.watch(tripProvider);
-              // TripStatus.COMPLETED일 때는 버튼 미노출
-              final isCompleted =
-                  tripState is TripModel &&
-                  tripState.status.toString().contains('COMPLETED');
-              if (isCompleted) return SizedBox.shrink();
-              return Padding(
-                padding: EdgeInsets.only(bottom: 20.h),
-                child: Builder(
-                  builder:
-                      (buttonContext) => TextButton(
-                        onPressed: () {
-                          // day와 dayId(id) 모두 전달
-                          GoRouter.of(buttonContext).push(
-                            '/naverPlaceMapScreen?day=${daySchedule.day}&dayId=${daySchedule.id}',
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          splashFactory: NoSplash.splashFactory,
+        children:
+            hasPlaces
+                ? daySchedule.places
+                    .map(
+                      (place) => ListTile(
+                        title: Text(
+                          place.name,
+                          style: TextStyle(fontSize: 36.sp),
                         ),
-                        child: Text(
-                          '+ 일정 담으러 가기',
-                          style: TextStyle(
-                            fontSize: 48.sp,
-                            color: const Color(0xff8287ff),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        subtitle: Text(
+                          '${place.latitude}, ${place.longitude}',
+                          style: TextStyle(fontSize: 28.sp),
                         ),
                       ),
-                ),
-              );
-            },
-          ),
-        ],
+                    )
+                    .toList()
+                : [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32.h),
+                    child: Center(
+                      child: Text(
+                        '등록된 일정이 없습니다.',
+                        style: TextStyle(
+                          fontSize: 48.sp,
+                          color: const Color(0xffc6c6c6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
       ),
     );
   }

@@ -95,9 +95,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                                 ),
                           );
                         } else {
-                          GoRouter.of(
-                            context,
-                          ).pushReplacement('/dateRangePicker');
+                          Navigator.of(context).pop();
+                          GoRouter.of(context).push('/dateRangePicker');
                         }
                       },
                     ),
