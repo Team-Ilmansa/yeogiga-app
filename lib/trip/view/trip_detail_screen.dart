@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/trip/component/detail_screen/top_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/component/detail_screen/notice_panel.dart';
@@ -69,7 +70,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(Icons.arrow_back_ios_new),
+              icon: Icon(Icons.arrow_back_ios_new, size: 56.sp),
               onPressed: () => Navigator.pop(context),
             ),
             Row(
@@ -81,19 +82,40 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     icon: Icon(Icons.map_outlined, color: Colors.black),
                     onPressed: () {
                       //TODO: 지도로 이동
+                      GoRouter.of(context).push('/ingTripMap');
                     },
                   ),
                 // TODO: 메뉴 보여주기
                 IconButton(
                   icon: Icon(Icons.more_vert, color: Colors.black),
                   onPressed: () {
+                    bool isLeader = false;
+                    String? myNickname;
+                    dynamic leader;
+                    if (tripState is TripModel) {
+                      final leaderId = tripState.leaderId;
+                      final leaderList = tripState.members.where(
+                        (m) => m.userId == leaderId,
+                      );
+                      leader = leaderList.isNotEmpty ? leaderList.first : null;
+                    }
+                    if (userMe is UserResponseModel) {
+                      myNickname = userMe.data?.nickname;
+                    }
+                    if (leader != null &&
+                        myNickname != null &&
+                        leader.nickname == myNickname) {
+                      isLeader = true;
+                    }
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: false,
                       backgroundColor: Colors.transparent,
                       barrierColor: Colors.black.withOpacity(0.7),
                       builder: (context) {
-                        return const TripMoreMenuSheet();
+                        return isLeader
+                            ? const TripMoreMenuSheetLeader()
+                            : const TripMoreMenuSheetMember();
                       },
                     );
                   },

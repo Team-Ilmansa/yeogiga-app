@@ -72,8 +72,23 @@ class ConfirmedPlaceModel {
     required this.isVisited,
   });
 
-  factory ConfirmedPlaceModel.fromJson(Map<String, dynamic> json) =>
-      _$ConfirmedPlaceModelFromJson(json);
+  factory ConfirmedPlaceModel.fromJson(Map<String, dynamic> json) {
+    print('[ConfirmedPlaceModel.fromJson] json: $json');
+    double? parseDouble(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      if (v is String) return double.tryParse(v);
+      return null;
+    }
+    return ConfirmedPlaceModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      latitude: parseDouble(json['latitude']),
+      longitude: parseDouble(json['longitude']),
+      placeType: json['placeType'] as String,
+      isVisited: json['isVisited'] as bool,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$ConfirmedPlaceModelToJson(this);
 }

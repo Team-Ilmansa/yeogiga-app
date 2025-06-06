@@ -84,6 +84,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(32.r),
                   ),
+                  backgroundColor: Color(0xff8287ff),
                 ),
                 onPressed: () async {
                   final tripIdController = TextEditingController();
@@ -371,7 +372,8 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   '여행 참가하기',
                   style: TextStyle(
                     fontSize: 48.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ),

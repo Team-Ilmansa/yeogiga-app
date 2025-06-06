@@ -185,7 +185,9 @@ class ConfirmScheduleRepository {
       final msg = msgRaw is String ? msgRaw : msgRaw?.toString();
       throw Exception(msg ?? '일정 확정에 실패했습니다');
     } catch (e) {
-      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
         throw Exception(e.response?.data['message']);
       }
       throw Exception(e.toString());
