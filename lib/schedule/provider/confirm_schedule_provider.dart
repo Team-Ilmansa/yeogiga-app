@@ -27,6 +27,7 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
     required String dayScheduleId,
     required int day,
   }) async {
+    print('실행됨');
     final result = await repo.fetchConfirmedDaySchedule(
       tripId: tripId,
       dayScheduleId: dayScheduleId,

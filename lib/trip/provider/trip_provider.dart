@@ -124,6 +124,22 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
     }
   }
 
+  /// 여행 탈퇴
+  Future<bool> leaveTrip() async {
+    if (state is! TripModel) return false;
+    final tripId = (state as TripModel).tripId;
+    try {
+      final result = await tripRepository.leaveTrip(tripId: tripId);
+      if (result) {
+        // 여행 탈퇴 후 tripListProvider 갱신
+        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+      }
+      return result;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// 여행 삭제
   Future<bool> deleteTrip() async {
     if (state is! TripModel) return false;

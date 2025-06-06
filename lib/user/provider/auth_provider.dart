@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/schedule/screen/naver_place_map_screen.dart';
+import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
+import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
 import 'package:yeogiga/trip/view/trip_date_range_picker_screen.dart';
 import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/user/view/login_screen.dart';
@@ -73,6 +75,16 @@ class AuthProvider extends ChangeNotifier {
         final day = int.tryParse(dayStr ?? '') ?? 1;
         return NaverPlaceMapScreen(day: day, dayId: dayId);
       },
+    ),
+    GoRoute(
+      path: '/ingTripMap',
+      name: IngTripMapScreen.routeName,
+      builder: (context, state) => IngTripMapScreen(),
+    ),
+    GoRoute(
+      path: '/endTripMap',
+      name: EndTripMapScreen.routeName,
+      builder: (_, __) => EndTripMapScreen(),
     ),
   ];
 

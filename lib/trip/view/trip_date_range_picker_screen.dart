@@ -102,6 +102,7 @@ class _TripDateRangePickerScreenState
             Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 36.w),
+                //TODO: 아이템 빌더에 아이템 수 안넣어도 무한대로 생성되나 ??
                 itemBuilder: (context, index) {
                   final month = DateTime(now.year, now.month + index);
                   return Padding(

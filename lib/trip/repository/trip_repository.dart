@@ -145,10 +145,26 @@ class TripRepository {
     }
   }
 
+  /// 여행 탈퇴하기
+  Future<bool> leaveTrip({required int tripId}) async {
+    try {
+      await dio.delete(
+        '$baseUrl/api/v1/trip/$tripId/members',
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+      return true;
+    } catch (e) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
+      return false;
+    }
+  }
+
   /// 여행 참가하기
-  Future<bool> joinTrip({
-    required int tripId,
-  }) async {
+  Future<bool> joinTrip({required int tripId}) async {
     try {
       await dio.post(
         '$baseUrl/api/v1/trip/$tripId/members',
@@ -156,7 +172,9 @@ class TripRepository {
       );
       return true;
     } catch (e) {
-      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
         throw Exception(e.response?.data['message']);
       }
       return false;

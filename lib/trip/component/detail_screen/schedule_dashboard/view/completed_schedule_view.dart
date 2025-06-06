@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
+import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/completed_trip_mini_map.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 
 class CompletedScheduleView extends StatelessWidget {
   final List<String> dynamicDays;
@@ -53,7 +56,18 @@ class CompletedScheduleView extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 42.w),
-                child: CompletedTripMiniMap(dayPlaceModels: schedules),
+                child: CompletedTripMiniMap(
+                  dayPlaceModels:
+                      selectedDayIndex == 0
+                          ? schedules
+                          : schedules
+                              .where((s) => s.day == selectedDayIndex)
+                              .toList(),
+                  onTap:
+                      () => GoRouter.of(
+                        context,
+                      ).pushNamed(EndTripMapScreen.routeName),
+                ),
               ),
             ),
             SliverToBoxAdapter(child: SizedBox(height: 20.h)),
@@ -143,15 +157,13 @@ class CompletedScheduleView extends StatelessWidget {
             hasPlaces
                 ? daySchedule.places
                     .map(
-                      (place) => ListTile(
-                        title: Text(
-                          place.name,
-                          style: TextStyle(fontSize: 36.sp),
-                        ),
-                        subtitle: Text(
-                          '${place.latitude}, ${place.longitude}',
-                          style: TextStyle(fontSize: 28.sp),
-                        ),
+                      (place) => ScheduleItem(
+                        key: ValueKey(place.id),
+                        title: place.name,
+                        time: null, // 필요시 시간 필드 추가
+                        // TODO: 일단은 끝나면 전부 다녀왔다고 표시함.
+                        done: true,
+                        // subtitle: '${place.latitude}, ${place.longitude}', // 필요시 ScheduleItem에 subtitle 추가
                       ),
                     )
                     .toList()
