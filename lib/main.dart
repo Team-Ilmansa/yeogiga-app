@@ -6,8 +6,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:yeogiga/common/service/fcm_background_handler.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase 초기화
+  await Firebase.initializeApp();
+
   // env 파일 적용
   await dotenv.load(fileName: ".env");
 
@@ -28,8 +36,18 @@ void main() async {
         },
   );
 
+  // FCM 백그라운드 핸들러 등록
+  final container = ProviderContainer();
+  FirebaseMessaging.onBackgroundMessage((message) => fcmBackgroundHandler(message, container));
+
+  // FCM 포그라운드 메시지 처리
+  FirebaseMessaging.onMessage.listen((message) async {
+    await fcmBackgroundHandler(message, container);
+  });
+
   runApp(ProviderScope(child: MyApp()));
 }
+
 
 //리버팟(provider) 적용
 class MyApp extends ConsumerWidget {
