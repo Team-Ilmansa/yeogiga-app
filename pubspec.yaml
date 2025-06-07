@@ -54,9 +54,9 @@ dependencies:
   http: ^1.4.0
 
   # --- FCM 및 알림 관련 의존성 추가 ---
-  firebase_core: ^2.30.0
-  firebase_messaging: ^14.7.19
-  flutter_local_notifications: ^17.1.2
+  firebase_core: ^3.13.1
+  firebase_messaging: ^15.2.6
+  flutter_local_notifications: ^19.2.1
 
 dev_dependencies:
   flutter_test:

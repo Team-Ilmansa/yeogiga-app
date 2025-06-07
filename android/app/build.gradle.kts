@@ -10,6 +10,9 @@ if (keystorePropertiesFile.exists()) {
 
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -23,6 +26,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // firebase fcm 관련
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
@@ -55,3 +60,7 @@ android {
 }
 
 flutter { source = "../.." }
+//flutter_local_notification 빌드 버전 맞춤.
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
