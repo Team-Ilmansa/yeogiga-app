@@ -3,13 +3,13 @@ import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/repository/confirm_schedule_repository.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
-final confirmScheduleProvider = StateNotifierProvider.autoDispose<
-  ConfirmScheduleNotifier,
-  ConfirmedScheduleModel?
->((ref) {
-  final repo = ref.watch(confirmScheduleRepositoryProvider);
-  return ConfirmScheduleNotifier(repo);
-});
+final confirmScheduleProvider =
+    StateNotifierProvider<ConfirmScheduleNotifier, ConfirmedScheduleModel?>((
+      ref,
+    ) {
+      final repo = ref.watch(confirmScheduleRepositoryProvider);
+      return ConfirmScheduleNotifier(repo);
+    });
 
 class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
   final ConfirmScheduleRepository repo;

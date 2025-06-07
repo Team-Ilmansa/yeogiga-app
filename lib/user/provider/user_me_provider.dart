@@ -8,6 +8,9 @@ import 'package:yeogiga/user/repository/auth_repository.dart';
 import 'package:yeogiga/user/repository/user_me_repository.dart';
 import 'package:yeogiga/user/repository/fcm_token_repository.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:yeogiga/common/service/fcm_token_manager.dart';
+
 final userMeProvider =
     StateNotifierProvider<UserMeStateNotifier, UserModelBase?>((ref) {
       final authRepository = ref.watch(authRepositoryProvider);
@@ -18,6 +21,7 @@ final userMeProvider =
         authRepository: authRepository,
         repository: userMeRepository,
         storage: storage,
+        ref: ref,
       );
     });
 
@@ -25,11 +29,13 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
   final AuthRepository authRepository;
   final UserMeRepository repository;
   final FlutterSecureStorage storage;
+  final Ref ref;
 
   UserMeStateNotifier({
     required this.authRepository,
     required this.repository,
     required this.storage,
+    required this.ref,
   }) : super(UserModelLoading()) {
     // 내 정보 가져오기
     getMe();
@@ -80,6 +86,9 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       );
       await storage.write(key: ACCESS_TOKEN_KEY, value: resp.data!.accessToken);
 
+      // 로그인 성공 시 FCM 토큰 등록
+      await registerFcmToken(ref);
+
       print('start get me');
       final userResp = await repository.getMe();
       state = userResp;
@@ -95,11 +104,11 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
   Future<void> logout() async {
     state = null;
 
-    // FCM 토큰 삭제
+    // FCM 토큰 삭제 (서버/기기 모두)
     try {
-      final container = ProviderContainer();
-      final fcmRepo = container.read(fcmTokenRepositoryProvider);
-      await fcmRepo.deleteFcmToken();
+      final fcmRepo = ref.read(fcmTokenRepositoryProvider);
+      await fcmRepo.deleteFcmToken(); // 서버에서 삭제
+      await FirebaseMessaging.instance.deleteToken(); // 기기에서 삭제
     } catch (e) {
       // 에러 로깅
     }
