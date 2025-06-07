@@ -164,7 +164,7 @@ class ConfirmScheduleRepository {
     }
   }
 
-  /// pending 상태의 목적지들을 confirmed로 전환하는 API
+  /// TODO: pending 상태의 목적지들을 confirmed로 전환하는 API
   /// 성공시 true, 실패시 false 반환
   /// 서버 응답 메시지까지 함께 반환 (성공 여부 + 에러 메시지)
   Future<bool> confirmTripSchedule({
@@ -193,4 +193,59 @@ class ConfirmScheduleRepository {
       throw Exception(e.toString());
     }
   }
+
+  /// 여행 확정 이후 목적지 순서 변경
+  Future<bool> reorderConfirmedPlaces({
+    required int tripId,
+    required String tripDayPlaceId,
+    required List<String> orderedPlaceIds,
+  }) async {
+    try {
+      final response = await dio.put(
+        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/order',
+        options: Options(headers: {"accessToken": 'true'}),
+        data: {"orderedPlaceIds": orderedPlaceIds},
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print(
+          '순서 변경 실패: status: \\${response.statusCode}, body: \\${response.data}',
+        );
+        return false;
+      }
+    } catch (e) {
+      print('순서 변경 예외: $e');
+      return false;
+    }
+  }
+
+  /// 확정된 목적지 방문여부 체크 API
+  /// PATCH /api/v1/trip/{tripId}/day-place/{tripDayPlaceId}/places/{placeId}/mark
+  /// body: {"isVisited": true|false}, accessToken 필요
+  /// 성공시 true, 실패시 false 반환
+  Future<bool> markPlaceVisited({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String placeId,
+    required bool isVisited,
+  }) async {
+    try {
+      final response = await dio.patch(
+        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId/mark',
+        options: Options(headers: {"accessToken": 'true'}),
+        data: {"isVisited": isVisited},
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('방문여부 체크 실패: status: \\${response.statusCode}, body: \\${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('방문여부 체크 예외: $e');
+      return false;
+    }
+  }
+
 }

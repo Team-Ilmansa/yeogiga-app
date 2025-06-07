@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
@@ -129,13 +130,110 @@ class ConfirmedScheduleView extends StatelessWidget {
         ),
         children: [
           if (hasPlaces)
-            ...daySchedule.places.map(
-              (place) => ScheduleItem(
-                key: ValueKey(place.id), // id를 key로 부여
-                title: place.name,
-                time: null, // 필요시 시간 필드 추가
-                done: place.isVisited,
-              ),
+            // Consumer로 감싸 ref를 스코프 내에서 안전하게 사용
+            Consumer(
+              builder: (context, ref, _) {
+                // tripProvider에서 tripId 추출
+                final tripState = ref.watch(tripProvider);
+                final tripId =
+                    (tripState is TripModel) ? tripState.tripId : null;
+
+                // DnD(드래그&드롭) 및 슬라이드 삭제가 가능한 확정 일정 리스트
+                return ReorderableListView.builder(
+                  shrinkWrap: true, // ExpansionTile 내부에서 스크롤 충돌 방지
+                  physics: const NeverScrollableScrollPhysics(), // 외부 스크롤만 허용
+                  key: ValueKey(daySchedule.day), // 일차별로 고유 key 부여
+                  itemCount: daySchedule.places.length,
+                  // 순서 변경 시 호출: 서버에 변경된 순서(placeId 리스트) 전달 & 최신화
+                  onReorder: (oldIndex, newIndex) async {
+                    if (tripId == null) return;
+                    // 현재 리스트 복사 후 순서 변경
+                    final places = List.of(daySchedule.places);
+                    final moved = places.removeAt(oldIndex);
+                    places.insert(
+                      newIndex > oldIndex ? newIndex - 1 : newIndex,
+                      moved,
+                    );
+                    // 변경된 순서의 placeId만 추출
+                    final orderedPlaceIds = places.map((p) => p.id).toList();
+                    // 서버에 순서 반영 및 해당 일차만 최신화
+                    await ref
+                        .read(confirmScheduleProvider.notifier)
+                        .reorderAndRefreshDaySchedule(
+                          tripId: tripId.toInt(),
+                          tripDayPlaceId: daySchedule.id,
+                          day: daySchedule.day,
+                          orderedPlaceIds: orderedPlaceIds,
+                        );
+                  },
+                  // 드래그 피드백 커스텀: 배경 투명 + 우측 파란 테두리 강조
+                  proxyDecorator: (child, index, animation) {
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border(
+                          right: BorderSide(color: Colors.blue, width: 4.0),
+                        ),
+                      ),
+                      child: child,
+                    );
+                  },
+                  // 각 일정 아이템 렌더링 (슬라이드 삭제 포함)
+                  itemBuilder: (context, index) {
+                    final place = daySchedule.places[index];
+                    return Slidable(
+                      key: ValueKey(place.id), // DnD/슬라이드 모두를 위한 고유 key
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          // 오른쪽으로 슬라이드 시 삭제 버튼
+                          SlidableAction(
+                            onPressed: (_) async {
+                              if (tripId != null) {
+                                // 서버에서 삭제 및 상태 최신화
+                                await ref
+                                    .read(confirmScheduleProvider.notifier)
+                                    .deletePlace(
+                                      tripId: tripId,
+                                      tripDayPlaceId: daySchedule.id,
+                                      placeId: place.id,
+                                    );
+                              }
+                            },
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: '삭제',
+                            flex: 1,
+                          ),
+                        ],
+                      ),
+                      // 실제 일정 정보 표시 위젯
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () async {
+                          if (tripId != null) {
+                            await ref.read(confirmScheduleProvider.notifier)
+                                .markAndRefreshPlaceVisited(
+                              tripId: tripId,
+                              tripDayPlaceId: daySchedule.id,
+                              placeId: place.id,
+                              day: daySchedule.day,
+                              isVisited: !place.isVisited, // 토글
+                            );
+                          }
+                        },
+                        child: ScheduleItem(
+                          key: ValueKey(place.id),
+                          title: place.name,
+                          time: null, // 필요시 시간 표시 가능
+                          done: place.isVisited,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             )
           else
             Center(

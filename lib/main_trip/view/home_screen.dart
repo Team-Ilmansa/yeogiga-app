@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/common/component/past_trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/common/provider/weather_provider.dart';
 import 'package:yeogiga/common/utils/weather_image_util.dart';
@@ -271,7 +273,30 @@ class AppBarTop extends StatelessWidget {
           ),
           Row(
             children: [
-              Icon(Icons.map_outlined, color: iconColor),
+              Consumer(
+                builder: (context, ref, _) {
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(24.r),
+                    onTap: () async {
+                      final mainTripAsync = ref.read(mainTripFutureProvider);
+                      final mainTrip =
+                          mainTripAsync is AsyncData
+                              ? mainTripAsync.value
+                              : null;
+                      final tripId = mainTrip?.tripId;
+                      if (tripId != null) {
+                        await ref
+                            .read(tripProvider.notifier)
+                            .getTrip(tripId: tripId);
+                        if (context.mounted) {
+                          GoRouter.of(context).push('/ingTripMap');
+                        }
+                      }
+                    },
+                    child: Icon(Icons.map_outlined, color: iconColor),
+                  );
+                },
+              ),
               SizedBox(width: 36.w),
               Icon(Icons.notifications_none, color: iconColor),
             ],

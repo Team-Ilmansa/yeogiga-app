@@ -35,6 +35,17 @@ class PendingDayScheduleModel {
       _$PendingDayScheduleModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$PendingDayScheduleModelToJson(this);
+
+  //TODO: optimistic UI 적용을 위한 copyWith
+  PendingDayScheduleModel copyWith({
+    int? day,
+    List<PendingPlaceModel>? places,
+  }) {
+    return PendingDayScheduleModel(
+      day: day ?? this.day,
+      places: places ?? this.places,
+    );
+  }
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -48,6 +59,16 @@ class PendingScheduleModel {
       _$PendingScheduleModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$PendingScheduleModelToJson(this);
+
+  PendingScheduleModel copyWith({
+    int? tripId,
+    List<PendingDayScheduleModel>? schedules,
+  }) {
+    return PendingScheduleModel(
+      tripId: tripId ?? this.tripId,
+      schedules: schedules ?? this.schedules,
+    );
+  }
 }
 
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -80,6 +101,7 @@ class ConfirmedPlaceModel {
       if (v is String) return double.tryParse(v);
       return null;
     }
+
     return ConfirmedPlaceModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -110,6 +132,18 @@ class ConfirmedDayScheduleModel {
       _$ConfirmedDayScheduleModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ConfirmedDayScheduleModelToJson(this);
+
+  ConfirmedDayScheduleModel copyWith({
+    String? id,
+    int? day,
+    List<ConfirmedPlaceModel>? places,
+  }) {
+    return ConfirmedDayScheduleModel(
+      id: id ?? this.id,
+      day: day ?? this.day,
+      places: places ?? this.places,
+    );
+  }
 }
 
 //확정 이후 각각 여행별 day스케줄들
@@ -124,6 +158,16 @@ class ConfirmedScheduleModel {
       _$ConfirmedScheduleModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ConfirmedScheduleModelToJson(this);
+
+  ConfirmedScheduleModel copyWith({
+    int? tripId,
+    List<ConfirmedDayScheduleModel>? schedules,
+  }) {
+    return ConfirmedScheduleModel(
+      tripId: tripId ?? this.tripId,
+      schedules: schedules ?? this.schedules,
+    );
+  }
 }
 
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
