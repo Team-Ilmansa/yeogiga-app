@@ -92,6 +92,80 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
     }
   }
 
+  /// 확정 일정 순서 변경 + 최신화
+  /// TODO: Optimistic UI: 순서 변경 시 임시로 UI 반영, 실패 시 롤백
+  Future<bool> reorderAndRefreshDaySchedule({
+    required int tripId,
+    required String tripDayPlaceId,
+    required int day,
+    required List<String> orderedPlaceIds,
+  }) async {
+    // 1. 기존 daySchedule 백업
+    final prevState = state;
+    final dayIndex =
+        state?.schedules.indexWhere((d) => d.id == tripDayPlaceId) ?? -1;
+    if (dayIndex == -1 || state == null) return false;
+    final originalPlaces = List.of(state!.schedules[dayIndex].places);
+
+    // 2. state를 optimistic하게 바로 변경
+    state = state!.copyWith(
+      schedules: [
+        ...state!.schedules.sublist(0, dayIndex),
+        state!.schedules[dayIndex].copyWith(
+          places:
+              orderedPlaceIds
+                  .map((id) => originalPlaces.firstWhere((p) => p.id == id))
+                  .toList(),
+        ),
+        ...state!.schedules.sublist(dayIndex + 1),
+      ],
+    );
+
+    // 3. 서버 요청
+    final success = await repo.reorderConfirmedPlaces(
+      tripId: tripId,
+      tripDayPlaceId: tripDayPlaceId,
+      orderedPlaceIds: orderedPlaceIds,
+    );
+
+    if (!success) {
+      // 4. 실패 시 원래 state로 롤백
+      state = prevState;
+      return false;
+    } else {
+      // 성공 시 서버 데이터로 fetch하여 동기화
+      await fetchDaySchedule(
+        tripId: tripId,
+        dayScheduleId: tripDayPlaceId,
+        day: day,
+      );
+      return true;
+    }
+  }
+
+  /// 확정 목적지 방문여부 체크 후, 해당 일차 일정 새로고침
+  Future<bool> markAndRefreshPlaceVisited({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String placeId,
+    required int day,
+    required bool isVisited,
+  }) async {
+    // 1. 방문여부 체크 API 호출
+    final result = await repo.markPlaceVisited(
+      tripId: tripId,
+      tripDayPlaceId: tripDayPlaceId,
+      placeId: placeId,
+      isVisited: isVisited,
+    );
+    // 2. 성공 시 해당 일차 일정 새로고침
+    if (result) {
+      await fetchDaySchedule(tripId: tripId, dayScheduleId: tripDayPlaceId, day: day);
+    }
+    return result;
+  }
+
+  // TODO: 여행 일정 확정용
   Future<bool> confirmAndRefreshTrip({
     required int tripId,
     required int lastDay,

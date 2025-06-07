@@ -79,17 +79,44 @@ class PendingScheduleNotifier extends StateNotifier<PendingScheduleModel?> {
   }
 
   /// 특정 일차에서 목적지 순서 변경
+  /// TODO: Optimistic UI: 순서 변경 시 임시로 UI 반영, 실패 시 롤백
   Future<void> reorderPlaces({
     required String tripId,
     required int day,
     required List<String> orderedPlaceIds,
   }) async {
+    // 1. 기존 daySchedule 백업
+    final prevState = state;
+    final dayIndex = state?.schedules.indexWhere((d) => d.day == day) ?? -1;
+    if (dayIndex == -1 || state == null) return;
+    final originalPlaces = List.of(state!.schedules[dayIndex].places);
+
+    // 2. state를 optimistic하게 바로 변경
+    state = state!.copyWith(
+      schedules: [
+        ...state!.schedules.sublist(0, dayIndex),
+        state!.schedules[dayIndex].copyWith(
+          places:
+              orderedPlaceIds
+                  .map((id) => originalPlaces.firstWhere((p) => p.id == id))
+                  .toList(),
+        ),
+        ...state!.schedules.sublist(dayIndex + 1),
+      ],
+    );
+
+    // 3. 서버 요청
     final success = await repo.reorderPendingPlaces(
       tripId: tripId,
       day: day,
       orderedPlaceIds: orderedPlaceIds,
     );
-    if (success) {
+
+    if (!success) {
+      // 4. 실패 시 원래 state로 롤백
+      state = prevState;
+    } else {
+      // 성공 시 서버 데이터로 fetch하여 동기화
       final updatedDay = await fetchDay(tripId: tripId, day: day);
       if (updatedDay != null) {
         _updateDayInState(tripId, updatedDay);

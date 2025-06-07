@@ -160,46 +160,67 @@ class _W2MOverlapCalendarScreenState
                         ),
                         onPressed: () async {
                           if (_startDate != null && _endDate != null) {
-                            final result = await ref
-                                .read(tripProvider.notifier)
-                                .updateTripTime(
-                                  start: _startDate!,
-                                  end: _endDate!,
-                                );
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    result ? '여행 일정이 저장되었습니다.' : '저장에 실패했습니다.',
-                                    style: TextStyle(
-                                      fontSize: 48.sp,
-                                      fontWeight: FontWeight.w600,
+                            try {
+                              await ref
+                                  .read(tripProvider.notifier)
+                                  .updateTripTime(
+                                    start: _startDate!,
+                                    end: _endDate!,
+                                  );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '여행 일정이 저장되었습니다.',
+                                      style: TextStyle(
+                                        fontSize: 48.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
+                                    backgroundColor: const Color.fromARGB(
+                                      212,
+                                      56,
+                                      212,
+                                      121,
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.all(16.w),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(48.r),
+                                    ),
+                                    elevation: 0,
+                                    duration: const Duration(seconds: 2),
                                   ),
-                                  backgroundColor:
-                                      result
-                                          ? const Color.fromARGB(
-                                            212,
-                                            56,
-                                            212,
-                                            121,
-                                          )
-                                          : const Color.fromARGB(
-                                            229,
-                                            226,
-                                            81,
-                                            65,
-                                          ),
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.all(16.w),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(48.r),
+                                );
+                                GoRouter.of(context).pop();
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      e.toString(),
+                                      style: TextStyle(
+                                        fontSize: 48.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    backgroundColor: const Color.fromARGB(
+                                      229,
+                                      226,
+                                      81,
+                                      65,
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.all(16.w),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(48.r),
+                                    ),
+                                    elevation: 0,
+                                    duration: const Duration(seconds: 2),
                                   ),
-                                  elevation: 0,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                              GoRouter.of(context).pop();
+                                );
+                              }
                             }
                           } else {
                             if (context.mounted) {

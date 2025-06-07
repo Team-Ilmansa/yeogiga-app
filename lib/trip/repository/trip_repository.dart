@@ -100,8 +100,8 @@ class TripRepository {
       // 성공적으로 요청이 끝나면 true 반환
       return true;
     } catch (e) {
-      // 에러 발생 시 false 반환 (원한다면 예외 throw도 가능)
-      return false;
+      // 에러 발생 시 예외 메시지 throw
+      throw Exception('patchTripTime error: $e');
     }
   }
 

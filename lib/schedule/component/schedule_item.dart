@@ -75,20 +75,20 @@ class ScheduleItem extends StatelessWidget {
                   ),
                   if (done)
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 39.w),
-                      height: 93.h,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 39.w,
+                        vertical: 20.h,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFC6C6C6),
                         borderRadius: BorderRadius.circular(48.r),
                       ),
-                      child: Center(
-                        child: Text(
-                          '완료',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 42.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      child: Text(
+                        '완료',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 42.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

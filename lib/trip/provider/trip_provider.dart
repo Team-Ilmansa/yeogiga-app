@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/repository/trip_repository.dart';
@@ -93,17 +94,25 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
   }) async {
     if (state is! TripModel) return false;
     final tripId = (state as TripModel).tripId;
-
-    final result = await tripRepository.patchTripTime(
-      tripId: tripId,
-      start: start,
-      end: end,
-    );
-    if (result) {
+    try {
+      final result = await tripRepository.patchTripTime(
+        tripId: tripId,
+        start: start,
+        end: end,
+      );
       // 성공 시 trip 정보 갱신
       await getTrip(tripId: tripId);
+      return result;
+    } catch (e) {
+      // Dio 5.x: DioException, Dio 4.x: DioError
+      if (e is DioException &&
+          e.response?.data is Map &&
+          e.response?.data['message'] != null) {
+        throw e.response!.data['message'].toString();
+      }
+      // 기타 예외는 기본 메시지
+      throw '저장에 실패했습니다.';
     }
-    return result;
   }
 
   /// 여행 제목 수정
