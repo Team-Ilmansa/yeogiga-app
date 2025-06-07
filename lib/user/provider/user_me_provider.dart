@@ -6,6 +6,7 @@ import 'package:yeogiga/common/secure_storage/secure_storage.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/repository/auth_repository.dart';
 import 'package:yeogiga/user/repository/user_me_repository.dart';
+import 'package:yeogiga/user/repository/fcm_token_repository.dart';
 
 final userMeProvider =
     StateNotifierProvider<UserMeStateNotifier, UserModelBase?>((ref) {
@@ -93,6 +94,15 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
   //로그아웃 하기
   Future<void> logout() async {
     state = null;
+
+    // FCM 토큰 삭제
+    try {
+      final container = ProviderContainer();
+      final fcmRepo = container.read(fcmTokenRepositoryProvider);
+      await fcmRepo.deleteFcmToken();
+    } catch (e) {
+      // 에러 로깅
+    }
 
     await Future.wait([
       storage.delete(key: REFRESH_TOKEN_KEY),
