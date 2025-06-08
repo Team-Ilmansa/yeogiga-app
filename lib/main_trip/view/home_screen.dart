@@ -6,6 +6,7 @@ import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/common/component/past_trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
+import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/common/provider/weather_provider.dart';
@@ -285,9 +286,18 @@ class AppBarTop extends StatelessWidget {
                               : null;
                       final tripId = mainTrip?.tripId;
                       if (tripId != null) {
+                        ref.invalidate(
+                          tripProvider,
+                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                        ref.invalidate(
+                          confirmScheduleProvider,
+                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
                         await ref
                             .read(tripProvider.notifier)
                             .getTrip(tripId: tripId);
+                        await ref
+                            .read(confirmScheduleProvider.notifier)
+                            .fetchAll(tripId);
                         if (context.mounted) {
                           GoRouter.of(context).push('/ingTripMap');
                         }

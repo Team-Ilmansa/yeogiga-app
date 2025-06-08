@@ -63,10 +63,9 @@ class CompletedScheduleView extends StatelessWidget {
                           : schedules
                               .where((s) => s.day == selectedDayIndex)
                               .toList(),
-                  onTap:
-                      () => GoRouter.of(
-                        context,
-                      ).pushNamed(EndTripMapScreen.routeName),
+                  onTap: () async {
+                    GoRouter.of(context).pushNamed(EndTripMapScreen.routeName);
+                  },
                 ),
               ),
             ),
