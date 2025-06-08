@@ -5,15 +5,24 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
+import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+
+import 'package:yeogiga/trip/provider/trip_member_location_provider.dart';
+import 'package:yeogiga/user/provider/user_me_provider.dart';
+import 'package:yeogiga/trip/model/trip_member_location.dart';
+import 'package:yeogiga/user/model/user_model.dart';
 
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
 // TODO: 화면 내에서는 어떻게 갱신? -> 계속해서 fcm받아가며 갱신?
 // TODO: 화면 내에서는 어떻게 갱신? -> 계속해서 fcm받아가며 갱신?
+
 class IngTripMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'ingTripMap';
   const IngTripMapScreen({Key? key}) : super(key: key);
@@ -23,34 +32,60 @@ class IngTripMapScreen extends ConsumerStatefulWidget {
 }
 
 class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
+  bool _cameraFitted = false;
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
   double _myLocationButtonOffset = 0;
 
   int selectedDayIndex = 0;
 
+  // 지도/데이터 동기화용 플래그와 임시 변수
+
+  bool _allDaysFetched = false;
+
   @override
   void initState() {
     super.initState();
+    _fetchAllDaysAndUpdateMarkers();
+    // sheetController 리스너 및 위치 버튼 오프셋 갱신만 등록
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _sheetController.addListener(_updateMyLocationButtonOffset);
       _updateMyLocationButtonOffset();
-      // 지도 진입 시 모든 dayScheduleId에 대해 fetchDaySchedule 실행
-      final trip = ref.read(tripProvider) as TripModel?;
-      final scheduleAsync = ref.read(confirmScheduleProvider);
-      final schedules = scheduleAsync?.schedules ?? [];
-      if (trip != null && schedules.isNotEmpty) {
-        for (final schedule in schedules) {
-          ref
-              .read(confirmScheduleProvider.notifier)
-              .fetchDaySchedule(
-                tripId: trip.tripId,
-                dayScheduleId: schedule.id,
-                day: schedule.day,
-              );
-        }
-      }
     });
+  }
+
+  Future<void> _fetchAllDaysAndUpdateMarkers() async {
+    final trip = ref.read(tripProvider) as TripModel;
+    // 지도에서는 fetchAll(tripId) 호출하지 않음! 이미 state에 들어온 schedules만 사용
+    var scheduleAsync = ref.read(confirmScheduleProvider);
+    var schedules = scheduleAsync?.schedules ?? [];
+
+    // schedules가 비어있으면 그냥 리턴 (혹시나 state 반영이 늦을 때는 잠깐 기다렸다가 한 번 더 시도)
+    if (schedules.isEmpty) {
+      await Future.delayed(const Duration(milliseconds: 10));
+      scheduleAsync = ref.read(confirmScheduleProvider);
+      schedules = scheduleAsync?.schedules ?? [];
+      if (schedules.isEmpty) {
+        // 한 번 더 시도 (재귀, 무한루프 방지)
+        return;
+      }
+    }
+
+    // day별 places만 fetch
+    for (final schedule in schedules) {
+      await ref
+          .read(confirmScheduleProvider.notifier)
+          .fetchDaySchedule(
+            tripId: trip.tripId,
+            dayScheduleId: schedule.id,
+            day: schedule.day,
+          );
+    }
+    if (mounted) {
+      setState(() {
+        _allDaysFetched = true;
+      });
+    }
   }
 
   // 내 위치로 가기 버튼 항상 sheet 위에 두기
@@ -74,6 +109,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
   NaverMapController? mapController;
   List<NMarker> _placeMarkers = [];
+  List<NMarker> _memberMarkers = [];
   NPolylineOverlay? _polyline;
   NLocationOverlay? _locationOverlay;
 
@@ -106,11 +142,16 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   }
 
   // 마커 업데이트
-  void _updateMapOverlays(List<ConfirmedPlaceModel> places) async {
+  void _updateMapOverlays(
+    List<ConfirmedPlaceModel> places, {
+    List<TripMemberLocation>? memberLocations,
+    String? myNickname,
+  }) async {
     if (mapController == null) return;
     // Remove previous overlays
     await mapController!.clearOverlays();
     _placeMarkers.clear();
+    _memberMarkers.clear();
     _polyline = null;
 
     final validPlaces =
@@ -123,6 +164,35 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       );
       _placeMarkers.add(marker);
       await mapController!.addOverlay(marker);
+    }
+    // --- 여행 멤버 위치 마커 ---
+    print('[DEBUG] memberLocations: $memberLocations');
+    print('[DEBUG] myNickname: $myNickname');
+    if (memberLocations != null && myNickname != null) {
+      final filtered =
+          memberLocations
+              .where((m) => m.nickname != null && m.nickname != myNickname)
+              .toList();
+      print('[DEBUG] filtered memberLocations:');
+      for (final m in filtered) {
+        print(
+          'nickname: \'${m.nickname}\', lat: ${m.latitude}, lng: ${m.longitude}',
+        );
+      }
+      for (final member in filtered) {
+        print(
+          '[DEBUG] adding marker: ${member.nickname}, ${member.latitude}, ${member.longitude}',
+        );
+        final marker = NMarker(
+          id: 'member_${member.userId}',
+          position: NLatLng(member.latitude, member.longitude),
+          icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
+          size: Size(100.w, 100.h),
+          caption: NOverlayCaption(text: member.nickname),
+        );
+        _memberMarkers.add(marker);
+        await mapController!.addOverlay(marker);
+      }
     }
 
     // Draw polyline if 2 or more places
@@ -217,48 +287,102 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         children: [
           Consumer(
             builder: (context, ref, _) {
-              final scheduleAsync = ref.watch(confirmScheduleProvider);
-              List<ConfirmedPlaceModel> placeList = [];
-              if (scheduleAsync != null) {
-                if (selectedDayIndex == 0) {
-                  // 전체 보기: 마커/폴리라인을 모두 지우고 아무것도 표시하지 않음
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _updateMapOverlays([]);
-                  });
-                } else {
-                  final schedules = scheduleAsync.schedules;
-                  final daySchedule = schedules.firstWhere(
-                    (s) => s.day == selectedDayIndex,
-                    orElse:
-                        () => ConfirmedDayScheduleModel(
-                          id: '',
-                          day: selectedDayIndex,
-                          places: [],
-                        ),
-                  );
-                  placeList = daySchedule.places;
-                  placeList =
-                      placeList
-                          .where(
-                            (p) => p.latitude != null && p.longitude != null,
-                          )
-                          .toList();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _updateMapOverlays(placeList);
-                  });
-                }
+              // fetch가 모두 끝날 때까지 로딩만 보여줌
+              if (!_allDaysFetched) {
+                return const Center(child: CircularProgressIndicator());
               }
+              final scheduleAsync = ref.watch(confirmScheduleProvider);
+              final schedules = scheduleAsync?.schedules ?? [];
+              List<ConfirmedPlaceModel> placeList = [];
+              if (selectedDayIndex == 0) {
+                placeList =
+                    [for (final day in schedules) ...day.places]
+                        .where((p) => p.latitude != null && p.longitude != null)
+                        .toList();
+              } else {
+                final daySchedule = schedules.firstWhere(
+                  (s) => s.day == selectedDayIndex,
+                  orElse:
+                      () => ConfirmedDayScheduleModel(
+                        id: '',
+                        day: selectedDayIndex,
+                        places: [],
+                      ),
+                );
+                placeList =
+                    daySchedule.places
+                        .where((p) => p.latitude != null && p.longitude != null)
+                        .toList();
+              }
+              final memberLocationAsync = ref.watch(tripMemberLocationProvider);
+              final userMe = ref.watch(userMeProvider);
+              String? myNickname;
+              if (userMe is UserResponseModel && userMe.data?.nickname != null) {
+                myNickname = userMe.data!.nickname;
+              }
+              List<TripMemberLocation>? memberLocations;
+              memberLocationAsync.when(
+                data: (data) {
+                  memberLocations = data;
+                },
+                loading: () {},
+                error: (_, __) {},
+              );
+              if (mapController != null && placeList.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _updateMapOverlays(
+                    placeList,
+                    memberLocations: memberLocations,
+                    myNickname: myNickname,
+                  );
+                });
+              }
+
               return NaverMap(
-                onMapReady: (controller) {
+                onMapReady: (controller) async {
                   setState(() {
                     mapController = controller;
-                    _updateMapOverlays(placeList);
                   });
-                  // Initial overlays
+                  // 최초 진입 시 전체 마커 기준으로 카메라 이동 (중복 호출 방지 플래그 사용)
+                  if (!_cameraFitted) {
+                    List<ConfirmedPlaceModel> fitPlaces = [];
+                    if (selectedDayIndex == 0) {
+                      fitPlaces =
+                          [for (final day in schedules) ...day.places]
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                    } else {
+                      final daySchedule = schedules.firstWhere(
+                        (s) => s.day == selectedDayIndex,
+                        orElse:
+                            () => ConfirmedDayScheduleModel(
+                              id: '',
+                              day: selectedDayIndex,
+                              places: [],
+                            ),
+                      );
+                      fitPlaces =
+                          daySchedule.places
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                    }
+                    if (fitPlaces.isNotEmpty) {
+                      await _fitMapToPlaces(fitPlaces);
+                      _cameraFitted = true;
+                    }
+                  }
+                  // ------ 최초 진입 카메라 로직
                 },
                 onMapTapped: (point, latLng) {
                   FocusScope.of(context).unfocus();
                 },
+                // ... 기타 옵션 ...
               );
             },
           ),
@@ -344,8 +468,19 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                             );
                             final schedules = scheduleAsync?.schedules ?? [];
                             if (index == 0) {
-                              // 전체 보기: 지도 전체 리셋
-                              if (mapController != null) {
+                              // 전체 보기: 모든 day의 place를 순서대로 합쳐서 마커/폴리라인 표시
+                              final allPlaces =
+                                  [for (final day in schedules) ...day.places]
+                                      .where(
+                                        (p) =>
+                                            p.latitude != null &&
+                                            p.longitude != null,
+                                      )
+                                      .toList();
+                              if (mapController != null &&
+                                  allPlaces.isNotEmpty) {
+                                await _fitMapToPlaces(allPlaces);
+                              } else if (mapController != null) {
                                 await mapController!.updateCamera(
                                   NCameraUpdate.withParams(
                                     target: NLatLng(
@@ -356,8 +491,26 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                   ),
                                 );
                               }
-                              // 마커/폴리라인 모두 지움
-                              _updateMapOverlays([]);
+                              // Fetch member locations and user info for overlays
+                              final memberLocationAsync = ref.read(
+                                tripMemberLocationProvider,
+                              );
+                              final userMe = ref.read(userMeProvider);
+                              String? myNickname;
+                              if (userMe is UserResponseModel && userMe.data?.nickname != null) {
+                                myNickname = userMe.data!.nickname;
+                              }
+                              List<TripMemberLocation>? memberLocations;
+                              memberLocationAsync.when(
+                                data: (data) => memberLocations = data,
+                                loading: () {},
+                                error: (_, __) {},
+                              );
+                              _updateMapOverlays(
+                                allPlaces,
+                                memberLocations: memberLocations,
+                                myNickname: myNickname,
+                              );
                             } else {
                               // Day 선택 시마다 무조건 fetch
                               if (tripState is TripModel) {
@@ -371,6 +524,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                         places: [],
                                       ),
                                 );
+                                // ref.invalidate(confirmScheduleProvider);// ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
                                 final fetched = await ref
                                     .read(confirmScheduleProvider.notifier)
                                     .fetchDaySchedule(
@@ -389,7 +543,25 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                           )
                                           .toList();
                                 }
-                                _updateMapOverlays(places);
+                                final memberLocationAsync = ref.read(
+                                  tripMemberLocationProvider,
+                                );
+                                final userMe = ref.read(userMeProvider);
+                                String? myNickname;
+                                if (userMe is UserModel) {
+                                  myNickname = userMe.nickname;
+                                }
+                                List<TripMemberLocation>? memberLocations;
+                                memberLocationAsync.when(
+                                  data: (data) => memberLocations = data,
+                                  loading: () {},
+                                  error: (_, __) {},
+                                );
+                                _updateMapOverlays(
+                                  places,
+                                  memberLocations: memberLocations,
+                                  myNickname: myNickname,
+                                );
                                 await _fitMapToPlaces(places);
                               }
                             }

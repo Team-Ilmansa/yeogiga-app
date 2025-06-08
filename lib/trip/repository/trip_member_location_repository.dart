@@ -61,7 +61,7 @@ class TripMemberLocationRepository {
         options: Options(headers: {'accessToken': 'true'}),
       );
       final data = response.data;
-
+      print(data);
       return (data['data'] as List)
           .map((e) => TripMemberLocation.fromJson(e))
           .toList();

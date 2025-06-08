@@ -18,6 +18,7 @@ class CompletedTripMiniMap extends StatefulWidget {
 
 class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
   NaverMapController? _controller;
+  bool _isFittingCamera = false;
 
   List<NLatLng> get _allPlaces =>
       widget.dayPlaceModels
@@ -35,7 +36,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
     super.didUpdateWidget(oldWidget);
     if (!mounted || _controller == null) return;
     if (oldWidget.dayPlaceModels != widget.dayPlaceModels) {
-      _updateMarkers();
+      _updateMarkersAndFitCamera();
     }
   }
 
@@ -45,18 +46,52 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
     super.dispose();
   }
 
-  Future<void> _updateMarkers() async {
-    if (_controller == null) return;
+  Future<void> _updateMarkersAndFitCamera() async {
+    if (_controller == null || _isFittingCamera) return;
+    _isFittingCamera = true;
     try {
       await _controller!.clearOverlays();
-      if (_allPlaces.isEmpty) return;
-      for (final latLng in _allPlaces) {
+      final places = _allPlaces;
+      if (places.isEmpty) return;
+      for (final latLng in places) {
         await _controller!.addOverlay(
           NMarker(id: latLng.toString(), position: latLng),
         );
       }
+      // 카메라 자동 fit
+      if (places.length == 1) {
+        await _controller!.updateCamera(
+          NCameraUpdate.withParams(
+            target: places.first,
+            zoom: 7, // 기존 13에서 살짝 축소
+          ),
+        );
+      } else if (places.length >= 2) {
+        final lats = places.map((p) => p.latitude).toList();
+        final lngs = places.map((p) => p.longitude).toList();
+        final southWest = NLatLng(
+          lats.reduce((a, b) => a < b ? a : b),
+          lngs.reduce((a, b) => a < b ? a : b),
+        );
+        final northEast = NLatLng(
+          lats.reduce((a, b) => a > b ? a : b),
+          lngs.reduce((a, b) => a > b ? a : b),
+        );
+        final bounds = NLatLngBounds(
+          southWest: southWest,
+          northEast: northEast,
+        );
+        await _controller!.updateCamera(
+          NCameraUpdate.fitBounds(
+            bounds,
+            padding: EdgeInsets.all(100.w),
+          ), // 기존 60.w에서 100.w로 padding 확대
+        );
+      }
     } catch (e, st) {
       debugPrint('NaverMap clearOverlays/addOverlay error: $e\n$st');
+    } finally {
+      _isFittingCamera = false;
     }
   }
 
@@ -101,10 +136,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
           children: [
             NaverMap(
               options: NaverMapViewOptions(
-                initialCameraPosition: NCameraPosition(
-                  target: center,
-                  zoom: 11,
-                ),
+                initialCameraPosition: NCameraPosition(target: center, zoom: 3),
                 locationButtonEnable: false,
                 indoorEnable: false,
                 scaleBarEnable: false,
@@ -112,7 +144,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
               ),
               onMapReady: (controller) async {
                 _controller = controller;
-                await _updateMarkers();
+                await _updateMarkersAndFitCamera();
               },
             ),
             Positioned.fill(

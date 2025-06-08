@@ -99,6 +99,7 @@ flutter:
     - asset/img/home/
     - asset/icon/
     - asset/icon/menu/
+    - asset/img/
     - asset/img/weather/
     - asset/img/logo/
     - asset/img/oauth/

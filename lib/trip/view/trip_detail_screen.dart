@@ -2,6 +2,9 @@ import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/top_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/component/detail_screen/notice_panel.dart';
@@ -80,7 +83,19 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 if (tripState is InProgressTripModel)
                   IconButton(
                     icon: Icon(Icons.map_outlined, color: Colors.black),
-                    onPressed: () {
+                    onPressed: () async {
+                      ref.invalidate(
+                        pendingScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      ref.invalidate(
+                        confirmScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      ref.invalidate(
+                        completedScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      await ref
+                          .read(confirmScheduleProvider.notifier)
+                          .fetchAll(tripState.tripId);
                       //TODO: 지도로 이동
                       GoRouter.of(context).push('/ingTripMap');
                     },

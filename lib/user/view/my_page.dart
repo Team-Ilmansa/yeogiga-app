@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/main_trip/view/home_screen.dart';
 import 'package:yeogiga/common/component/past_trip_card.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
@@ -63,6 +66,16 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
             PastTripCardList(
               trips: ref.watch(tripListProvider),
               onTap: (tripId) async {
+                ref.invalidate(tripProvider); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                ref.invalidate(
+                  confirmScheduleProvider,
+                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                ref.invalidate(
+                  pendingScheduleProvider,
+                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                ref.invalidate(
+                  completedScheduleProvider,
+                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
                 await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
                 final tripState = ref.read(tripProvider);
                 final userW2mState = ref.read(userW2mProvider);
