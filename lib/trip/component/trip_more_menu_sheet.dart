@@ -12,6 +12,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
   const TripMoreMenuSheetLeader({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final trip = ref.watch(tripProvider) as TripModel;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.of(context).pop(),
@@ -113,9 +114,9 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(60.r),
                                 ),
-                                insetPadding: EdgeInsets.all(48.w),
+                                insetPadding: EdgeInsets.all(100.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 40.w,
@@ -162,7 +163,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                               ),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(48.r),
+                                                    BorderRadius.circular(42.r),
                                               ),
                                               elevation: 0,
                                               minimumSize: Size(0, 150.h),
@@ -281,40 +282,46 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(60.r),
                                 ),
-                                insetPadding: EdgeInsets.all(48.w),
+                                insetPadding: EdgeInsets.all(100.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    vertical: 40.h,
-                                    horizontal: 40.w,
+                                    vertical: 50.h,
+                                    horizontal: 50.w,
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(
-                                        Icons.warning_amber_rounded,
-                                        color: Colors.red,
-                                        size: 120.w,
-                                      ),
-                                      SizedBox(height: 48.h),
+                                      SizedBox(height: 10.h),
                                       Text(
-                                        '정말 삭제하시겠습니까?',
+                                        '${trip.title}을 정말로 삭제하시겠어요?',
                                         style: TextStyle(
-                                          fontSize: 56.sp,
+                                          fontSize: 60.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
+                                          letterSpacing: -0.9.sp,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      SizedBox(height: 50.h),
+                                      SizedBox(height: 10.h),
+                                      Text(
+                                        '해당 작업은 복구할 수 없어요',
+                                        style: TextStyle(
+                                          color: Color(0xff7d7d7d),
+                                          fontSize: 42.sp,
+                                        ),
+                                      ),
+                                      SizedBox(height: 150.h),
                                       Row(
                                         children: [
                                           Expanded(
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: const Color(
-                                                  0xffc6c6c6,
+                                                  0xfff0f0f0,
                                                 ),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -324,7 +331,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  156.h,
+                                                  160.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -337,7 +344,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                 style: TextStyle(
                                                   fontSize: 48.sp,
                                                   fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
+                                                  color: Colors.black,
                                                 ),
                                               ),
                                             ),
@@ -347,7 +354,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: const Color(
-                                                  0xFF8287FF,
+                                                  0xFFf0f0f0,
                                                 ),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
@@ -357,7 +364,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  156.h,
+                                                  160.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -366,11 +373,11 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                     context,
                                                   ).pop(true),
                                               child: Text(
-                                                '삭제',
+                                                '삭제하기',
                                                 style: TextStyle(
                                                   fontSize: 48.sp,
                                                   fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
+                                                  color: Colors.red,
                                                 ),
                                               ),
                                             ),

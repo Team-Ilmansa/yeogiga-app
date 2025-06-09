@@ -292,13 +292,19 @@ Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
       return null;
     }
   } else if (bottomAppBarState == 1) {
-    return const BottomAppBarLayout(child: AddScheduleState());
-  } else if (bottomAppBarState == 2) {
-    return const BottomAppBarLayout(child: AddPictureState());
-  } else if (bottomAppBarState == 3) {
-    return const BottomAppBarLayout(child: PictureOptionState());
-  } else {
-    return null;
+    return const BottomAppBarLayout(child: AddNoticeState());
+  } else if (bottomAppBarState == 2 || bottomAppBarState == 3) {
+    // 갤러리 탭 하단바는 inprogress/completed 상태에서만 노출
+    if (tripState is InProgressTripModel || tripState is CompletedTripModel) {
+      if (bottomAppBarState == 2) {
+        return const BottomAppBarLayout(child: AddPictureState());
+      } else {
+        return const BottomAppBarLayout(child: PictureOptionState());
+      }
+    } else {
+      // 그 외 상태에서는 하단바 숨김
+      return null;
+    }
   }
 }
 

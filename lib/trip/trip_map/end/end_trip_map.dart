@@ -8,6 +8,8 @@ import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/trip/model/trip_host_route_day.dart';
+import 'package:yeogiga/trip/provider/trip_host_route_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
 class EndTripMapScreen extends ConsumerStatefulWidget {
@@ -110,7 +112,10 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     }
   }
 
-  void _updateMapOverlays(List<CompletedTripPlaceModel> places) async {
+  void _updateMapOverlays(
+    List<CompletedTripPlaceModel> places, {
+    List<NLatLng>? hostRouteCoords,
+  }) async {
     if (mapController == null) return;
     await mapController!.clearOverlays();
     _placeMarkers.clear();
@@ -126,7 +131,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       _placeMarkers.add(marker);
       await mapController!.addOverlay(marker);
     }
-    // Draw polyline if 2 or more places
+    // 일정 폴리라인
     if (validPlaces.length >= 2) {
       final polyline = NPolylineOverlay(
         id: 'trip_polyline',
@@ -138,7 +143,18 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
     }
-    // Show user location overlay (if permission granted)
+    // 방장 경로 폴리라인 (hostRouteCoords)
+    print(hostRouteCoords);
+    if (hostRouteCoords != null && hostRouteCoords.length >= 2) {
+      final hostPolyline = NPolylineOverlay(
+        id: 'host_route_polyline',
+        coords: hostRouteCoords,
+        color: const Color(0xff2ac308), // 빨간색
+        width: 8.w,
+      );
+      await mapController!.addOverlay(hostPolyline);
+    }
+    // 권한 요청
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -155,6 +171,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     } catch (_) {}
   }
 
+  // TODO: 내 위치로 가기 버튼 생성
   Widget _buildMyLocationButton() {
     return Material(
       color: Colors.white,
@@ -176,6 +193,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     );
   }
 
+  // TODO: 내 위치로 카메라 이동 함수
   Future<void> _moveToMyLocation() async {
     if (mapController == null) return;
     LocationPermission permission = await Geolocator.checkPermission();
@@ -193,6 +211,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     );
   }
 
+  // TODO: day 뽑아내기
   List<String> getDaysForTrip(TripBaseModel? trip) {
     if (trip is CompletedTripModel &&
         trip.startedAt != null &&
@@ -209,10 +228,12 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   Widget build(BuildContext context) {
     final tripState = ref.watch(tripProvider);
     final days = getDaysForTrip(tripState);
+    final hostRouteAsync = ref.watch(tripHostRouteProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
+          // TODO: 네이버 지도 파트
           Consumer(
             builder: (context, ref, _) {
               final completedAsync = ref.watch(completedScheduleProvider);
@@ -246,9 +267,38 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                             (p) => p.latitude != null && p.longitude != null,
                           )
                           .toList();
+              // host route polyline 좌표 추출
+              List<NLatLng> hostRouteCoords = [];
+              if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
+                final hostRoutes = hostRouteAsync.value ?? [];
+                if (selectedDayIndex == 0) {
+                  // 전체 여행: 모든 day의 좌표를 합침
+                  hostRouteCoords = [
+                    for (final day in hostRoutes)
+                      ...day.routes.map(
+                        (p) => NLatLng(p.latitude, p.longitude),
+                      ),
+                  ];
+                } else {
+                  // 특정 day: 해당 day의 좌표만
+                  final dayRoute = hostRoutes.firstWhere(
+                    (d) => d.day == selectedDayIndex,
+                    orElse:
+                        () =>
+                            TripHostRouteDay(day: selectedDayIndex, routes: []),
+                  );
+                  hostRouteCoords =
+                      dayRoute.routes
+                          .map((p) => NLatLng(p.latitude, p.longitude))
+                          .toList();
+                }
+              }
               if (mapController != null && placeList.isNotEmpty) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _updateMapOverlays(placeList);
+                  _updateMapOverlays(
+                    placeList,
+                    hostRouteCoords: hostRouteCoords,
+                  );
                 });
               }
               return NaverMap(
@@ -257,7 +307,10 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     mapController = controller;
                   });
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _updateMapOverlays(placeList);
+                    _updateMapOverlays(
+                      placeList,
+                      hostRouteCoords: hostRouteCoords,
+                    );
                   });
                 },
                 onMapTapped: (point, latLng) {
@@ -266,7 +319,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               );
             },
           ),
-          // Custom floating back button
+          // TODO: 뒤로 가기 버튼
           Positioned(
             top: 50.h,
             left: 30.w,
@@ -284,7 +337,7 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               ),
             ),
           ),
-          // 내 위치로 가기 버튼
+          // TODO: 내 위치로 가기 버튼
           Positioned(
             left: 50.w,
             bottom: _myLocationButtonOffset,
@@ -293,11 +346,12 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               child: _buildMyLocationButton(),
             ),
           ),
+          // TODO: 하단 슬라이더 위젯
           DraggableScrollableSheet(
             controller: _sheetController,
             initialChildSize: 0.215,
             minChildSize: 0.025,
-            maxChildSize: 0.215,
+            maxChildSize: 0.9,
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
@@ -357,7 +411,25 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                             p.longitude != null,
                                       )
                                       .toList();
-                              _updateMapOverlays(allPlaces);
+                              // host route polyline 좌표 추출 (전체)
+                              List<NLatLng> hostRouteCoords = [];
+                              final hostRouteAsync = ref.read(
+                                tripHostRouteProvider,
+                              );
+                              if (hostRouteAsync
+                                  is AsyncData<List<TripHostRouteDay>>) {
+                                final hostRoutes = hostRouteAsync.value ?? [];
+                                hostRouteCoords = [
+                                  for (final day in hostRoutes)
+                                    ...day.routes.map(
+                                      (p) => NLatLng(p.latitude, p.longitude),
+                                    ),
+                                ];
+                              }
+                              _updateMapOverlays(
+                                allPlaces,
+                                hostRouteCoords: hostRouteCoords,
+                              );
                               await _fitMapToPlaces(allPlaces);
                             } else {
                               final completedAsync = ref.read(
@@ -382,7 +454,34 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                             p.longitude != null,
                                       )
                                       .toList();
-                              _updateMapOverlays(places);
+                              // host route polyline 좌표 추출 (해당 day)
+                              List<NLatLng> hostRouteCoords = [];
+                              final hostRouteAsync = ref.read(
+                                tripHostRouteProvider,
+                              );
+                              if (hostRouteAsync
+                                  is AsyncData<List<TripHostRouteDay>>) {
+                                final hostRoutes = hostRouteAsync.value ?? [];
+                                final dayRoute = hostRoutes.firstWhere(
+                                  (d) => d.day == index,
+                                  orElse:
+                                      () => TripHostRouteDay(
+                                        day: index,
+                                        routes: [],
+                                      ),
+                                );
+                                hostRouteCoords =
+                                    dayRoute.routes
+                                        .map(
+                                          (p) =>
+                                              NLatLng(p.latitude, p.longitude),
+                                        )
+                                        .toList();
+                              }
+                              _updateMapOverlays(
+                                places,
+                                hostRouteCoords: hostRouteCoords,
+                              );
                               await _fitMapToPlaces(places);
                             }
                           },
