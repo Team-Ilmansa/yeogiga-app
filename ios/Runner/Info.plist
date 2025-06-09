@@ -2,12 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- TODO: 권한 설정 관련 코드들 -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>이 앱이 현재 위치 정보를 사용하도록 허용해주세요.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>이 앱이 항상 위치 정보를 사용하도록 허용해주세요.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>이 앱은 개발 및 디버깅을 위해 로컬 네트워크에 접근합니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>사진을 촬영하려면 카메라 접근 권한이 필요합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진을 선택하려면 사진 라이브러리 접근 권한이 필요합니다.</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
