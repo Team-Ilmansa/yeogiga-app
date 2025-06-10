@@ -7,9 +7,7 @@ final matchedTripImagesProvider = StateNotifierProvider<
   List<MatchedDayTripPlaceImage>
 >((ref) {
   final repo = ref.watch(matchedTripImageRepository);
-  // tripId, dayPlaceInfos는 외부에서 주입 (예: constructor나 다른 provider에서)
-  throw UnimplementedError('tripId와 dayPlaceInfos를 주입하세요');
-  // return MatchedDayTripImageNotifier(repo, tripId, dayPlaceInfos);
+  return MatchedDayTripImageNotifier(repo);
 });
 
 /// 각 일차의 day, tripDayPlaceId, placeId를 담는 구조체
@@ -17,6 +15,7 @@ class MatchedDayPlaceInfo {
   final int day;
   final String tripDayPlaceId;
   final List<String> placeIds; // 각 일차 장소별 placeId 목록
+
   MatchedDayPlaceInfo({
     required this.day,
     required this.tripDayPlaceId,
@@ -27,77 +26,66 @@ class MatchedDayPlaceInfo {
 class MatchedDayTripImageNotifier
     extends StateNotifier<List<MatchedDayTripPlaceImage>> {
   final MatchedTripImageRepository repo;
-  final int tripId;
-  final List<MatchedDayPlaceInfo> dayPlaceInfos;
 
-  MatchedDayTripImageNotifier(this.repo, this.tripId, this.dayPlaceInfos)
-    : super([]) {
-    fetchAll();
-  }
+  MatchedDayTripImageNotifier(this.repo) : super([]);
 
-  /// TODO: 모든 일차-장소별 매칭 이미지 fetch
-  Future<void> fetchAll() async {
-    final List<MatchedDayTripPlaceImage> result = [];
-    for (final dayPlace in dayPlaceInfos) {
-      // 각 장소별 fetch를 병렬로
-      final placeImagesList = await Future.wait(
-        dayPlace.placeIds.map(
-          (placeId) => repo.fetchMatchedPlaceImages(
-            tripId: tripId,
-            tripDayPlaceId: dayPlace.tripDayPlaceId,
-            placeId: placeId,
-          ),
-        ),
-      );
-      result.add(
-        MatchedDayTripPlaceImage(
-          tripDayPlaceId: dayPlace.tripDayPlaceId,
-          day: dayPlace.day,
-          placeImagesList: placeImagesList,
-        ),
-      );
-    }
-    state = result;
-  }
-
-  // TODO: 하루의 이미지만 새로 fetch해서 state에 반영
-  Future<void> fetchDay(int day, String tripDayPlaceId) async {
-    final index = dayPlaceInfos.indexWhere(
-      (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
+  /// 모든 일차-장소별 매칭 이미지 fetch
+  Future<void> fetchAll(
+    int tripId,
+    List<MatchedDayPlaceInfo> dayPlaceInfos,
+  ) async {
+    state = await Future.wait(
+      dayPlaceInfos.map((e) async {
+        // 각 dayPlaceInfo의 placeIds 별로 fetchMatchedPlaceImages 실행
+        final placeImagesList = await Future.wait(
+          e.placeIds.map((placeId) async {
+            final result = await repo.fetchMatchedPlaceImages(
+              tripId: tripId,
+              tripDayPlaceId: e.tripDayPlaceId,
+              placeId: placeId,
+            );
+            return result;
+          }),
+        );
+        // null 필터링 (repo가 null 반환 가능성 대비)
+        final filteredPlaceImagesList =
+            placeImagesList.where((img) => img != null).toList();
+        return MatchedDayTripPlaceImage(
+          tripDayPlaceId: e.tripDayPlaceId,
+          day: e.day,
+          placeImagesList: filteredPlaceImagesList,
+        );
+      }),
     );
-    if (index == -1) return;
-    final places = dayPlaceInfos[index].placeIds;
-    final placeImagesList = await Future.wait(
-      places.map(
-        (placeId) => repo.fetchMatchedPlaceImages(
+  }
+
+  /// 리매핑 (re-assign)
+  Future<bool> reassignImagesToPlaces({
+    required int tripId,
+    required List<String> tripDayPlaceIds,
+  }) async {
+    try {
+      bool allSuccess = true;
+      for (final dayPlaceId in tripDayPlaceIds) {
+        final result = await repo.reassignImagesToPlaces(
           tripId: tripId,
-          tripDayPlaceId: tripDayPlaceId,
-          placeId: placeId,
-        ),
-      ),
-    );
-    final newItem = MatchedDayTripPlaceImage(
-      tripDayPlaceId: tripDayPlaceId,
-      day: day,
-      placeImagesList: placeImagesList,
-    );
-    final newState = [...state];
-    newState[index] = newItem;
-    state = newState;
+          tripDayPlaceId: dayPlaceId,
+        );
+        if (!result) {
+          allSuccess = false;
+          break;
+        }
+      }
+      return allSuccess;
+    } catch (e, st) {
+      print('reassignImagesToPlaces 예외 발생: $e\n$st');
+      rethrow;
+    }
   }
 
-  /// TODO: 리매핑 (re-assign)
-  Future<bool> reassignImagesToPlaces({required String tripDayPlaceId}) async {
-    final result = await repo.reassignImagesToPlaces(
-      tripId: tripId,
-      tripDayPlaceId: tripDayPlaceId,
-    );
-    if (result) await fetchAll();
-    return result;
-  }
-
-  /// TODO: 여러 이미지 삭제
+  /// 여러 이미지 삭제
   Future<bool> deleteImages({
+    required int tripId,
     required List<String> imageIds,
     required List<String> urls,
   }) async {
@@ -106,7 +94,6 @@ class MatchedDayTripImageNotifier
       imageIds: imageIds,
       urls: urls,
     );
-    if (result) await fetchAll();
     return result;
   }
 }

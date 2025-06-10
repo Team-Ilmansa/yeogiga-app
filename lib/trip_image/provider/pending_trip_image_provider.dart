@@ -10,31 +10,27 @@ final pendingDayTripImagesProvider = StateNotifierProvider<
   List<PendingDayTripImage>
 >((ref) {
   final repo = ref.watch(pendingTripImageRepository);
-  // tripId, dayPlaceIds는 외부에서 주입 (예: constructor나 다른 provider에서)
-  throw UnimplementedError('tripId와 dayPlaceIds를 주입하세요');
-  // return PendingDayTripImageNotifier(repo, tripId, dayPlaceIds);
+  return PendingDayTripImageNotifier(repo);
 });
 
 /// 각 일차의 day, tripDayPlaceId를 담는 구조체
-class TripDayPlaceInfo {
+class PendingTripDayPlaceInfo {
   final int day;
   final String tripDayPlaceId;
-  TripDayPlaceInfo({required this.day, required this.tripDayPlaceId});
+  PendingTripDayPlaceInfo({required this.day, required this.tripDayPlaceId});
 }
 
 class PendingDayTripImageNotifier
     extends StateNotifier<List<PendingDayTripImage>> {
   final PendingTripImageRepository repo;
-  final int tripId;
-  final List<TripDayPlaceInfo> dayPlaceIds;
 
-  PendingDayTripImageNotifier(this.repo, this.tripId, this.dayPlaceIds)
-    : super([]) {
-    fetchAll();
-  }
+  PendingDayTripImageNotifier(this.repo) : super([]);
 
-  // TODO: 임지 저장 이미지 전부 불러오기
-  Future<void> fetchAll() async {
+  // 임시 저장 이미지 전부 불러오기
+  Future<void> fetchAll(
+    int tripId,
+    List<PendingTripDayPlaceInfo> dayPlaceIds,
+  ) async {
     state = await Future.wait(
       dayPlaceIds.map(
         (e) => repo.fetchPendingDayTripImages(
@@ -46,9 +42,9 @@ class PendingDayTripImageNotifier
     );
   }
 
-  // TODO: 하루의 이미지만 새로 fetch해서 state에 반영
-  Future<void> fetchDay(int day, String tripDayPlaceId) async {
-    final index = dayPlaceIds.indexWhere(
+  // 하루의 이미지만 새로 fetch해서 state에 반영 (state의 index와 day, tripDayPlaceId가 일치해야 함)
+  Future<void> fetchDay(int tripId, int day, String tripDayPlaceId) async {
+    final index = state.indexWhere(
       (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
     );
     if (index == -1) return;
@@ -62,35 +58,35 @@ class PendingDayTripImageNotifier
     state = newState;
   }
 
-  // TODO: 이미지 여러 장 업로드
+  // 이미지 여러 장 업로드
   Future<bool> uploadImages({
+    required int tripId,
     required String tripDayPlaceId,
-    required int day,
     required List<XFile> images,
   }) async {
     bool allSuccess = true;
-    // TODO: 2장씩 잘라서 업로드
-    for (var i = 0; i < images.length; i += 2) {
-      final chunk = images.sublist(
-        i,
-        i + 2 > images.length ? images.length : i + 2,
-      );
-      final result = await repo.uploadTripDayPlaceImages(
-        tripId: tripId,
-        tripDayPlaceId: tripDayPlaceId,
-        images: chunk,
-      );
-      if (!result) {
-        allSuccess = false;
-        break;
+    try {
+      for (var image in images) {
+        final result = await repo.uploadTripDayPlaceImages(
+          tripId: tripId,
+          tripDayPlaceId: tripDayPlaceId,
+          image: image, // 한 장씩 리스트로 감싸서 전달
+        );
+        if (!result) {
+          allSuccess = false;
+          break;
+        }
       }
+    } catch (e, st) {
+      print('이미지 업로드 중 예외 발생: $e\n$st');
+      allSuccess = false;
     }
-    await fetchAll();
     return allSuccess;
   }
 
-  // TODO: 이미지 삭제
+  // 이미지 삭제
   Future<bool> deleteImages({
+    required int tripId,
     required String tempPlaceImageId,
     required List<String> imageIds,
     required List<String> urls,
@@ -101,21 +97,31 @@ class PendingDayTripImageNotifier
       imageIds: imageIds,
       urls: urls,
     );
-    if (result) {
-      await fetchAll();
-    }
     return result;
   }
 
-  // TODO: 이미지 목적지 매칭
-  Future<bool> assignImages({required String tripDayPlaceId}) async {
-    final result = await repo.assignPendingImagesToDayPlace(
-      tripId: tripId,
-      tripDayPlaceId: tripDayPlaceId,
-    );
-    if (result) {
-      await fetchAll();
+  // 이미지 목적지 매칭
+  /// 여러 dayPlaceId에 대해 assignPendingImagesToDayPlace를 순차적으로 실행
+  Future<bool> assignImages({
+    required int tripId,
+    required List<String> tripDayPlaceIds,
+  }) async {
+    bool allSuccess = true;
+    try {
+      for (final dayPlaceId in tripDayPlaceIds) {
+        final result = await repo.assignPendingImagesToDayPlace(
+          tripId: tripId,
+          tripDayPlaceId: dayPlaceId,
+        );
+        if (!result) {
+          allSuccess = false;
+          break;
+        }
+      }
+    } catch (e, st) {
+      print('assignImages 예외 발생: $e\n$st');
+      rethrow; // 예외를 상위로 다시 던짐
     }
-    return result;
+    return allSuccess;
   }
 }

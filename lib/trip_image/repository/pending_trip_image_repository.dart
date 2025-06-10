@@ -21,21 +21,20 @@ class PendingTripImageRepository {
   Future<bool> uploadTripDayPlaceImages({
     required int tripId,
     required String tripDayPlaceId,
-    required List<XFile> images, // List<File> 또는 List<XFile>
+    required XFile image,
   }) async {
     final url = '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/images';
     final formData = FormData();
 
-    for (var image in images) {
-      // image는 File 또는 XFile로 가정
-      final fileName = image.path.split('/').last;
-      formData.files.add(
-        MapEntry(
-          'images',
-          await MultipartFile.fromFile(image.path, filename: fileName),
-        ),
-      );
-    }
+    print('image.path ======= ${image.path}');
+    final fileName = image.path.split('/').last;
+
+    formData.files.add(
+      MapEntry(
+        'images',
+        await MultipartFile.fromFile(image.path, filename: fileName),
+      ),
+    );
 
     try {
       final response = await dio.post(

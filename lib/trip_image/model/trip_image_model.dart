@@ -72,7 +72,7 @@ class UnMatchedImage {
 class MatchedDayTripPlaceImage {
   final String tripDayPlaceId;
   final int day;
-  final List<MatchedPlaceImage> placeImagesList;
+  final List<MatchedPlaceImage?> placeImagesList;
 
   MatchedDayTripPlaceImage({
     required this.tripDayPlaceId,
@@ -80,7 +80,8 @@ class MatchedDayTripPlaceImage {
     required this.placeImagesList,
   });
 
-  factory MatchedDayTripPlaceImage.fromJson(Map<String, dynamic> json) => _$MatchedDayTripPlaceImageFromJson(json);
+  factory MatchedDayTripPlaceImage.fromJson(Map<String, dynamic> json) =>
+      _$MatchedDayTripPlaceImageFromJson(json);
   Map<String, dynamic> toJson() => _$MatchedDayTripPlaceImageToJson(this);
 }
 
@@ -102,7 +103,16 @@ class MatchedPlaceImage {
     required this.placeImages,
   });
 
-  factory MatchedPlaceImage.fromJson(Map<String, dynamic> json) => _$MatchedPlaceImageFromJson(json);
+  factory MatchedPlaceImage.fromJson(Map<String, dynamic> json) {
+    return MatchedPlaceImage(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      type: json['type'] as String? ?? '',
+      placeImages: (json['placeImages'] as List<dynamic>?)?.map((e) => MatchedImage.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+    );
+  }
   Map<String, dynamic> toJson() => _$MatchedPlaceImageToJson(this);
 }
 
@@ -124,7 +134,7 @@ class MatchedImage {
     required this.favorite,
   });
 
-  factory MatchedImage.fromJson(Map<String, dynamic> json) => _$MatchedImageFromJson(json);
+  factory MatchedImage.fromJson(Map<String, dynamic> json) =>
+      _$MatchedImageFromJson(json);
   Map<String, dynamic> toJson() => _$MatchedImageToJson(this);
 }
-

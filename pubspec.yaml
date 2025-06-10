@@ -66,6 +66,16 @@ dependencies:
   firebase_messaging: ^15.2.6
   flutter_local_notifications: ^19.2.1
 
+  # 이쁜 새로고침
+  liquid_pull_to_refresh: ^3.0.0
+  pull_to_refresh: ^2.0.0
+
+  # 갤러리에 저장
+  image_gallery_saver: ^2.0.3
+  # 이미지 공유
+  share_plus: ^7.2.1
+  path_provider: ^2.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

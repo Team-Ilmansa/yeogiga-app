@@ -7,10 +7,13 @@ import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
+import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
+import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/model/trip_host_route_day.dart';
 import 'package:yeogiga/trip/provider/trip_host_route_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 
 class EndTripMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'endTripMap';
@@ -23,10 +26,16 @@ class EndTripMapScreen extends ConsumerStatefulWidget {
 class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   bool _allDaysFetched = false;
   bool _fetchedAndFitted = false;
+
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
   double _myLocationButtonOffset = 0;
+
   int selectedDayIndex = 0;
+  bool selectionMode = false;
+
+  Map<String, List<String>> matchedOrUnmatchedPayload = {};
+  Map<String, List<String>> pendingPayload = {};
 
   @override
   void initState() {
@@ -230,6 +239,13 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     final days = getDaysForTrip(tripState);
     final hostRouteAsync = ref.watch(tripHostRouteProvider);
     return Scaffold(
+      bottomNavigationBar: _getPictureOptionBar(
+        selectionMode,
+        ref,
+        selectedDayIndex,
+        matchedOrUnmatchedPayload,
+        pendingPayload,
+      ),
       backgroundColor: Colors.white,
       body: Stack(
         children: [
@@ -626,7 +642,8 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                           );
                                         },
                                       )
-                                      : Center(
+                                      : Align(
+                                        alignment: Alignment.center,
                                         child: Text(
                                           '등록된 일정이 없습니다.',
                                           style: TextStyle(
@@ -639,6 +656,33 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                             );
                           },
                         ),
+
+                        GalleryTab(
+                          sliverMode: false,
+                          showDaySelector: false,
+                          selectedDayIndex: selectedDayIndex,
+                          onDayIndexChanged: (index) {
+                            setState(() {
+                              selectedDayIndex = index;
+                            });
+                          },
+                          // selectionMode, onSelectionModeChanged 등 필요한 props 전달
+                          selectionMode: selectionMode,
+                          onSelectionModeChanged: (val) {
+                            setState(() {
+                              selectionMode = val;
+                            });
+                          },
+                          onSelectionPayloadChanged: ({
+                            required matchedOrUnmatched,
+                            required pending,
+                          }) {
+                            setState(() {
+                              matchedOrUnmatchedPayload = matchedOrUnmatched;
+                              pendingPayload = pending;
+                            });
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -649,5 +693,25 @@ class _EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         ],
       ),
     );
+  }
+}
+
+Widget? _getPictureOptionBar(
+  bool selectionMode,
+  WidgetRef ref,
+  int selectedDayIndex,
+  Map<String, List<String>> matchedOrUnmatchedPayload,
+  Map<String, List<String>> pendingPayload,
+) {
+  if (selectionMode) {
+    return BottomAppBarLayout(
+      child: PictureOptionState(
+        selectedDayIndex: selectedDayIndex,
+        matchedOrUnmatchedPayload: matchedOrUnmatchedPayload,
+        pendingPayload: pendingPayload,
+      ),
+    );
+  } else {
+    return null;
   }
 }
