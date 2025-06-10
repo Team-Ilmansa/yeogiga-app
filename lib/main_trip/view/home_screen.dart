@@ -94,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 },
               ),
 
-              SizedBox(height: 100.h),
+              SizedBox(height: 200.h),
               Consumer(
                 builder: (context, ref, _) {
                   final userState = ref.watch(userMeProvider);

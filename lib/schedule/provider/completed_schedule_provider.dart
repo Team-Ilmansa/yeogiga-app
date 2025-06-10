@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/repository/confirm_schedule_repository.dart';
 
-final completedScheduleProvider = StateNotifierProvider.autoDispose<
+final completedScheduleProvider = StateNotifierProvider<
   CompletedScheduleNotifier,
   CompletedTripDayPlaceListModel?
 >((ref) {

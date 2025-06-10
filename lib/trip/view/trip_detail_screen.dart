@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -11,9 +12,13 @@ import 'package:yeogiga/trip/component/detail_screen/notice_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/schedule_dashboard_tab.dart';
 import 'package:yeogiga/trip/component/trip_more_menu_sheet.dart';
+import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
+import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
+import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
@@ -26,8 +31,25 @@ class TripDetailScreen extends ConsumerStatefulWidget {
 
 class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     with SingleTickerProviderStateMixin {
+  int _selectedDayIndex = 0;
+
+  bool selectionMode = false;
+
   int bottomAppBarState = 1;
   late TabController _tabController;
+
+  Map<String, List<String>> matchedOrUnmatchedPayload = {};
+  Map<String, List<String>> pendingPayload = {};
+
+  void onSelectionPayloadChanged({
+    required Map<String, List<String>> matchedOrUnmatched,
+    required Map<String, List<String>> pending,
+  }) {
+    setState(() {
+      matchedOrUnmatchedPayload = matchedOrUnmatched;
+      pendingPayload = pending;
+    });
+  }
 
   @override
   void initState() {
@@ -48,10 +70,130 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     });
   }
 
+  bool _initialized = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+
+      //앱을 시작할때도 호출
+      refreshAll();
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  bool isRefreshing = false;
+
+  // 갤러리탭 리프레쉬
+  Future<void> refreshAll() async {
+    setState(() {
+      isRefreshing = true;
+    });
+    final trip = ref.read(tripProvider);
+    final isCompleted = trip is CompletedTripModel;
+    int tripId = (trip is TripModel) ? trip.tripId : 0;
+    // invalidate 일정/이미지 provider
+    ref.invalidate(completedScheduleProvider);
+    ref.invalidate(confirmScheduleProvider);
+    ref.invalidate(pendingDayTripImagesProvider);
+    ref.invalidate(unmatchedTripImagesProvider);
+    ref.invalidate(matchedTripImagesProvider);
+    // 일정 fetchAll
+    if (isCompleted) {
+      await ref.read(completedScheduleProvider.notifier).fetch(tripId);
+      final completed = ref.read(completedScheduleProvider);
+      if (completed != null && completed.data.isNotEmpty) {
+        final pendingDayPlaceInfos =
+            completed.data
+                .map(
+                  (dayPlace) => PendingTripDayPlaceInfo(
+                    day: dayPlace.day,
+                    tripDayPlaceId: dayPlace.id,
+                  ),
+                )
+                .toList();
+        final unmatchedDayPlaceInfos =
+            completed.data
+                .map(
+                  (dayPlace) => UnMatchedTripDayPlaceInfo(
+                    day: dayPlace.day,
+                    tripDayPlaceId: dayPlace.id,
+                  ),
+                )
+                .toList();
+        final matchedDayPlaceInfos =
+            completed.data
+                .map(
+                  (dayPlace) => MatchedDayPlaceInfo(
+                    day: dayPlace.day,
+                    tripDayPlaceId: dayPlace.id,
+                    placeIds: dayPlace.places.map((e) => e.id).toList(),
+                  ),
+                )
+                .toList();
+        await ref
+            .read(pendingDayTripImagesProvider.notifier)
+            .fetchAll(tripId, pendingDayPlaceInfos);
+        await ref
+            .read(unmatchedTripImagesProvider.notifier)
+            .fetchAll(tripId, unmatchedDayPlaceInfos);
+        await ref
+            .read(matchedTripImagesProvider.notifier)
+            .fetchAll(tripId, matchedDayPlaceInfos);
+      }
+    } else {
+      await ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
+      final confirmed = ref.read(confirmScheduleProvider);
+      if (confirmed != null && confirmed.schedules.isNotEmpty) {
+        final matchedDayPlaceInfos =
+            confirmed.schedules
+                .map(
+                  (schedule) => MatchedDayPlaceInfo(
+                    day: schedule.day,
+                    tripDayPlaceId: schedule.id,
+                    placeIds: schedule.places.map((e) => e.id).toList(),
+                  ),
+                )
+                .toList();
+        final unmatchedDayPlaceInfos =
+            confirmed.schedules
+                .map(
+                  (schedule) => UnMatchedTripDayPlaceInfo(
+                    day: schedule.day,
+                    tripDayPlaceId: schedule.id,
+                  ),
+                )
+                .toList();
+        final pendingDayPlaceInfos =
+            confirmed.schedules
+                .map(
+                  (schedule) => PendingTripDayPlaceInfo(
+                    day: schedule.day,
+                    tripDayPlaceId: schedule.id,
+                  ),
+                )
+                .toList();
+        await ref
+            .read(matchedTripImagesProvider.notifier)
+            .fetchAll(tripId, matchedDayPlaceInfos);
+        await ref
+            .read(unmatchedTripImagesProvider.notifier)
+            .fetchAll(tripId, unmatchedDayPlaceInfos);
+        await ref
+            .read(pendingDayTripImagesProvider.notifier)
+            .fetchAll(tripId, pendingDayPlaceInfos);
+      }
+    }
+    setState(() {
+      isRefreshing = false;
+      selectionMode = false;
+    });
   }
 
   @override
@@ -140,10 +282,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           ],
         ),
       ),
-      bottomNavigationBar: getBottomNavigationBar(
-        tripState,
-        userMe,
+      bottomNavigationBar: _getBottomNavigationBar(
+        /// TODO: 하단바 버튼으로
+        /// TODO: 상태, 선택한 날짜, 삭제할 리스트들 전부 넘겨야함.
+        ref,
         bottomAppBarState,
+        _selectedDayIndex,
+        matchedOrUnmatchedPayload,
+        pendingPayload,
       ),
       body: DefaultTabController(
         length: 2,
@@ -209,12 +355,29 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
             children: [
               ScheduleDashboardTab(),
-              GalleryTab(
-                onSelectionModeChanged: (bool selectionMode) {
-                  setState(() {
-                    bottomAppBarState = selectionMode ? 3 : 2;
-                  });
-                },
+              LiquidPullToRefresh(
+                onRefresh: refreshAll,
+                animSpeedFactor: 7.0,
+                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
+                backgroundColor: Color(0xfff0f0f0), // 배경색
+                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+                child: GalleryTab(
+                  sliverMode: true,
+                  selectedDayIndex: _selectedDayIndex,
+                  onDayIndexChanged: (index) {
+                    setState(() {
+                      _selectedDayIndex = index;
+                    });
+                  },
+                  selectionMode: selectionMode,
+                  onSelectionModeChanged: (selectionMode) {
+                    setState(() {
+                      this.selectionMode = selectionMode;
+                      bottomAppBarState = selectionMode ? 3 : 2;
+                    });
+                  },
+                  onSelectionPayloadChanged: onSelectionPayloadChanged,
+                ),
               ),
             ],
           ),
@@ -226,11 +389,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
 /// 하단 바 생성 함수
 /// 공통 하단 바 레이아웃 컴포넌트
-class BottomAppBarLayout extends StatelessWidget {
+class BottomAppBarLayout extends ConsumerWidget {
   final Widget child;
   const BottomAppBarLayout({required this.child, super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(72.r),
@@ -252,10 +415,18 @@ class BottomAppBarLayout extends StatelessWidget {
   }
 }
 
-Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
+Widget? _getBottomNavigationBar(
+  WidgetRef ref,
+  int bottomAppBarState,
+  int selectedDayIndex,
+  Map<String, List<String>> matchedOrUnmatchedPayload,
+  Map<String, List<String>> pendingPayload,
+) {
+  final tripState = ref.watch(tripProvider);
+  final userMe = ref.watch(userMeProvider);
   // 여행 상태가 SETTING이고 날짜 미지정이면 '여행 날짜 확정하기' 버튼
   if (tripState is SettingTripModel) {
-    final settingTrip = tripState as SettingTripModel;
+    final settingTrip = tripState;
     final startedAt = settingTrip.startedAt;
     final endedAt = settingTrip.endedAt;
     String? myNickname;
@@ -297,15 +468,24 @@ Widget? getBottomNavigationBar(tripState, userMe, int bottomAppBarState) {
     // 갤러리 탭 하단바는 inprogress/completed 상태에서만 노출
     if (tripState is InProgressTripModel || tripState is CompletedTripModel) {
       if (bottomAppBarState == 2) {
-        return const BottomAppBarLayout(child: AddPictureState());
+        return BottomAppBarLayout(
+          child: AddPictureState(selectedDayIndex: selectedDayIndex),
+        );
       } else {
-        return const BottomAppBarLayout(child: PictureOptionState());
+        return BottomAppBarLayout(
+          child: PictureOptionState(
+            selectedDayIndex: selectedDayIndex,
+            matchedOrUnmatchedPayload: matchedOrUnmatchedPayload,
+            pendingPayload: pendingPayload,
+          ),
+        );
       }
     } else {
       // 그 외 상태에서는 하단바 숨김
       return null;
     }
   }
+  return null;
 }
 
 // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ

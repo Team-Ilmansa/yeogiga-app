@@ -62,7 +62,12 @@ MatchedDayTripPlaceImage _$MatchedDayTripPlaceImageFromJson(
   day: (json['day'] as num).toInt(),
   placeImagesList:
       (json['placeImagesList'] as List<dynamic>)
-          .map((e) => MatchedPlaceImage.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                e == null
+                    ? null
+                    : MatchedPlaceImage.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
 );
 

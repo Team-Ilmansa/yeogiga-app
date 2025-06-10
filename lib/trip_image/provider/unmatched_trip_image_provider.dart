@@ -7,31 +7,27 @@ final unmatchedTripImagesProvider = StateNotifierProvider<
   List<UnMatchedDayTripImage>
 >((ref) {
   final repo = ref.watch(unmatchedTripImageRepository);
-  // tripId, dayPlaceIds는 외부에서 주입 (예: constructor나 다른 provider에서)
-  throw UnimplementedError('tripId와 dayPlaceIds를 주입하세요');
-  // return UnmatchedDayTripImageNotifier(repo, tripId, dayPlaceIds);
+  return UnmatchedDayTripImageNotifier(repo);
 });
 
 /// 각 일차의 day, tripDayPlaceId를 담는 구조체
-class TripDayPlaceInfo {
+class UnMatchedTripDayPlaceInfo {
   final int day;
   final String tripDayPlaceId;
-  TripDayPlaceInfo({required this.day, required this.tripDayPlaceId});
+  UnMatchedTripDayPlaceInfo({required this.day, required this.tripDayPlaceId});
 }
 
 class UnmatchedDayTripImageNotifier
     extends StateNotifier<List<UnMatchedDayTripImage>> {
   final UnmatchedTripImageRepository repo;
-  final int tripId;
-  final List<TripDayPlaceInfo> dayPlaceIds;
 
-  UnmatchedDayTripImageNotifier(this.repo, this.tripId, this.dayPlaceIds)
-    : super([]) {
-    fetchAll();
-  }
+  UnmatchedDayTripImageNotifier(this.repo) : super([]);
 
   /// TODO: 모든 일차별 매칭되지 않은 이미지 fetch
-  Future<void> fetchAll() async {
+  Future<void> fetchAll(
+    int tripId,
+    List<UnMatchedTripDayPlaceInfo> dayPlaceIds,
+  ) async {
     state = await Future.wait(
       dayPlaceIds.map(
         (e) => repo.fetchUnmatchedDayTripImages(
@@ -44,8 +40,9 @@ class UnmatchedDayTripImageNotifier
   }
 
   // TODO: 하루의 이미지만 새로 fetch해서 state에 반영
-  Future<void> fetchDay(int day, String tripDayPlaceId) async {
-    final index = dayPlaceIds.indexWhere(
+  // 하루의 이미지만 새로 fetch해서 state에 반영 (state의 index와 day, tripDayPlaceId가 일치해야 함)
+  Future<void> fetchDay(int tripId, int day, String tripDayPlaceId) async {
+    final index = state.indexWhere(
       (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
     );
     if (index == -1) return;
