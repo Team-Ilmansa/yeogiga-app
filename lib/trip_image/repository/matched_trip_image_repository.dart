@@ -41,7 +41,7 @@ class MatchedTripImageRepository {
   }
 
   // TODO: 목적지에 매칭된 이미지들을 불러옴
-  Future<MatchedPlaceImage?> fetchMatchedPlaceImages({
+  Future<MatchedPlaceImage> fetchMatchedPlaceImages({
     required int tripId,
     required String tripDayPlaceId,
     required String placeId,

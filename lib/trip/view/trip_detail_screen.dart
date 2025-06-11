@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:yeogiga/common/provider/selection_mode_provider.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -18,7 +19,6 @@ import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
-import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
@@ -26,14 +26,15 @@ class TripDetailScreen extends ConsumerStatefulWidget {
   const TripDetailScreen({super.key});
 
   @override
-  ConsumerState<TripDetailScreen> createState() => _TripDetailScreenState();
+  ConsumerState<TripDetailScreen> createState() => TripDetailScreenState();
 }
 
-class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
+class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     with SingleTickerProviderStateMixin {
-  int _selectedDayIndex = 0;
+  // static 메서드로 분리
+  // TODO: 존나 중요
 
-  bool selectionMode = false;
+  int _selectedDayIndex = 0;
 
   int bottomAppBarState = 1;
   late TabController _tabController;
@@ -59,14 +60,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     // 탭 컨트롤러 리스너
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      setState(() {
-        if (_tabController.index == 0) {
-          bottomAppBarState = 1;
-        } else if (_tabController.index == 1) {
-          // selectionMode는 onSelectionModeChanged 콜백에서만 관리
-          bottomAppBarState = 2;
-        }
-      });
     });
   }
 
@@ -99,8 +92,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final isCompleted = trip is CompletedTripModel;
     int tripId = (trip is TripModel) ? trip.tripId : 0;
     // invalidate 일정/이미지 provider
-    ref.invalidate(completedScheduleProvider);
-    ref.invalidate(confirmScheduleProvider);
     ref.invalidate(pendingDayTripImagesProvider);
     ref.invalidate(unmatchedTripImagesProvider);
     ref.invalidate(matchedTripImagesProvider);
@@ -192,14 +183,21 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     }
     setState(() {
       isRefreshing = false;
-      selectionMode = false;
+      ref.read(selectionModeProvider.notifier).state = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectionMode = ref.watch(selectionModeProvider);
     final tripState = ref.watch(tripProvider);
     final userMe = ref.watch(userMeProvider);
+
+    if (_tabController.index == 0) {
+      bottomAppBarState = 1;
+    } else if (_tabController.index == 1) {
+      bottomAppBarState = selectionMode ? 3 : 2;
+    }
 
     return Scaffold(
       backgroundColor: Color(0xfffafafa),
@@ -367,13 +365,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   onDayIndexChanged: (index) {
                     setState(() {
                       _selectedDayIndex = index;
-                    });
-                  },
-                  selectionMode: selectionMode,
-                  onSelectionModeChanged: (selectionMode) {
-                    setState(() {
-                      this.selectionMode = selectionMode;
-                      bottomAppBarState = selectionMode ? 3 : 2;
                     });
                   },
                   onSelectionPayloadChanged: onSelectionPayloadChanged,

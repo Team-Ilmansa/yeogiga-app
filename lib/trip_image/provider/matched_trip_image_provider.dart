@@ -44,16 +44,15 @@ class MatchedDayTripImageNotifier
               tripDayPlaceId: e.tripDayPlaceId,
               placeId: placeId,
             );
+            print('=============$result');
             return result;
           }),
         );
         // null 필터링 (repo가 null 반환 가능성 대비)
-        final filteredPlaceImagesList =
-            placeImagesList.where((img) => img != null).toList();
         return MatchedDayTripPlaceImage(
           tripDayPlaceId: e.tripDayPlaceId,
           day: e.day,
-          placeImagesList: filteredPlaceImagesList,
+          placeImagesList: placeImagesList,
         );
       }),
     );
