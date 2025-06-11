@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
+import 'package:yeogiga/common/provider/selection_mode_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/no_image.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -17,12 +18,14 @@ class GalleryImage {
   final String url;
   final int day;
   final GalleryImageType type;
+  final String? placeName;
 
   GalleryImage({
     required this.id,
     required this.url,
     required this.day,
     required this.type,
+    this.placeName,
   });
 }
 
@@ -34,8 +37,6 @@ class GalleryTab extends ConsumerStatefulWidget {
   final bool showDaySelector;
   final int selectedDayIndex;
   final ValueChanged<int> onDayIndexChanged;
-  final bool selectionMode;
-  final ValueChanged<bool>? onSelectionModeChanged;
   final void Function({
     required Map<String, List<String>> matchedOrUnmatched,
     required Map<String, List<String>> pending,
@@ -48,8 +49,6 @@ class GalleryTab extends ConsumerStatefulWidget {
     this.showDaySelector = true,
     required this.selectedDayIndex,
     required this.onDayIndexChanged,
-    required this.selectionMode,
-    required this.onSelectionModeChanged,
     required this.onSelectionPayloadChanged,
   });
 
@@ -60,18 +59,31 @@ class GalleryTab extends ConsumerStatefulWidget {
 class _GalleryTabState extends ConsumerState<GalleryTab> {
   Set<int> selectedMatchedOrUnMatchedPictures = {};
 
-  void setSelectionMode(bool value) {
-    widget.onSelectionModeChanged?.call(value);
-    if (!value) {
-      setState(() {
-        selectedMatchedOrUnMatchedPictures.clear();
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final selectionMode = ref.watch(selectionModeProvider);
     final matchedImages = ref.watch(matchedTripImagesProvider);
+    print('===== matchedImages 전체 내용 =====');
+    for (final dayPlace in matchedImages) {
+      print(
+        'MatchedDayTripPlaceImage: day=${dayPlace.day}, tripDayPlaceId=${dayPlace.tripDayPlaceId}',
+      );
+      for (final place in dayPlace.placeImagesList) {
+        if (place == null) {
+          print('  MatchedPlaceImage: null');
+          continue;
+        }
+        print(
+          '  MatchedPlaceImage: id=${place.id}, name=${place.name}, type=${place.type}, lat=${place.latitude}, lng=${place.longitude}',
+        );
+        for (final img in place.placeImages) {
+          print(
+            '    MatchedImage: id=${img.id}, url=${img.url}, lat=${img.latitude}, lng=${img.longitude}, date=${img.date}, favorite=${img.favorite}',
+          );
+        }
+      }
+    }
+    print('==============================');
     final unmatchedImages = ref.watch(unmatchedTripImagesProvider);
     final pendingImages = ref.watch(pendingDayTripImagesProvider);
     final selectedDay = widget.selectedDayIndex;
@@ -127,15 +139,16 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                   url: img.url,
                   day: dayPlace.day,
                   type: GalleryImageType.matched,
+                  placeName: place.name, // 장소 이름 전달!
                 ),
               );
             }
           }
         }
       }
-      // unmatched
+      // unmatched (matched에 이미 포함된 id는 제외)
       for (final dayPlace in unmatchedImages) {
-        for (final img in dayPlace.pendingImages) {
+        for (final img in dayPlace.unmatchedImages) {
           allImages.add(
             GalleryImage(
               id: img.id,
@@ -174,11 +187,12 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                     url: img.url,
                     day: dayPlace.day,
                     type: GalleryImageType.matched,
+                    placeName: place.name, // 장소 이름 전달!
                   ),
         // unmatched
         for (final dayPlace in unmatchedImages)
           if (dayPlace.day == selectedDay)
-            for (final img in dayPlace.pendingImages)
+            for (final img in dayPlace.unmatchedImages)
               GalleryImage(
                 id: img.id,
                 url: img.url,
@@ -229,7 +243,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                     widget.onDayIndexChanged(index);
                     setState(() {
                       selectedMatchedOrUnMatchedPictures.clear();
-                      widget.onSelectionModeChanged?.call(false); // ✅ 이렇게 변경
+                      ref.read(selectionModeProvider.notifier).state =
+                          false; // ✅ 이렇게 변경
                     });
                   },
                 );
@@ -263,10 +278,9 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              widget.onSelectionModeChanged?.call(
-                                !widget.selectionMode,
-                              );
-                              if (!widget.selectionMode) {
+                              ref.read(selectionModeProvider.notifier).state =
+                                  !selectionMode;
+                              if (!ref.read(selectionModeProvider)) {
                                 setState(() {
                                   selectedMatchedOrUnMatchedPictures.clear();
                                 });
@@ -275,14 +289,14 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                             child: Row(
                               children: [
                                 Text(
-                                  widget.selectionMode
+                                  selectionMode
                                       ? '${selectedMatchedOrUnMatchedPictures.length}개 선택됨'
                                       : '선택하기',
                                   style: TextStyle(
                                     fontSize: 39.sp,
                                     letterSpacing: -0.6,
                                     color:
-                                        widget.selectionMode
+                                        selectionMode
                                             ? Color(0xff8287ff)
                                             : Color.fromARGB(
                                               255,
@@ -298,7 +312,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   width: 48.w,
                                   height: 48.h,
                                   color:
-                                      widget.selectionMode
+                                      selectionMode
                                           ? Color(0xff8287ff)
                                           : Color.fromARGB(255, 193, 193, 193),
                                 ),
@@ -323,12 +337,13 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                       itemCount: allImages.length,
                       itemBuilder: (context, idx) {
                         final image = allImages[idx];
+                        print(image.type);
                         final isSelected = selectedMatchedOrUnMatchedPictures
                             .contains(idx);
 
                         return GestureDetector(
                           onTap:
-                              widget.selectionMode
+                              selectionMode
                                   ? () {
                                     setState(() {
                                       if (isSelected) {
@@ -356,47 +371,83 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                       Navigator.of(
                                                         context,
                                                       ).pop(),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(24.r),
-                                                child: Container(
-                                                  color: Colors.black,
-                                                  child: InteractiveViewer(
-                                                    child: Image.network(
-                                                      image.url,
-                                                      fit: BoxFit.contain,
-                                                      loadingBuilder:
-                                                          (
-                                                            context,
-                                                            child,
-                                                            progress,
-                                                          ) =>
-                                                              progress == null
-                                                                  ? child
-                                                                  : Center(
-                                                                    child:
-                                                                        CircularProgressIndicator(),
-                                                                  ),
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => Container(
-                                                            height: 400.h,
-                                                            color:
-                                                                Colors
-                                                                    .grey[300],
-                                                            child: Center(
-                                                              child: Icon(
-                                                                Icons
-                                                                    .broken_image,
-                                                                size: 48.sp,
-                                                              ),
-                                                            ),
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    // 텍스트 라벨 (위)
+                                                    Container(
+                                                      width: double.infinity,
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            vertical: 12.h,
+                                                            horizontal: 24.w,
                                                           ),
+                                                      child: Text(
+                                                        image.type ==
+                                                                GalleryImageType
+                                                                    .matched
+                                                            ? (image.placeName ??
+                                                                "알 수 없음")
+                                                            : "기타",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 50.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
                                                     ),
-                                                  ),
+                                                    SizedBox(height: 20.h),
+                                                    // 이미지 (아래)
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadiusGeometry.circular(
+                                                            24.r,
+                                                          ),
+                                                      child: InteractiveViewer(
+                                                        child: Image.network(
+                                                          image.url,
+                                                          fit: BoxFit.contain,
+                                                          loadingBuilder:
+                                                              (
+                                                                context,
+                                                                child,
+                                                                progress,
+                                                              ) =>
+                                                                  progress ==
+                                                                          null
+                                                                      ? child
+                                                                      : Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(),
+                                                                      ),
+                                                          errorBuilder:
+                                                              (
+                                                                context,
+                                                                error,
+                                                                stackTrace,
+                                                              ) => Container(
+                                                                height: 400.h,
+                                                                color:
+                                                                    Colors
+                                                                        .grey[300],
+                                                                child: Center(
+                                                                  child: Icon(
+                                                                    Icons
+                                                                        .broken_image,
+                                                                    size: 48.sp,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -425,7 +476,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   child: _typeBadge(image.type),
                                 ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
-                                if (widget.selectionMode && isSelected)
+                                if (selectionMode && isSelected)
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Color(0xff8287ff).withOpacity(0.3),
@@ -491,41 +542,68 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                     insetPadding: EdgeInsets.all(100.w),
                                     child: GestureDetector(
                                       onTap: () => Navigator.of(context).pop(),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          24.r,
-                                        ),
-                                        child: Container(
-                                          color: Colors.black,
-                                          child: InteractiveViewer(
-                                            child: Image.network(
-                                              image.url,
-                                              fit: BoxFit.contain,
-                                              loadingBuilder:
-                                                  (context, child, progress) =>
-                                                      progress == null
-                                                          ? child
-                                                          : Center(
-                                                            child:
-                                                                CircularProgressIndicator(),
-                                                          ),
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => Container(
-                                                    height: 400.h,
-                                                    color: Colors.grey[300],
-                                                    child: Center(
-                                                      child: Icon(
-                                                        Icons.broken_image,
-                                                        size: 48.sp,
-                                                      ),
-                                                    ),
-                                                  ),
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: double.infinity,
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 12.h,
+                                                horizontal: 24.w,
+                                              ),
+                                              child: Text(
+                                                "임시저장",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 50.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
                                             ),
-                                          ),
+                                            SizedBox(height: 20.h),
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadiusGeometry.circular(
+                                                    24.r,
+                                                  ),
+                                              child: InteractiveViewer(
+                                                child: Image.network(
+                                                  image.url,
+                                                  fit: BoxFit.contain,
+                                                  loadingBuilder:
+                                                      (
+                                                        context,
+                                                        child,
+                                                        progress,
+                                                      ) =>
+                                                          progress == null
+                                                              ? child
+                                                              : Center(
+                                                                child:
+                                                                    CircularProgressIndicator(),
+                                                              ),
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => Container(
+                                                        height: 400.h,
+                                                        color: Colors.grey[300],
+                                                        child: Center(
+                                                          child: Icon(
+                                                            Icons.broken_image,
+                                                            size: 48.sp,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -598,7 +676,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                         widget.onDayIndexChanged(index);
                         setState(() {
                           selectedMatchedOrUnMatchedPictures.clear();
-                          widget.onSelectionModeChanged?.call(false);
+                          ref.read(selectionModeProvider.notifier).state =
+                              false;
                         });
                       },
                     );
@@ -628,10 +707,9 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              widget.onSelectionModeChanged?.call(
-                                !widget.selectionMode,
-                              );
-                              if (!widget.selectionMode) {
+                              ref.read(selectionModeProvider.notifier).state =
+                                  !selectionMode;
+                              if (!selectionMode) {
                                 setState(() {
                                   selectedMatchedOrUnMatchedPictures.clear();
                                 });
@@ -640,14 +718,14 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                             child: Row(
                               children: [
                                 Text(
-                                  widget.selectionMode
+                                  selectionMode
                                       ? '${selectedMatchedOrUnMatchedPictures.length}개 선택됨'
                                       : '선택하기',
                                   style: TextStyle(
                                     fontSize: 39.sp,
                                     letterSpacing: -0.6,
                                     color:
-                                        widget.selectionMode
+                                        selectionMode
                                             ? Color(0xff8287ff)
                                             : Color.fromARGB(
                                               255,
@@ -663,7 +741,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   width: 48.w,
                                   height: 48.h,
                                   color:
-                                      widget.selectionMode
+                                      selectionMode
                                           ? Color(0xff8287ff)
                                           : Color.fromARGB(255, 193, 193, 193),
                                 ),
@@ -693,7 +771,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                             .contains(idx);
                         return GestureDetector(
                           onTap:
-                              widget.selectionMode
+                              selectionMode
                                   ? () {
                                     setState(() {
                                       if (isSelected) {
@@ -720,47 +798,83 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                       Navigator.of(
                                                         context,
                                                       ).pop(),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(24.r),
-                                                child: Container(
-                                                  color: Colors.black,
-                                                  child: InteractiveViewer(
-                                                    child: Image.network(
-                                                      image.url,
-                                                      fit: BoxFit.contain,
-                                                      loadingBuilder:
-                                                          (
-                                                            context,
-                                                            child,
-                                                            progress,
-                                                          ) =>
-                                                              progress == null
-                                                                  ? child
-                                                                  : Center(
-                                                                    child:
-                                                                        CircularProgressIndicator(),
-                                                                  ),
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => Container(
-                                                            height: 400.h,
-                                                            color:
-                                                                Colors
-                                                                    .grey[300],
-                                                            child: Center(
-                                                              child: Icon(
-                                                                Icons
-                                                                    .broken_image,
-                                                                size: 48.sp,
-                                                              ),
-                                                            ),
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    // 텍스트 라벨 (위)
+                                                    Container(
+                                                      width: double.infinity,
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            vertical: 12.h,
+                                                            horizontal: 24.w,
                                                           ),
+                                                      child: Text(
+                                                        image.type ==
+                                                                GalleryImageType
+                                                                    .matched
+                                                            ? (image.placeName ??
+                                                                "알 수 없음")
+                                                            : "기타",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 50.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
                                                     ),
-                                                  ),
+                                                    SizedBox(height: 20.h),
+                                                    // 이미지 (아래)
+                                                    ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadiusGeometry.circular(
+                                                            24.r,
+                                                          ),
+                                                      child: InteractiveViewer(
+                                                        child: Image.network(
+                                                          image.url,
+                                                          fit: BoxFit.contain,
+                                                          loadingBuilder:
+                                                              (
+                                                                context,
+                                                                child,
+                                                                progress,
+                                                              ) =>
+                                                                  progress ==
+                                                                          null
+                                                                      ? child
+                                                                      : Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(),
+                                                                      ),
+                                                          errorBuilder:
+                                                              (
+                                                                context,
+                                                                error,
+                                                                stackTrace,
+                                                              ) => Container(
+                                                                height: 400.h,
+                                                                color:
+                                                                    Colors
+                                                                        .grey[300],
+                                                                child: Center(
+                                                                  child: Icon(
+                                                                    Icons
+                                                                        .broken_image,
+                                                                    size: 48.sp,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -789,7 +903,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   child: _typeBadge(image.type),
                                 ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
-                                if (widget.selectionMode && isSelected)
+                                if (selectionMode && isSelected)
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Color(0xff8287ff).withOpacity(0.3),
@@ -855,41 +969,68 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                     insetPadding: EdgeInsets.all(100.w),
                                     child: GestureDetector(
                                       onTap: () => Navigator.of(context).pop(),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          24.r,
-                                        ),
-                                        child: Container(
-                                          color: Colors.black,
-                                          child: InteractiveViewer(
-                                            child: Image.network(
-                                              image.url,
-                                              fit: BoxFit.contain,
-                                              loadingBuilder:
-                                                  (context, child, progress) =>
-                                                      progress == null
-                                                          ? child
-                                                          : Center(
-                                                            child:
-                                                                CircularProgressIndicator(),
-                                                          ),
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => Container(
-                                                    height: 400.h,
-                                                    color: Colors.grey[300],
-                                                    child: Center(
-                                                      child: Icon(
-                                                        Icons.broken_image,
-                                                        size: 48.sp,
-                                                      ),
-                                                    ),
-                                                  ),
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: double.infinity,
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 12.h,
+                                                horizontal: 24.w,
+                                              ),
+                                              child: Text(
+                                                "임시저장",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 50.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
                                             ),
-                                          ),
+                                            SizedBox(height: 20.h),
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadiusGeometry.circular(
+                                                    24.r,
+                                                  ),
+                                              child: InteractiveViewer(
+                                                child: Image.network(
+                                                  image.url,
+                                                  fit: BoxFit.contain,
+                                                  loadingBuilder:
+                                                      (
+                                                        context,
+                                                        child,
+                                                        progress,
+                                                      ) =>
+                                                          progress == null
+                                                              ? child
+                                                              : Center(
+                                                                child:
+                                                                    CircularProgressIndicator(),
+                                                              ),
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => Container(
+                                                        height: 400.h,
+                                                        color: Colors.grey[300],
+                                                        child: Center(
+                                                          child: Icon(
+                                                            Icons.broken_image,
+                                                            size: 48.sp,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

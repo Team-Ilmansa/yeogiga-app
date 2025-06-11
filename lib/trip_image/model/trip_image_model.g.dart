@@ -35,8 +35,8 @@ UnMatchedDayTripImage _$UnMatchedDayTripImageFromJson(
 ) => UnMatchedDayTripImage(
   tripDayPlaceId: json['tripDayPlaceId'] as String,
   day: (json['day'] as num).toInt(),
-  pendingImages:
-      (json['pendingImages'] as List<dynamic>)
+  unmatchedImages:
+      (json['unmatchedImages'] as List<dynamic>)
           .map((e) => UnMatchedImage.fromJson(e as Map<String, dynamic>))
           .toList(),
 );
@@ -46,7 +46,7 @@ Map<String, dynamic> _$UnMatchedDayTripImageToJson(
 ) => <String, dynamic>{
   'tripDayPlaceId': instance.tripDayPlaceId,
   'day': instance.day,
-  'pendingImages': instance.pendingImages,
+  'unmatchedImages': instance.unmatchedImages,
 };
 
 UnMatchedImage _$UnMatchedImageFromJson(Map<String, dynamic> json) =>

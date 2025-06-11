@@ -39,7 +39,7 @@ class UnmatchedTripImageRepository {
         return UnMatchedDayTripImage(
           tripDayPlaceId: tripDayPlaceId,
           day: day,
-          pendingImages: images,
+          unmatchedImages: images,
         );
       } else {
         throw data['message'] ?? '알 수 없는 오류';

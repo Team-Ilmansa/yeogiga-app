@@ -40,12 +40,12 @@ class PendingImage {
 class UnMatchedDayTripImage {
   final String tripDayPlaceId;
   final int day;
-  final List<UnMatchedImage> pendingImages;
+  final List<UnMatchedImage> unmatchedImages;
 
   UnMatchedDayTripImage({
     required this.tripDayPlaceId,
     required this.day,
-    required this.pendingImages,
+    required this.unmatchedImages,
   });
 
   factory UnMatchedDayTripImage.fromJson(Map<String, dynamic> json) =>
@@ -109,8 +109,12 @@ class MatchedPlaceImage {
       name: json['name'] as String? ?? '',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
-      type: json['type'] as String? ?? '',
-      placeImages: (json['placeImages'] as List<dynamic>?)?.map((e) => MatchedImage.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+      type: json['placeType'] as String? ?? '', // 여기 때문에 맵핑 안됐었음.
+      placeImages:
+          (json['images'] as List<dynamic>?) // 여기 때문에 맵핑 안됐었음.
+              ?.map((e) => MatchedImage.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
   Map<String, dynamic> toJson() => _$MatchedPlaceImageToJson(this);

@@ -15,6 +15,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart';
@@ -232,6 +233,13 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         );
 
                         if (success) {
+                          //TODO: 개중요
+                          final state =
+                              context
+                                  .findAncestorStateOfType<
+                                    TripDetailScreenState
+                                  >();
+                          await state?.refreshAll();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('사진 업로드 완료!'),
@@ -536,6 +544,11 @@ class PictureOptionState extends ConsumerWidget {
                         urls: urls,
                       );
                   if (success) {
+                    // TODO: 존나 중요
+                    final state =
+                        context
+                            .findAncestorStateOfType<TripDetailScreenState>();
+                    await state?.refreshAll();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('사진이 삭제되었습니다.'),
