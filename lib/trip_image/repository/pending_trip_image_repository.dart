@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/trip_image/model/trip_image_model.dart';
@@ -21,7 +22,7 @@ class PendingTripImageRepository {
   Future<bool> uploadTripDayPlaceImages({
     required int tripId,
     required String tripDayPlaceId,
-    required XFile image,
+    required File image,
   }) async {
     final url = '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/images';
     final formData = FormData();
