@@ -453,6 +453,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               child: SafeArea(
                 child: GestureDetector(
                   onTap: () {
+                    ref.read(selectionModeProvider.notifier).state = false;
                     Navigator.of(context).pop();
                   },
                   child: Padding(
