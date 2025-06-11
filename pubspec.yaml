@@ -90,10 +90,30 @@ dev_dependencies:
   json_serializable: ^6.7.1
   retrofit_generator: 9.2.0
 
+  # 로고 관련
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+  
+
 # json_serializable 설정 중요!!!!!!!!!!!!!!!
 json_serializable:
   generic_argument_factories: true
 
+# 로고 설정
+flutter_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "asset/img/logo/logo.png"
+  
+# 스플래쉬 스크린 설정
+flutter_native_splash:
+  color: "#ffffff" # 배경색 (원하는 색상으로 변경)
+  image: asset/img/logo/splash_logo.png
+  android: true
+  ios: true
+  web: false
   
 
 # For information on the generic Dart part of this file, see the
