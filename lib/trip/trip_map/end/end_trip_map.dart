@@ -480,7 +480,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             DraggableScrollableSheet(
               controller: _sheetController,
               initialChildSize: 0.215,
-              minChildSize: 0.025,
+              minChildSize: 0.08,
               maxChildSize: 0.9,
               builder: (context, scrollController) {
                 return Container(
