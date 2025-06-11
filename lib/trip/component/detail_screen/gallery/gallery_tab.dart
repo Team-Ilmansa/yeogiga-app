@@ -62,6 +62,9 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
   @override
   Widget build(BuildContext context) {
     final selectionMode = ref.watch(selectionModeProvider);
+    if (!selectionMode) {
+      selectedMatchedOrUnMatchedPictures.clear();
+    }
     final matchedImages = ref.watch(matchedTripImagesProvider);
     print('===== matchedImages 전체 내용 =====');
     for (final dayPlace in matchedImages) {

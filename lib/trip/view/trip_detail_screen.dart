@@ -60,6 +60,16 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     // 탭 컨트롤러 리스너
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
+      if (_tabController.index != 1) {
+        ref.read(selectionModeProvider.notifier).state = false;
+      }
+      setState(() {
+        if (_tabController.index == 0) {
+          bottomAppBarState = 1;
+        } else if (_tabController.index == 1) {
+          bottomAppBarState = ref.watch(selectionModeProvider) ? 3 : 2;
+        }
+      });
     });
   }
 
