@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 import 'package:yeogiga/trip_image/repository/pending_trip_image_repository.dart';
 
@@ -62,7 +63,7 @@ class PendingDayTripImageNotifier
   Future<bool> uploadImages({
     required int tripId,
     required String tripDayPlaceId,
-    required List<XFile> images,
+    required List<File> images,
   }) async {
     bool allSuccess = true;
     try {

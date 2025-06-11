@@ -445,7 +445,9 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                           } else {
                             errorMsg = e.toString();
                           }
-                          // GoRouter.of(context).pop();
+                          if (context.mounted) {
+                            GoRouter.of(context).pop();
+                          }
                           Future.microtask(() {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(

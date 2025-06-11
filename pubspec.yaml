@@ -59,7 +59,10 @@ dependencies:
   flutter_slidable: ^4.0.0
 
   # 사진 선택
-  image_picker: ^1.1.2
+  file_picker: ^10.1.9
+
+  exif: ^3.3.0
+
 
   # --- FCM 및 알림 관련 의존성 추가 ---
   firebase_core: ^3.13.1
@@ -71,7 +74,8 @@ dependencies:
   pull_to_refresh: ^2.0.0
 
   # 갤러리에 저장
-  image_gallery_saver: ^2.0.3
+  image_gallery_saver_plus: ^4.0.1
+
   # 이미지 공유
   share_plus: ^7.2.1
   path_provider: ^2.1.2

@@ -2,13 +2,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:exif/exif.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
@@ -188,26 +189,48 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                           }
                         }
 
-                        final picker = ImagePicker();
-                        final List<XFile>? images = await picker.pickMultiImage(
-                          // imageQuality: 80, // 0 ~ 100 (낮을수록 고압축)
-                          // maxWidth: 1024,
-                          // maxHeight: 1024,
-                        );
-                        if (images == null || images.isEmpty) {
+                        FilePickerResult? result = await FilePicker.platform
+                            .pickFiles(
+                              type: FileType.image,
+                              allowMultiple: true,
+                              withData: true,
+                            );
+
+                        if (result == null || result.files.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('사진을 선택하지 않았습니다.')),
                           );
                           return;
                         }
+
+                        List<File> files =
+                            result.paths.map((path) => File(path!)).toList();
+
                         final notifier = ref.read(
                           pendingDayTripImagesProvider.notifier,
                         );
+
+                        for (final picked in result.files) {
+                          final bytes =
+                              picked.bytes ??
+                              await File(picked.path!).readAsBytes();
+                          final tags = await readExifFromBytes(bytes);
+
+                          if (tags.isEmpty) {
+                            print('EXIF 정보 없음');
+                          } else {
+                            tags.forEach((key, value) {
+                              print('$key: $value');
+                            });
+                          }
+                        }
+
                         final success = await notifier.uploadImages(
                           tripId: tripId,
                           tripDayPlaceId: tripDayPlaceId,
-                          images: images,
+                          images: files,
                         );
+
                         if (success) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -921,7 +944,7 @@ Future<void> saveImagesToGallery(
         options: Options(responseType: ResponseType.bytes),
       );
       final Uint8List imageBytes = Uint8List.fromList(response.data);
-      final result = await ImageGallerySaver.saveImage(
+      final result = await ImageGallerySaverPlus.saveImage(
         imageBytes,
         quality: 100,
         name: "yeogiga_${DateTime.now().millisecondsSinceEpoch}",
