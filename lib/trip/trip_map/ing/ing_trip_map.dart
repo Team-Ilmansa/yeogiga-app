@@ -317,7 +317,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               final memberLocationAsync = ref.watch(tripMemberLocationProvider);
               final userMe = ref.watch(userMeProvider);
               String? myNickname;
-              if (userMe is UserResponseModel && userMe.data?.nickname != null) {
+              if (userMe is UserResponseModel &&
+                  userMe.data?.nickname != null) {
                 myNickname = userMe.data!.nickname;
               }
               List<TripMemberLocation>? memberLocations;
@@ -416,7 +417,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
           DraggableScrollableSheet(
             controller: _sheetController,
             initialChildSize: 0.215,
-            minChildSize: 0.025,
+            minChildSize: 0.08,
             maxChildSize: 0.215,
             builder: (context, scrollController) {
               return Container(
@@ -497,7 +498,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                               );
                               final userMe = ref.read(userMeProvider);
                               String? myNickname;
-                              if (userMe is UserResponseModel && userMe.data?.nickname != null) {
+                              if (userMe is UserResponseModel &&
+                                  userMe.data?.nickname != null) {
                                 myNickname = userMe.data!.nickname;
                               }
                               List<TripMemberLocation>? memberLocations;
