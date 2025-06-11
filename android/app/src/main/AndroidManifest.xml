@@ -10,7 +10,7 @@
     android:maxSdkVersion="32"/>
     
     <application
-        android:label="yeogiga"
+        android:label="여기가"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

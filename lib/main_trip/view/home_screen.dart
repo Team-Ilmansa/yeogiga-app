@@ -70,13 +70,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                     loading: () => const SizedBox.shrink(),
                     error: (e, _) => const SizedBox.shrink(),
                     data: (trip) {
-                      if (trip == null) return const SizedBox.shrink();
+                      if (trip == null) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [_HomeAppBar(trip: trip)],
+                        );
+                      }
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _HomeAppBar(trip: trip),
                           Transform.translate(
-                            offset: Offset(0, -84.h),
+                            offset: Offset(0, -44.h),
                             child: Column(
                               children: [
                                 ScheduleItemList(),
@@ -84,6 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                   height: 36.h,
                                   color: Color(0xfff0f0f0),
                                 ),
+                                SizedBox(height: 100.h),
                               ],
                             ),
                           ),
@@ -94,7 +100,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 },
               ),
 
-              SizedBox(height: 200.h),
               Consumer(
                 builder: (context, ref, _) {
                   final userState = ref.watch(userMeProvider);
@@ -137,6 +142,7 @@ class _HomeAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsync = ref.watch(weatherProvider);
+    final userMe = ref.read(userMeProvider);
     return SizedBox(
       height: 738.h,
       child: weatherAsync.when(
@@ -155,10 +161,10 @@ class _HomeAppBar extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color.fromARGB(1, 255, 255, 255), // 거의 투명한 흰색
-                      Color.fromARGB(200, 255, 255, 255), // 55% 흰색
+                      Color.fromARGB(1, 248, 248, 248), // 거의 투명한 흰색
+                      Color.fromARGB(255, 248, 248, 248), // 55% 흰색
                     ],
-                    stops: [0.8, 1.0],
+                    stops: [0.7, 1],
                   ).createShader(bounds);
                 },
                 blendMode: BlendMode.srcOver,
@@ -177,6 +183,7 @@ class _HomeAppBar extends ConsumerWidget {
                   children: [
                     SizedBox(height: 50.h),
                     AppBarTop(
+                      trip: trip,
                       weatherMain: weatherMain,
                       temp: temp,
                       isWhiteTheme:
@@ -191,35 +198,52 @@ class _HomeAppBar extends ConsumerWidget {
                       ),
                       child: Builder(
                         builder: (context) {
-                          final now = DateTime.now();
-                          final start = trip.staredAt;
-                          final title = trip.title;
-                          final diff = start.difference(now).inDays;
-                          if (now.isBefore(start)) {
-                            // 여행 시작 전
-                            return Text(
-                              '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
-                              style: TextStyle(
-                                color: Color(0xff313131),
-                                fontSize: 84.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.3,
-                                height: 1.4,
-                              ),
-                            );
+                          if (trip != null) {
+                            final now = DateTime.now();
+                            final start = trip.staredAt;
+                            final title = trip.title;
+                            final diff = start.difference(now).inDays;
+
+                            if (now.isBefore(start)) {
+                              // 여행 시작 전
+                              return Text(
+                                '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
+                                style: TextStyle(
+                                  color: Color(0xff313131),
+                                  fontSize: 84.sp,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                  height: 1.4,
+                                ),
+                              );
+                            } else {
+                              // 여행 진행 중 or 이후
+                              final day = now.difference(start).inDays + 1;
+                              return Text(
+                                '오늘은\n$title ${day}일차에요!',
+                                style: TextStyle(
+                                  color: Color(0xff313131),
+                                  fontSize: 84.sp,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                  height: 1.4,
+                                ),
+                              );
+                            }
                           } else {
-                            // 여행 진행 중 or 이후
-                            final day = now.difference(start).inDays + 1;
-                            return Text(
-                              '오늘은\n$title ${day}일차에요!',
-                              style: TextStyle(
-                                color: Color(0xff313131),
-                                fontSize: 84.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.3,
-                                height: 1.4,
-                              ),
-                            );
+                            if (userMe is UserResponseModel) {
+                              return Text(
+                                '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
+                                style: TextStyle(
+                                  color: Color(0xff313131),
+                                  fontSize: 84.sp,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                  height: 1.4,
+                                ),
+                              );
+                            }
+                            return Container();
                           }
                         },
                       ),
@@ -243,8 +267,10 @@ class AppBarTop extends StatelessWidget {
     required this.weatherMain,
     required this.temp,
     required this.isWhiteTheme,
+    required this.trip,
   });
 
+  final dynamic trip;
   final String weatherMain;
   final dynamic temp;
   final bool isWhiteTheme;
@@ -276,35 +302,39 @@ class AppBarTop extends StatelessWidget {
             children: [
               Consumer(
                 builder: (context, ref, _) {
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(24.r),
-                    onTap: () async {
-                      final mainTripAsync = ref.read(mainTripFutureProvider);
-                      final mainTrip =
-                          mainTripAsync is AsyncData
-                              ? mainTripAsync.value
-                              : null;
-                      final tripId = mainTrip?.tripId;
-                      if (tripId != null) {
-                        ref.invalidate(
-                          tripProvider,
-                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                        ref.invalidate(
-                          confirmScheduleProvider,
-                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                        await ref
-                            .read(tripProvider.notifier)
-                            .getTrip(tripId: tripId);
-                        await ref
-                            .read(confirmScheduleProvider.notifier)
-                            .fetchAll(tripId);
-                        if (context.mounted) {
-                          GoRouter.of(context).push('/ingTripMap');
+                  if (trip != null) {
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(24.r),
+                      onTap: () async {
+                        final mainTripAsync = ref.read(mainTripFutureProvider);
+                        final mainTrip =
+                            mainTripAsync is AsyncData
+                                ? mainTripAsync.value
+                                : null;
+                        final tripId = mainTrip?.tripId;
+                        if (tripId != null) {
+                          ref.invalidate(
+                            tripProvider,
+                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                          ref.invalidate(
+                            confirmScheduleProvider,
+                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                          await ref
+                              .read(tripProvider.notifier)
+                              .getTrip(tripId: tripId);
+                          await ref
+                              .read(confirmScheduleProvider.notifier)
+                              .fetchAll(tripId);
+                          if (context.mounted) {
+                            GoRouter.of(context).push('/ingTripMap');
+                          }
                         }
-                      }
-                    },
-                    child: Icon(Icons.map_outlined, color: iconColor),
-                  );
+                      },
+                      child: Icon(Icons.map_outlined, color: iconColor),
+                    );
+                  } else {
+                    return Container();
+                  }
                 },
               ),
               SizedBox(width: 36.w),
