@@ -248,7 +248,7 @@ class _W2MOverlapCalendarScreenState
                           }
                         },
                         child: Text(
-                          '${_startDate != null && _endDate != null ? '${_startDate!.year}.${_startDate!.month.toString().padLeft(2, '0')}.${_startDate!.day.toString().padLeft(2, '0')} - ${_endDate!.year}.${_endDate!.month.toString().padLeft(2, '0')}.${_endDate!.day.toString().padLeft(2, '0')} / ${_endDate!.difference(_startDate!).inDays + 1}박 ${_endDate!.difference(_startDate!).inDays}일' : ''}',
+                          '${_startDate != null && _endDate != null ? '${_startDate!.year}.${_startDate!.month.toString().padLeft(2, '0')}.${_startDate!.day.toString().padLeft(2, '0')} - ${_endDate!.year}.${_endDate!.month.toString().padLeft(2, '0')}.${_endDate!.day.toString().padLeft(2, '0')} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일' : ''}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
