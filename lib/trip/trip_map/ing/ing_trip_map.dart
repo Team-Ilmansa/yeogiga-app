@@ -32,6 +32,7 @@ class IngTripMapScreen extends ConsumerStatefulWidget {
 }
 
 class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
+  bool _initialized = false;
   bool _cameraFitted = false;
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
@@ -52,6 +53,15 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       _sheetController.addListener(_updateMyLocationButtonOffset);
       _updateMyLocationButtonOffset();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      ref.invalidate(tripMemberLocationProvider);
+      _initialized = true;
+    }
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
@@ -314,7 +324,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                         .where((p) => p.latitude != null && p.longitude != null)
                         .toList();
               }
-              ref.invalidate(tripMemberLocationProvider);
+
               final memberLocationAsync = ref.watch(tripMemberLocationProvider);
               final userMe = ref.watch(userMeProvider);
               String? myNickname;
