@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -22,6 +23,17 @@ import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart';
 import 'package:yeogiga/trip_image/repository/pending_trip_image_repository.dart';
 import '../../../schedule/provider/confirm_schedule_provider.dart';
+
+Future<bool> requestImagePermission() async {
+  if (await Permission.photos.isGranted || await Permission.storage.isGranted) {
+    return true;
+  }
+  if (await Permission.photos.request().isGranted ||
+      await Permission.storage.request().isGranted) {
+    return true;
+  }
+  return false;
+}
 
 class AddNoticeState extends StatelessWidget {
   const AddNoticeState({super.key});
@@ -189,6 +201,22 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                             );
                             tripDayPlaceId = match.id;
                           }
+                        }
+
+                        if (await requestImagePermission()) {
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('권한을 설정해주세요'),
+                              action: SnackBarAction(
+                                label: '설정으로 이동',
+                                onPressed: () {
+                                  openAppSettings();
+                                },
+                              ),
+                            ),
+                          );
+                          return;
                         }
 
                         FilePickerResult? result = await FilePicker.platform
@@ -816,9 +844,9 @@ class ConfirmScheduleState extends ConsumerWidget {
                   errorMsg = e.toString();
                 }
               }
-              if (scaffoldContext.mounted) {
+              if (context.mounted) {
                 await showDialog(
-                  context: scaffoldContext,
+                  context: context,
                   builder:
                       (context) => Dialog(
                         backgroundColor: Colors.white,
