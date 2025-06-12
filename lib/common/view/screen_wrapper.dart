@@ -27,6 +27,8 @@ class ScreenWrapper extends ConsumerStatefulWidget {
 class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
   int _selectedIndex = 0;
 
+  late final PageController _pageController;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +43,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
       ref.refresh(mainTripFutureProvider);
       // 필요시 추가 provider도 여기에!
     });
+
+    _pageController = PageController(initialPage: _selectedIndex);
   }
 
   @override
@@ -162,8 +166,13 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
         ),
       ),
 
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
         children: const [HomeScreen(), MyPage()],
       ),
     );
@@ -181,6 +190,11 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         setState(() => _selectedIndex = index);
+        _pageController.animateToPage(
+          index,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
         if (refresh != null) refresh();
       },
       child: Column(

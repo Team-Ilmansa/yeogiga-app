@@ -169,10 +169,11 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                               minimumSize: Size(0, 150.h),
                                               padding: EdgeInsets.zero,
                                             ),
-                                            onPressed:
-                                                () => Navigator.of(
-                                                  context,
-                                                ).pop(controller.text.trim()),
+                                            onPressed: () {
+                                              GoRouter.of(
+                                                context,
+                                              ).pop(controller.text.trim());
+                                            },
                                             child: Text(
                                               '확인',
                                               style: TextStyle(

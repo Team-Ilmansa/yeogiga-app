@@ -135,6 +135,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
       children: [
         // 머릿말
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 144.h),
             Text(
