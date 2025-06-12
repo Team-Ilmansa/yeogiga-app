@@ -314,6 +314,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                         .where((p) => p.latitude != null && p.longitude != null)
                         .toList();
               }
+              ref.invalidate(tripMemberLocationProvider);
               final memberLocationAsync = ref.watch(tripMemberLocationProvider);
               final userMe = ref.watch(userMeProvider);
               String? myNickname;

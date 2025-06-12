@@ -121,35 +121,42 @@ class CompletedScheduleView extends StatelessWidget {
   ) {
     final hasPlaces = daySchedule.places.isNotEmpty;
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 42.w, vertical: 18.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(54.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24.r,
-            offset: Offset(0, 12.h),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 18.h),
+      // decoration: BoxDecoration(
+      //   color: Colors.white,
+      //   borderRadius: BorderRadius.circular(54.r),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withOpacity(0.04),
+      //       blurRadius: 24.r,
+      //       offset: Offset(0, 12.h),
+      //     ),
+      //   ],
+      // ),
       child: ExpansionTile(
+        // shape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(54.r),
+        // ),
+        // collapsedShape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(54.r),
+        // ),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(54.r),
+          borderRadius: BorderRadius.circular(66.r),
+          side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(54.r),
+          borderRadius: BorderRadius.circular(66.r),
+          side: const BorderSide(color: Color(0xffd9d9d9)),
         ),
-        title: Padding(
-          padding: EdgeInsets.symmetric(vertical: 18.h),
-          child: Text(
-            dayLabel,
-            style: TextStyle(
-              fontSize: 48.sp,
-              color: Color(0xff7d7d7d),
-              letterSpacing: -0.3,
-              fontWeight: FontWeight.w600,
-            ),
+        minTileHeight: 186.h,
+        title: Text(
+          dayLabel,
+          style: TextStyle(
+            fontSize: 48.sp,
+            color: Color(0xff7d7d7d),
+            letterSpacing: -0.3,
+            fontWeight: FontWeight.w600,
           ),
         ),
         children:

@@ -73,7 +73,7 @@ class PendingScheduleView extends StatelessWidget {
                         () =>
                             PendingDayScheduleModel(day: index + 1, places: []),
                   );
-                  return _buildExpansionTile(daySchedule, 'Day ${index + 1}');
+                  return _buildExpansionTiles(daySchedule, 'Day ${index + 1}');
                 } else {
                   // 선택된 Day만 보기
                   if (index == selectedDayIndex - 1) {
@@ -85,7 +85,10 @@ class PendingScheduleView extends StatelessWidget {
                             places: [],
                           ),
                     );
-                    return _buildExpansionTile(daySchedule, dynamicDays[index]);
+                    return _buildExpansionTiles(
+                      daySchedule,
+                      dynamicDays[index],
+                    );
                   } else {
                     return const SizedBox.shrink();
                   }
@@ -99,7 +102,7 @@ class PendingScheduleView extends StatelessWidget {
   }
 
   // pending 전용
-  Widget _buildExpansionTile(
+  Widget _buildExpansionTiles(
     PendingDayScheduleModel daySchedule,
     String dayLabel,
   ) {
