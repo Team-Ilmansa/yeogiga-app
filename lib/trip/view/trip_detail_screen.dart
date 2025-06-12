@@ -85,6 +85,17 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     }
   }
 
+  // 날짜 개수 뽑기
+  List<String> getDaysForTrip(TripBaseModel? trip) {
+    if (trip is TripModel && trip.startedAt != null && trip.endedAt != null) {
+      final start = DateTime.parse(trip.startedAt!.substring(0, 10));
+      final end = DateTime.parse(trip.endedAt!.substring(0, 10));
+      final dayCount = end.difference(start).inDays + 1;
+      return List.generate(dayCount, (index) => 'Day ${index + 1}');
+    }
+    return [];
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -195,6 +206,32 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       isRefreshing = false;
       ref.read(selectionModeProvider.notifier).state = false;
     });
+  }
+
+  //대쉬보드탭 리프레쉬
+  Future<void> refreshSchedule() async {
+    final tripState = ref.read(tripProvider);
+    if (tripState is SettingTripModel &&
+        tripState.startedAt != null &&
+        tripState.endedAt != null) {
+      // Pending
+      final dynamicDays = getDaysForTrip(tripState);
+      final tripId = tripState.tripId;
+      final days = List.generate(dynamicDays.length, (i) => i + 1);
+      await ref
+          .read(pendingScheduleProvider.notifier)
+          .fetchAll(tripId.toString(), days);
+    }
+    if (tripState is TripModel) {
+      // Confirmed
+      await ref
+          .read(confirmScheduleProvider.notifier)
+          .fetchAll(tripState.tripId);
+      // Completed
+      await ref
+          .read(completedScheduleProvider.notifier)
+          .fetch(tripState.tripId);
+    }
   }
 
   @override
@@ -362,7 +399,14 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
             children: [
-              ScheduleDashboardTab(),
+              LiquidPullToRefresh(
+                onRefresh: refreshSchedule,
+                animSpeedFactor: 7.0,
+                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
+                backgroundColor: Color(0xfff0f0f0), // 배경색
+                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+                child: ScheduleDashboardTab(),
+              ),
               LiquidPullToRefresh(
                 onRefresh: refreshAll,
                 animSpeedFactor: 7.0,

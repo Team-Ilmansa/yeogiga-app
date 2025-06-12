@@ -32,6 +32,7 @@ class _W2MOverlapCalendarScreenState
       // tripProvider가 비어있을 일은 없으나, 안전하게 처리
       return const Scaffold(body: Center(child: Text('trip 정보가 필요합니다.')));
     }
+    ref.invalidate(tripW2mProvider);
     final tripW2mAsync = ref.watch(tripW2mProvider(tripId));
 
     return tripW2mAsync.when(
