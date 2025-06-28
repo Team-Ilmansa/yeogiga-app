@@ -483,324 +483,192 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               minChildSize: 0.08,
               maxChildSize: 0.9,
               builder: (context, scrollController) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(54.r),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: ListView(
-                    controller: scrollController,
-                    physics: ClampingScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    children: [
-                      Column(
-                        children: [
-                          Center(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 30.h, bottom: 40.h),
-                              child: Container(
-                                width: 333.w,
-                                height: 18.h,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xffe1e1e1),
-                                  borderRadius: BorderRadius.circular(8.r),
+                return EndTripBottomSheet(
+                  scrollController: scrollController,
+                  days: days,
+                  selectedDayIndex: selectedDayIndex,
+                  onDayChanged: (index) async {
+                    setState(() {
+                      selectedDayIndex = index;
+                    });
+
+                    // 기존 DaySelector onChanged의 지도 마커/폴리라인 갱신 로직
+                    final tripState = ref.read(tripProvider);
+                    if (index == 0) {
+                      // 전체 보기: 지도 전체 리셋
+                      final completedAsync = ref.read(
+                        completedScheduleProvider,
+                      );
+                      final schedules = completedAsync?.data ?? [];
+                      final allPlaces =
+                          [for (final day in schedules) ...day.places]
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                      // host route polyline 좌표 추출 (전체)
+                      List<NLatLng> hostRouteCoords = [];
+                      final hostRouteAsync = ref.read(tripHostRouteProvider);
+                      if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
+                        final hostRoutes = hostRouteAsync.value ?? [];
+                        hostRouteCoords = [
+                          for (final day in hostRoutes)
+                            ...day.routes.map(
+                              (p) => NLatLng(p.latitude, p.longitude),
+                            ),
+                        ];
+                      }
+                      _updateMapOverlays(
+                        allPlaces,
+                        hostRouteCoords: hostRouteCoords,
+                      );
+                      await _fitMapToPlaces(allPlaces);
+                    } else {
+                      final completedAsync = ref.read(
+                        completedScheduleProvider,
+                      );
+                      final schedules = completedAsync?.data ?? [];
+                      final daySchedule = schedules.firstWhere(
+                        (s) => s.day == index,
+                        orElse:
+                            () => CompletedTripDayPlaceModel(
+                              day: index,
+                              places: [],
+                              id: '',
+                              unmatchedImage: null,
+                            ),
+                      );
+                      final places =
+                          daySchedule.places
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                      // host route polyline 좌표 추출 (해당 day)
+                      List<NLatLng> hostRouteCoords = [];
+                      final hostRouteAsync = ref.read(tripHostRouteProvider);
+                      if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
+                        final hostRoutes = hostRouteAsync.value ?? [];
+                        final dayRoute = hostRoutes.firstWhere(
+                          (d) => d.day == index,
+                          orElse:
+                              () => TripHostRouteDay(day: index, routes: []),
+                        );
+                        hostRouteCoords =
+                            dayRoute.routes
+                                .map((p) => NLatLng(p.latitude, p.longitude))
+                                .toList();
+                      }
+                      _updateMapOverlays(
+                        places,
+                        hostRouteCoords: hostRouteCoords,
+                      );
+                      await _fitMapToPlaces(places);
+                    }
+                  },
+                  buildPlaceList: () {
+                    final completedAsync = ref.watch(completedScheduleProvider);
+                    final tripState = ref.watch(tripProvider);
+
+                    if (completedAsync == null) {
+                      final trip =
+                          tripState is CompletedTripModel ? tripState : null;
+                      if (trip != null) {
+                        Future.microtask(() {
+                          ref
+                              .read(completedScheduleProvider.notifier)
+                              .fetch(trip.tripId);
+                        });
+                      }
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final schedules = completedAsync.data;
+                    List<CompletedTripPlaceModel> placeList = [];
+                    if (selectedDayIndex == 0) {
+                      placeList =
+                          [for (final day in schedules) ...day.places]
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                    } else {
+                      final daySchedule = schedules.firstWhere(
+                        (s) => s.day == selectedDayIndex,
+                        orElse:
+                            () => CompletedTripDayPlaceModel(
+                              day: selectedDayIndex,
+                              places: [],
+                              id: '',
+                              unmatchedImage: null,
+                            ),
+                      );
+                      placeList =
+                          daySchedule.places
+                              .where(
+                                (p) =>
+                                    p.latitude != null && p.longitude != null,
+                              )
+                              .toList();
+                    }
+                    final hasPlaces = placeList.isNotEmpty;
+                    return SizedBox(
+                      height: 310.h,
+                      child:
+                          hasPlaces
+                              ? PageView.builder(
+                                itemCount: placeList.length,
+                                controller: PageController(
+                                  viewportFraction: 0.95,
+                                ),
+                                itemBuilder: (context, idx) {
+                                  final place = placeList[idx];
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      if (mapController != null &&
+                                          place.latitude != null &&
+                                          place.longitude != null) {
+                                        await mapController!.updateCamera(
+                                          NCameraUpdate.withParams(
+                                            target: NLatLng(
+                                              place.latitude!,
+                                              place.longitude!,
+                                            ),
+                                            zoom: 15,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: ScheduleItem(
+                                      key: ValueKey(place.id),
+                                      title: place.name,
+                                      time: null,
+                                      done: true,
+                                    ),
+                                  );
+                                },
+                              )
+                              : Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '등록된 일정이 없습니다.',
+                                  style: TextStyle(
+                                    fontSize: 48.sp,
+                                    color: const Color(0xffc6c6c6),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          DaySelector(
-                            itemCount: days.length + 1,
-                            selectedIndex: selectedDayIndex,
-                            onChanged: (index) async {
-                              setState(() {
-                                selectedDayIndex = index;
-                              });
-                              await Future.delayed(
-                                const Duration(milliseconds: 100),
-                              );
-                              final tripState = ref.read(tripProvider);
-                              if (index == 0) {
-                                // 전체 보기: 지도 전체 리셋
-                                final completedAsync = ref.read(
-                                  completedScheduleProvider,
-                                );
-                                final schedules = completedAsync?.data ?? [];
-                                final allPlaces =
-                                    [for (final day in schedules) ...day.places]
-                                        .where(
-                                          (p) =>
-                                              p.latitude != null &&
-                                              p.longitude != null,
-                                        )
-                                        .toList();
-                                // host route polyline 좌표 추출 (전체)
-                                List<NLatLng> hostRouteCoords = [];
-                                final hostRouteAsync = ref.read(
-                                  tripHostRouteProvider,
-                                );
-                                if (hostRouteAsync
-                                    is AsyncData<List<TripHostRouteDay>>) {
-                                  final hostRoutes = hostRouteAsync.value ?? [];
-                                  hostRouteCoords = [
-                                    for (final day in hostRoutes)
-                                      ...day.routes.map(
-                                        (p) => NLatLng(p.latitude, p.longitude),
-                                      ),
-                                  ];
-                                }
-                                _updateMapOverlays(
-                                  allPlaces,
-                                  hostRouteCoords: hostRouteCoords,
-                                );
-                                await _fitMapToPlaces(allPlaces);
-                              } else {
-                                final completedAsync = ref.read(
-                                  completedScheduleProvider,
-                                );
-                                final schedules = completedAsync?.data ?? [];
-                                final daySchedule = schedules.firstWhere(
-                                  (s) => s.day == index,
-                                  orElse:
-                                      () => CompletedTripDayPlaceModel(
-                                        day: index,
-                                        places: [],
-                                        id: '',
-                                        unmatchedImage: null,
-                                      ),
-                                );
-                                final places =
-                                    daySchedule.places
-                                        .where(
-                                          (p) =>
-                                              p.latitude != null &&
-                                              p.longitude != null,
-                                        )
-                                        .toList();
-                                // host route polyline 좌표 추출 (해당 day)
-                                List<NLatLng> hostRouteCoords = [];
-                                final hostRouteAsync = ref.read(
-                                  tripHostRouteProvider,
-                                );
-                                if (hostRouteAsync
-                                    is AsyncData<List<TripHostRouteDay>>) {
-                                  final hostRoutes = hostRouteAsync.value ?? [];
-                                  final dayRoute = hostRoutes.firstWhere(
-                                    (d) => d.day == index,
-                                    orElse:
-                                        () => TripHostRouteDay(
-                                          day: index,
-                                          routes: [],
-                                        ),
-                                  );
-                                  hostRouteCoords =
-                                      dayRoute.routes
-                                          .map(
-                                            (p) => NLatLng(
-                                              p.latitude,
-                                              p.longitude,
-                                            ),
-                                          )
-                                          .toList();
-                                }
-                                _updateMapOverlays(
-                                  places,
-                                  hostRouteCoords: hostRouteCoords,
-                                );
-                                await _fitMapToPlaces(places);
-                              }
-                            },
-                          ),
-                          Consumer(
-                            builder: (context, ref, _) {
-                              // 최초 fetch 완료 시점에만 마커/폴리라인/카메라 fit
-                              final completedAsync = ref.watch(
-                                completedScheduleProvider,
-                              );
-                              if (!_fetchedAndFitted &&
-                                  completedAsync != null) {
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  final schedules = completedAsync.data;
-                                  List<CompletedTripPlaceModel> fitPlaces = [];
-                                  if (selectedDayIndex == 0) {
-                                    fitPlaces =
-                                        [
-                                              for (final day in schedules)
-                                                ...day.places,
-                                            ]
-                                            .where(
-                                              (p) =>
-                                                  p.latitude != null &&
-                                                  p.longitude != null,
-                                            )
-                                            .toList();
-                                  } else {
-                                    final daySchedule = schedules.firstWhere(
-                                      (s) => s.day == selectedDayIndex,
-                                      orElse:
-                                          () => CompletedTripDayPlaceModel(
-                                            day: selectedDayIndex,
-                                            places: [],
-                                            id: '',
-                                            unmatchedImage: null,
-                                          ),
-                                    );
-                                    fitPlaces =
-                                        daySchedule.places
-                                            .where(
-                                              (p) =>
-                                                  p.latitude != null &&
-                                                  p.longitude != null,
-                                            )
-                                            .toList();
-                                  }
-                                  if (mapController != null &&
-                                      fitPlaces.isNotEmpty) {
-                                    _updateMapOverlays(fitPlaces);
-                                    _fitMapToPlaces(fitPlaces);
-                                    setState(() {
-                                      _fetchedAndFitted = true;
-                                    });
-                                  }
-                                });
-                              }
-                              // fetch가 끝나기 전에는 아무것도 그리지 않음 (로딩만)
-                              if (completedAsync == null) {
-                                final trip =
-                                    tripState is CompletedTripModel
-                                        ? tripState
-                                        : null;
-                                if (trip != null) {
-                                  Future.microtask(() {
-                                    ref
-                                        .read(
-                                          completedScheduleProvider.notifier,
-                                        )
-                                        .fetch(trip.tripId);
-                                  });
-                                }
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              // fetch가 끝나서 데이터가 들어온 경우에만 마커/지도 위젯 렌더링
-                              final schedules = completedAsync.data;
-                              List<CompletedTripPlaceModel> placeList = [];
-                              if (selectedDayIndex == 0) {
-                                // 전체 보기: 모든 day의 place를 flatten해서 마커로 표시
-                                placeList =
-                                    [for (final day in schedules) ...day.places]
-                                        .where(
-                                          (p) =>
-                                              p.latitude != null &&
-                                              p.longitude != null,
-                                        )
-                                        .toList();
-                              } else {
-                                final daySchedule = schedules.firstWhere(
-                                  (s) => s.day == selectedDayIndex,
-                                  orElse:
-                                      () => CompletedTripDayPlaceModel(
-                                        day: selectedDayIndex,
-                                        places: [],
-                                        id: '',
-                                        unmatchedImage: null,
-                                      ),
-                                );
-                                placeList =
-                                    daySchedule.places
-                                        .where(
-                                          (p) =>
-                                              p.latitude != null &&
-                                              p.longitude != null,
-                                        )
-                                        .toList();
-                              }
-                              final hasPlaces = placeList.isNotEmpty;
-                              return SizedBox(
-                                height: 310.h,
-                                child:
-                                    hasPlaces
-                                        ? PageView.builder(
-                                          itemCount: placeList.length,
-                                          controller: PageController(
-                                            viewportFraction: 0.95,
-                                          ),
-                                          itemBuilder: (context, idx) {
-                                            final place = placeList[idx];
-                                            return GestureDetector(
-                                              onTap: () async {
-                                                if (mapController != null &&
-                                                    place.latitude != null &&
-                                                    place.longitude != null) {
-                                                  await mapController!
-                                                      .updateCamera(
-                                                        NCameraUpdate.withParams(
-                                                          target: NLatLng(
-                                                            place.latitude!,
-                                                            place.longitude!,
-                                                          ),
-                                                          zoom: 15,
-                                                        ),
-                                                      );
-                                                }
-                                              },
-                                              child: ScheduleItem(
-                                                key: ValueKey(place.id),
-                                                title: place.name,
-                                                time: null,
-                                                done: true,
-                                              ),
-                                            );
-                                          },
-                                        )
-                                        : Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            '등록된 일정이 없습니다.',
-                                            style: TextStyle(
-                                              fontSize: 48.sp,
-                                              color: const Color(0xffc6c6c6),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                              );
-                            },
-                          ),
-
-                          GalleryTab(
-                            sliverMode: false,
-                            showDaySelector: false,
-                            selectedDayIndex: selectedDayIndex,
-                            onDayIndexChanged: (index) {
-                              setState(() {
-                                selectedDayIndex = index;
-                              });
-                            },
-                            onSelectionPayloadChanged: ({
-                              required matchedOrUnmatched,
-                              required pending,
-                            }) {
-                              setState(() {
-                                matchedOrUnmatchedPayload = matchedOrUnmatched;
-                                pendingPayload = pending;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    );
+                  },
+                  onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
+                    setState(() {
+                      matchedOrUnmatchedPayload = matchedOrUnmatched;
+                      pendingPayload = pending;
+                    });
+                  },
                 );
               },
             ),
@@ -828,5 +696,116 @@ Widget? _getPictureOptionBar(
     );
   } else {
     return null;
+  }
+}
+
+class EndTripBottomSheet extends StatefulWidget {
+  final ScrollController scrollController;
+  final List<String> days;
+  final int selectedDayIndex;
+  final ValueChanged<int> onDayChanged;
+  final Widget Function()? buildPlaceList;
+  final Function(Map<String, List<String>>, Map<String, List<String>>)?
+  onSelectionPayloadChanged;
+
+  const EndTripBottomSheet({
+    Key? key,
+    required this.scrollController,
+    required this.days,
+    required this.selectedDayIndex,
+    required this.onDayChanged,
+    this.buildPlaceList,
+    this.onSelectionPayloadChanged,
+  }) : super(key: key);
+
+  @override
+  State<EndTripBottomSheet> createState() => _EndTripBottomSheetState();
+}
+
+class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
+  late int _selectedDayIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDayIndex = widget.selectedDayIndex;
+  }
+
+  @override
+  void didUpdateWidget(covariant EndTripBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedDayIndex != oldWidget.selectedDayIndex) {
+      _selectedDayIndex = widget.selectedDayIndex;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(54.r)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10),
+        ],
+      ),
+      child: ListView(
+        controller: widget.scrollController,
+        physics: const ClampingScrollPhysics(),
+        padding: EdgeInsets.zero,
+        children: [
+          Column(
+            children: [
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 30.h, bottom: 40.h),
+                  child: Container(
+                    width: 333.w,
+                    height: 18.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe1e1e1),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                ),
+              ),
+              DaySelector(
+                itemCount: widget.days.length + 1,
+                selectedIndex: _selectedDayIndex,
+                onChanged: (index) {
+                  setState(() {
+                    _selectedDayIndex = index;
+                  });
+                  widget.onDayChanged(index);
+                },
+              ),
+              if (widget.buildPlaceList != null) widget.buildPlaceList!(),
+              GalleryTab(
+                sliverMode: false,
+                showDaySelector: false,
+                selectedDayIndex: _selectedDayIndex,
+                onDayIndexChanged: (index) {
+                  setState(() {
+                    _selectedDayIndex = index;
+                  });
+                  widget.onDayChanged(index);
+                },
+                onSelectionPayloadChanged: ({
+                  required matchedOrUnmatched,
+                  required pending,
+                }) {
+                  if (widget.onSelectionPayloadChanged != null) {
+                    widget.onSelectionPayloadChanged!(
+                      matchedOrUnmatched,
+                      pending,
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
