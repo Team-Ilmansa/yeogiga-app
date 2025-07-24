@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/common/const/data.dart';
+import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/repository/register_repository.dart';
 import 'package:yeogiga/user/model/register_response.dart';
 
@@ -17,9 +20,15 @@ class RegisterFlowScreen extends ConsumerStatefulWidget {
 class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
   int currentStep = 0;
 
+  bool emailSent = false;
+  String? emailErrorText;
+  String? emailVerifyInfoText;
+  String? emailVerifyErrorText;
+
   bool? usernameAvailable;
   bool? nicknameAvailable;
   Timer? _nicknameDebounce;
+  bool isEmailVerified = false;
 
   final _emailController = TextEditingController();
   final _emailVerifyController = TextEditingController();
@@ -75,10 +84,26 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
             SizedBox(height: 24.h),
             CustomTextFormField(
               controller: _emailController,
+              enabled: !emailSent && _emailVerifyController.text.isEmpty,
               hintText: '이메일을 입력해주세요',
               onChanged: (_) => setState(() {}),
             ),
-            SizedBox(height: 72.h),
+            if (emailErrorText != null)
+              SizedBox(
+                height: 54.h,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                  child: Text(
+                    emailErrorText!,
+                    style: TextStyle(color: Colors.red, fontSize: 30.sp),
+                    textAlign: TextAlign.right, // 오른쪽 정렬
+                  ),
+                ),
+              )
+            else
+              SizedBox(height: 54.h),
+
+            SizedBox(height: 42.h),
           ],
         ),
         //이메일 확인 입력칸
@@ -90,38 +115,141 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
               style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 24.h),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomTextFormField(
-                    controller: _emailVerifyController,
-                    hintText: '인증번호 6자리를 입력해주세요',
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                SizedBox(width: 24.w),
-                ElevatedButton(
-                  onPressed:
-                      _emailVerifyController.text.length == 6 ? () {} : null,
+            CustomVerifyTextFormField(
+              controller: _emailVerifyController,
+              enabled: _emailController.text.isNotEmpty && !isEmailVerified,
+              hintText: '인증번호 6자리를 입력해주세요',
+              onChanged: (value) => setState(() {}),
+              suffix: Padding(
+                padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 40.w),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final dio = ref.watch(dioProvider);
+
+                    if (_emailVerifyController.text.length == 6) {
+                      // 이메일 코드 검증
+                      try {
+                        final response = await dio.post(
+                          'https://$ip/api/v1/auth/email-verification/verify',
+                          data: {
+                            "email": _emailController.text,
+                            "code": _emailVerifyController.text,
+                          },
+                        );
+                        if (response.data['code'] == 200) {
+                          isEmailVerified = true;
+                          emailVerifyInfoText = '인증에 성공하였습니다.';
+                          emailVerifyErrorText = null;
+                          emailErrorText = null;
+                        }
+                      } on DioException catch (e) {
+                        // TODO: 이메일 인증 실패!
+                        if (e.response != null && e.response?.data != null) {
+                          final data = e.response!.data;
+                          // message 또는 errors 파싱
+                          if (data['message'] != null) {
+                            emailVerifyErrorText = data['message'];
+                          } else if (data['errors'] != null) {
+                            final errors = data['errors'];
+                            if (errors['code'] != null) {
+                              emailVerifyErrorText = errors['code'];
+                            } else if (errors['email'] != null) {
+                              emailVerifyErrorText = errors['email'];
+                            }
+                          } else {
+                            emailVerifyErrorText = "알 수 없는 오류가 발생했습니다.";
+                          }
+                        } else {
+                          // 서버 응답 자체가 없을 때(네트워크 등)
+                          emailVerifyErrorText = "네트워크 오류가 발생했습니다.";
+                        }
+                        emailVerifyInfoText = null;
+                      }
+                    } else {
+                      // 이메일 코드 보내깅
+                      try {
+                        final response = await dio.post(
+                          'https://$ip/api/v1/auth/email-verification/request',
+                          data: {"email": _emailController.text},
+                        );
+                        if (response.data['code'] == 200) {
+                          emailSent = true;
+                          emailVerifyInfoText = '인증코드를 전송했습니다.';
+                          emailVerifyErrorText = null;
+                          emailErrorText = null;
+                        }
+                      } on DioException catch (e) {
+                        // TODO: 이메일 코드 보내기 실패!
+                        if (e.response != null && e.response?.data != null) {
+                          final data = e.response!.data;
+                          if (data['code'] == 'A016') {
+                            emailVerifyErrorText = data['message'];
+                          } else if (data['message'] != null) {
+                            emailErrorText = data['message'];
+                          } else if (data['errors'] != null) {
+                            final errors = data['errors'];
+                            if (errors['code'] != null) {
+                              emailErrorText = errors['code'];
+                            } else if (errors['email'] != null) {
+                              emailErrorText = errors['email'];
+                            }
+                          } else {
+                            emailVerifyErrorText = "알 수 없는 오류가 발생했습니다.";
+                          }
+                        } else {
+                          emailVerifyErrorText = "네트워크 오류가 발생했습니다.";
+                        }
+                        emailVerifyInfoText = null;
+                      }
+                    }
+
+                    setState(() {});
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _emailVerifyController.text.length == 6
-                            ? const Color(0xff8287ff)
-                            : Colors.grey[400],
+                    backgroundColor: const Color(0xff8287ff),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 60.w,
-                      vertical: 42.h,
-                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
+                      borderRadius: BorderRadius.circular(54.r),
                     ),
                     elevation: 0,
+                    minimumSize: Size.zero,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 35.w,
+                      vertical: 20.h,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text('재전송', style: TextStyle(fontSize: 45.sp)),
+                  child: Text(
+                    _emailVerifyController.text.length == 6
+                        ? '확인'
+                        : emailSent
+                        ? '재전송'
+                        : '전송',
+                    style: TextStyle(fontSize: 36.sp),
+                  ),
                 ),
-              ],
+              ),
             ),
+            if (emailVerifyErrorText != null)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                child: Text(
+                  emailVerifyErrorText!,
+                  style: TextStyle(color: Colors.red, fontSize: 30.sp),
+                  textAlign: TextAlign.right, // 오른쪽 정렬
+                ),
+              )
+            else if (emailVerifyInfoText != null)
+              Padding(
+                padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                child: Text(
+                  emailVerifyInfoText!,
+                  style: TextStyle(color: Colors.blue, fontSize: 30.sp),
+                  textAlign: TextAlign.right, // 오른쪽 정렬
+                ),
+              )
+            else
+              SizedBox(height: 24.h),
           ],
         ),
       ],
@@ -485,7 +613,8 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
       canProceed =
           _emailController.text.isNotEmpty &&
           _emailVerifyController.text.isNotEmpty &&
-          _emailVerifyController.text.length == 6;
+          _emailVerifyController.text.length == 6 &&
+          isEmailVerified;
     } else if (currentStep == 1) {
       canProceed =
           _usernameController.text.isNotEmpty &&

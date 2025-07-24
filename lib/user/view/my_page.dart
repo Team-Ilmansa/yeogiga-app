@@ -139,7 +139,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 15.w,
                                   ),
-                                  child: CustomTextFormField(
+                                  child: CustomVerifyTextFormField(
                                     controller: tripIdController,
                                     hintText: '참가할 여행 ID를 입력하세요',
                                     onChanged: (value) {},
