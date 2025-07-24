@@ -145,7 +145,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                         padding: EdgeInsets.symmetric(
                                           horizontal: 15.w,
                                         ),
-                                        child: CustomTextFormField(
+                                        child: CustomVerifyTextFormField(
                                           controller: controller,
                                           hintText: '새 여행 이름을 입력하세요',
                                           onChanged: (value) {},
