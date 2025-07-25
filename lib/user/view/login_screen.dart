@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/common/const/data.dart';
+import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 
@@ -68,6 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 state is UserModelLoading
                     ? null
                     : () async {
+                      //TODO: await하는 동안 버튼 비활성화 안되나?
                       final user = await ref
                           .read(userMeProvider.notifier)
                           .login(username: username, password: password);
@@ -274,8 +279,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       // 카카오톡 로그인 버튼
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          final dio = ref.watch(dioProvider);
                           // TODO: 카카오 로그인 로직
+                          try {
+                            // 휴대폰에 카카오톡이 깔려있는지 bool 값으로 반환해주는 함수
+                            bool installed = await isKakaoTalkInstalled();
+
+                            // 깔려있다면 UserApi.instance.loginWithKakaoTalk() 으로 카카오톡 오픈 후 동의
+                            // 깔려있지 않다면 UserApi.instance.loginWithKakaoAccount() 으로 웹을통한 인증
+                            OAuthToken token =
+                                installed
+                                    ? await UserApi.instance
+                                        .loginWithKakaoTalk()
+                                    : await UserApi.instance
+                                        .loginWithKakaoAccount();
+
+                            // final response = await dio.post(
+                            //   //TODO: 변경 필요.
+                            //   'https://$ip/api/v1/oauth/sign-in/kakao',
+                            //   data: {
+                            //     "code":
+                            //         token
+                            //             .accessToken, // 카카오 로그인에서 받은 accessToken
+                            //   },
+                            //   options: Options(headers: {"device": "MOBILE"}),
+                            // );
+
+                            // if (response != null) {
+                            //   // 저장 후 페이지 이동
+                            //   Navigator.pushNamedAndRemoveUntil(
+                            //     context,
+                            //     '/',
+                            //     (route) => false,
+                            //   );
+                            // }
+                          } on DioException catch (e) {
+                            print('카카오톡 회원가입 실패: ${e.response}');
+                          } catch (i) {
+                            print('카카오톡 회원가입 실패: ${i}');
+                          }
                         },
                         child: Center(
                           child: Image.asset('asset/img/oauth/kakao.png'),

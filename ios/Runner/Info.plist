@@ -47,6 +47,23 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<!-- 카카오 소셜로그인 uri -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+				<string>kakao0e2b4c6886ca5a40118dd41935b17592</string>
+				</array>
+			</dict>
+		</array>
+		<key>LSApplicationQueriesSchemes</key>
+			<array>
+				<string>kakaokompassauth</string>
+				<!-- KakaoLink -->
+				<string>kakaolink</string>
+				<string>kakaotalk</string>
+			</array>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

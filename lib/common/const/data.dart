@@ -11,3 +11,7 @@ final simulatorIp = '127.0.0.1:3000';
 
 // final ip = Platform.isIOS ? simulatorIp : emulatorIp;
 final ip = 'api.yeogiga.com';
+
+final kakaoRedirectUri = 'http://yeogiga.com/oauth/kakao/callback';
+// final kakaoRedirectUri =
+//     'kakao0e2b4c6886ca5a40118dd41935b17592://login-callback';
