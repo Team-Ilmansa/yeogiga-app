@@ -28,9 +28,11 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(tripListProvider.notifier).fetchAndSetTrips();
-    });
+    // TODO: didPopNext에서 시작할때도 실행되므로 주석처리함.
+
+    // Future.microtask(() {
+    //   ref.read(tripListProvider.notifier).fetchAndSetTrips();
+    // });
   }
 
   @override
