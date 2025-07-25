@@ -637,7 +637,11 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
     // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        toolbarHeight: 120.h,
         backgroundColor: Colors.white,
+        shadowColor: Colors.transparent, // 그림자도 제거
+        foregroundColor: Colors.black,
         elevation: 0,
         leading:
             currentStep > 0
@@ -704,93 +708,114 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
 
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          48.w,
-          36.h,
-          48.w,
-          MediaQuery.of(context).viewInsets.bottom + 60.h,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(72.r),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              offset: const Offset(0, -2),
+              blurRadius: 1,
+              spreadRadius: 0,
+            ),
+          ],
         ),
-        child:
-            currentStep < stepCount - 1
-                ? ElevatedButton(
-                  onPressed:
-                      canProceed && !_isRegistering
-                          ? () async {
-                            FocusScope.of(context).unfocus();
-                            if (currentStep == 3) {
-                              setState(() {
-                                _isRegistering = true;
-                              });
-                              final repo = ref.read(registerRepositoryProvider);
-                              final result = await repo.register(
-                                username: _usernameController.text,
-                                password: _pwController.text,
-                                email: _emailController.text,
-                                nickname: _nicknameController.text,
-                              );
-                              setState(() {
-                                _registerResult = result;
-                                _isRegistering = false;
-                                currentStep = 4;
-                              });
-                            } else {
-                              nextStep();
-                            }
-                          }
-                          : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            // 48.w,
+            // 36.h,
+            // 48.w,
+            // MediaQuery.of(context).viewInsets.bottom + 60.h,
+            36.w,
+            36.h,
+            36.w,
+            // 키보드 높이만큼 여백 추가
+            MediaQuery.of(context).viewInsets.bottom + 75.h,
+          ),
+          child:
+              currentStep < stepCount - 1
+                  ? ElevatedButton(
+                    onPressed:
                         canProceed && !_isRegistering
-                            ? const Color(0xff8287ff)
-                            : Colors.grey[400],
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 48.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(36.r),
+                            ? () async {
+                              FocusScope.of(context).unfocus();
+                              if (currentStep == 3) {
+                                setState(() {
+                                  _isRegistering = true;
+                                });
+                                final repo = ref.read(
+                                  registerRepositoryProvider,
+                                );
+                                final result = await repo.register(
+                                  username: _usernameController.text,
+                                  password: _pwController.text,
+                                  email: _emailController.text,
+                                  nickname: _nicknameController.text,
+                                );
+                                setState(() {
+                                  _registerResult = result;
+                                  _isRegistering = false;
+                                  currentStep = 4;
+                                });
+                              } else {
+                                nextStep();
+                              }
+                            }
+                            : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          canProceed && !_isRegistering
+                              ? const Color(0xff8287ff)
+                              : Colors.grey[400],
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 48.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(36.r),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child:
-                      _isRegistering
-                          ? SizedBox(
-                            width: 66.w,
-                            height: 66.h,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 7.5.w,
+                    child:
+                        _isRegistering
+                            ? SizedBox(
+                              width: 66.w,
+                              height: 66.h,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 7.5.w,
+                              ),
+                            )
+                            : Text(
+                              currentStep == 3 ? '가입 완료' : '다음 단계로',
+                              style: TextStyle(
+                                fontSize: 48.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          )
-                          : Text(
-                            currentStep == 3 ? '가입 완료' : '다음 단계로',
-                            style: TextStyle(
-                              fontSize: 48.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                )
-                : ElevatedButton(
-                  onPressed: () {
-                    FocusScope.of(context).unfocus();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff8287ff),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 48.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(36.r),
+                  )
+                  : ElevatedButton(
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff8287ff),
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 48.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(36.r),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    '확인',
-                    style: TextStyle(
-                      fontSize: 48.sp,
-                      fontWeight: FontWeight.w500,
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        fontSize: 48.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
+        ),
       ),
     );
   }

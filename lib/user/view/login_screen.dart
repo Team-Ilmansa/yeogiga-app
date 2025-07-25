@@ -69,7 +69,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
           child: ElevatedButton(
             onPressed:
-                state is UserModelLoading
+                state is UserModelLoading ||
+                        username.isEmpty ||
+                        password.isEmpty
                     ? null
                     : () async {
                       //TODO: await하는 동안 버튼 비활성화 안되나?
@@ -81,10 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       });
                     },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  (username.isNotEmpty && password.isNotEmpty)
-                      ? const Color(0xff8287ff)
-                      : Colors.grey[400],
+              backgroundColor: const Color(0xff8287ff),
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(vertical: 48.h),
               shape: RoundedRectangleBorder(
