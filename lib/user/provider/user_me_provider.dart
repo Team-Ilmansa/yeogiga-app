@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/secure_storage/secure_storage.dart';
 import 'package:yeogiga/user/model/user_model.dart';
@@ -97,6 +100,58 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
     } catch (e) {
       state = UserModelError(message: '로그인에 실패했습니다.');
       return state!;
+    }
+  }
+
+  //소셜 로그인하기
+  Future<UserModelBase> socialLogin({
+    required Dio dio,
+    required OAuthToken token,
+  }) async {
+    try {
+      print('Social Login Start');
+
+      state = UserModelLoading();
+
+      final response = await dio.post(
+        'https://$ip/api/v1/oauth/sign-in/KAKAO/mobile',
+        data: {
+          "accessToken": token.accessToken, // 카카오 로그인에서 받은 accessToken
+        },
+      );
+
+      print('response: $response');
+
+      if (response.data['code'] != 200 || response.data == null) {
+        state = UserModelError(message: '카카오 인증에 실패했습니다.');
+        return state!;
+      }
+
+      String accessToken = response.data['data']['token']['accessToken'];
+      String refreshToken = response.data['data']['token']['refreshToken'];
+
+      await storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
+      await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
+
+      final parts = accessToken.split('.');
+      if (parts.length != 3) {
+        state = UserModelError(message: '잘못된 토큰 형식입니다.');
+        return state!;
+      }
+
+      // final payload = parts[1];
+      // String normalized = base64.normalize(payload);
+      // final decoded = utf8.decode(base64Url.decode(normalized));
+      // final payloadMap = jsonDecode(decoded);
+      // print('payloadMap: $payloadMap');
+      // final role = payloadMap['role'] as String?;
+      // print('role: $role');
+
+      // TODO: 토큰 저장, get me 실행, userGuestModel 만들기, shouldSignUp 값 따라 userGuestModel해버리기, 리다이렉트 설정, fcm 토큰 등록, 닉네임 페이지 만들기
+      return UserModelError(message: '테스트 끝');
+    } on Exception catch (e) {
+      // TODO:
+      return UserModelError(message: '테스트 끝');
     }
   }
 

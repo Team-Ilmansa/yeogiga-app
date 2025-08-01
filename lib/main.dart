@@ -65,7 +65,7 @@ void main() async {
   });
 
   // 카카오 소셜로그인 설정
-  KakaoSdk.init(nativeAppKey: '***REMOVED***');
+  KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_NATIVE_APP_KEY'));
 
   runApp(ProviderScope(child: MyApp()));
 }
