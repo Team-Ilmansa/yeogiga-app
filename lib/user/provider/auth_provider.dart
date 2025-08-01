@@ -11,6 +11,7 @@ import 'package:yeogiga/user/view/login_screen.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/view/register_flow_screen.dart';
+import 'package:yeogiga/user/view/nickname_setup_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
 
@@ -83,6 +84,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/register',
       name: RegisterFlowScreen.routeName,
       builder: (_, __) => RegisterFlowScreen(),
+    ),
+    GoRoute(
+      path: '/nickname',
+      name: NicknameSetupScreen.routeName,
+      builder: (_, __) => NicknameSetupScreen(),
     ),
     GoRoute(
       path: '/dateRangePicker',

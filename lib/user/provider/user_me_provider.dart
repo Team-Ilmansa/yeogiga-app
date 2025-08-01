@@ -46,6 +46,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
   //일단 내 정보 가져오기
   Future<void> getMe() async {
+    ////
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
     final accessToken = await storage.read(key: ACCESS_TOKEN_KEY);
 
@@ -54,6 +55,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       state = null;
       return;
     }
+    ////
 
     try {
       final resp = await repository.getMe();
@@ -107,6 +109,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
   Future<UserModelBase> socialLogin({
     required Dio dio,
     required OAuthToken token,
+    required String platform,
   }) async {
     try {
       print('Social Login Start');
@@ -114,7 +117,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       state = UserModelLoading();
 
       final response = await dio.post(
-        'https://$ip/api/v1/oauth/sign-in/KAKAO/mobile',
+        'https://$ip/api/v1/oauth/sign-in/$platform/mobile',
         data: {
           "accessToken": token.accessToken, // 카카오 로그인에서 받은 accessToken
         },
@@ -123,35 +126,97 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       print('response: $response');
 
       if (response.data['code'] != 200 || response.data == null) {
-        state = UserModelError(message: '카카오 인증에 실패했습니다.');
+        state = UserModelError(message: '$platform 인증에 실패했습니다.');
         return state!;
       }
 
-      String accessToken = response.data['data']['token']['accessToken'];
-      String refreshToken = response.data['data']['token']['refreshToken'];
+      //shouldSignUp이 true이면 guest
+      if (response.data['data']['shouldSignup'] == true) {
+        final tempToken = response.data['data']['token']['accessToken'] as String?;
+        if (tempToken != null) {
+          await storage.write(key: SOCIAL_TEMP_TOKEN, value: tempToken);
+        }
+        state = UserModelGuest();
+        return state!;
+      }
 
+      // shouldSignup이 false일 때만 토큰 추출
+      final accessToken = response.data['data']['token']['accessToken'] as String?;
+      final refreshToken = response.data['data']['token']['refreshToken'] as String?;
+      
+      if (accessToken == null || refreshToken == null) {
+        state = UserModelError(message: '토큰 정보가 올바르지 않습니다.');
+        return state!;
+      }
+
+      //shouldSignup이 false이면 그대로 로그인로직 실행.
       await storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
       await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
 
-      final parts = accessToken.split('.');
-      if (parts.length != 3) {
-        state = UserModelError(message: '잘못된 토큰 형식입니다.');
-        return state!;
-      }
+      await registerFcmToken(ref);
 
-      // final payload = parts[1];
-      // String normalized = base64.normalize(payload);
-      // final decoded = utf8.decode(base64Url.decode(normalized));
-      // final payloadMap = jsonDecode(decoded);
-      // print('payloadMap: $payloadMap');
-      // final role = payloadMap['role'] as String?;
-      // print('role: $role');
-
+      final userResp = await repository.getMe();
+      state = userResp;
+      return state!;
       // TODO: 토큰 저장, get me 실행, userGuestModel 만들기, shouldSignUp 값 따라 userGuestModel해버리기, 리다이렉트 설정, fcm 토큰 등록, 닉네임 페이지 만들기
-      return UserModelError(message: '테스트 끝');
     } on Exception catch (e) {
       // TODO:
-      return UserModelError(message: '테스트 끝');
+      state = UserModelError(message: '로그인에 실패했습니다.');
+      return state!;
+    }
+  }
+
+  //소셜 로그인 닉네임 설정 및 로그인하기
+  Future<UserModelBase> setGuestNickname({
+    required Dio dio,
+    required String nickname,
+  }) async {
+    //TODO: 닉네임 설정, 임시 토큰 이용, 토큰 새로 저장, getme 실행, 상태 변경
+
+    try {
+      final response = await dio.put(
+        'https://$ip/api/v1/oauth/register',
+        options: Options(headers: {'accessToken': 'temp', 'device': 'MOBILE'}),
+        data: {'nickname': nickname},
+      );
+
+      if (response.data['code'] != 200 && response.data['data'] == null) {
+        throw Exception();
+      }
+
+      final accessToken = response.data['data']['accessToken'];
+      final refreshToken = response.data['data']['refreshToken'];
+
+      storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
+      storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
+
+      // 성공 시 FCM 토큰 등록 및 getMe()
+      await registerFcmToken(ref);
+
+      final userResponse = await repository.getMe();
+      state = userResponse;
+      return userResponse;
+    } on DioException catch (e) {
+      String errorMessage = '로그인 정보에 문제가 생겼습니다.';
+
+      if (e.response?.data != null) {
+        final responseData = e.response!.data;
+        final code = responseData['code'];
+
+        // 서버에서 온 에러 메시지 처리
+        if (code == 'G002' && responseData['errors']?['nickname'] != null) {
+          errorMessage = responseData['errors']['nickname'];
+        } else if (code == 'A000' && responseData['message'] != null) {
+          errorMessage = responseData['message'];
+        } else if (code == 'A012' && responseData['message'] != null) {
+          errorMessage = responseData['message'];
+        } else if (responseData['message'] != null) {
+          errorMessage = responseData['message'];
+        }
+      }
+      return UserModelError(message: errorMessage);
+    } catch (e) {
+      return UserModelError(message: '네트워크 오류가 발생했습니다.');
     }
   }
 

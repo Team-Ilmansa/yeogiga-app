@@ -36,6 +36,7 @@ class CustomInterceptor extends Interceptor {
   ) async {
     print('[REQ] [${options.method}] ${options.uri}');
 
+    //TODO: 액세스 토큰용
     if (options.headers['accessToken'] == 'true') {
       // 헤더 삭제
       options.headers.remove('accessToken');
@@ -46,6 +47,18 @@ class CustomInterceptor extends Interceptor {
       options.headers.addAll({'Authorization': 'Bearer $token'});
     }
 
+    //TODO: 소셜 로그인용
+    if (options.headers['accessToken'] == 'temp') {
+      // 헤더 삭제
+      options.headers.remove('accessToken');
+
+      final token = await storage.read(key: SOCIAL_TEMP_TOKEN);
+
+      // 실제 토큰으로 대체
+      options.headers.addAll({'Authorization': 'Bearer $token'});
+    }
+
+    //TODO: 리프레쉬 토큰용
     if (options.headers['refreshToken'] == 'true') {
       // 헤더 삭제
       options.headers.remove('refreshToken');
