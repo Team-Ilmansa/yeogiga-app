@@ -15,6 +15,9 @@ class UserModelError extends UserModelBase {
 //로그인 중일 때 쓸거
 class UserModelLoading extends UserModelBase {}
 
+//닉네임 반드시 추가해줘야하는 놈
+class UserModelGuest extends UserModelBase {}
+
 // 유저 모델
 @JsonSerializable()
 class UserModel extends UserModelBase {

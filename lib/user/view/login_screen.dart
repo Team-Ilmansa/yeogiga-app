@@ -74,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         password.isEmpty
                     ? null
                     : () async {
-                      //TODO: await하는 동안 버튼 비활성화 안되나?
+                      //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
                       final user = await ref
                           .read(userMeProvider.notifier)
                           .login(username: username, password: password);
@@ -279,7 +279,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       // 카카오톡 로그인 버튼
                       GestureDetector(
                         onTap: () async {
-                          final dio = ref.watch(dioProvider);
                           // TODO: 카카오 로그인 로직
                           try {
                             // 휴대폰에 카카오톡이 깔려있는지 bool 값으로 반환해주는 함수
@@ -294,25 +293,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     : await UserApi.instance
                                         .loginWithKakaoAccount();
 
-                            // final response = await dio.post(
-                            //   //TODO: 변경 필요.
-                            //   'https://$ip/api/v1/oauth/sign-in/kakao',
-                            //   data: {
-                            //     "code":
-                            //         token
-                            //             .accessToken, // 카카오 로그인에서 받은 accessToken
-                            //   },
-                            //   options: Options(headers: {"device": "MOBILE"}),
-                            // );
-
-                            // if (response != null) {
-                            //   // 저장 후 페이지 이동
-                            //   Navigator.pushNamedAndRemoveUntil(
-                            //     context,
-                            //     '/',
-                            //     (route) => false,
-                            //   );
-                            // }
+                            final user = await ref
+                                .read(userMeProvider.notifier)
+                                .socialLogin(
+                                  dio: ref.watch(dioProvider),
+                                  token: token,
+                                );
+                            setState(() {
+                              loginFailed = user is UserModelError;
+                            });
                           } on DioException catch (e) {
                             print('카카오톡 회원가입 실패: ${e.response}');
                           } catch (i) {
