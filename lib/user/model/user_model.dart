@@ -21,14 +21,14 @@ class UserModelGuest extends UserModelBase {}
 // 유저 모델
 @JsonSerializable()
 class UserModel extends UserModelBase {
-  final String username;
+  final String? username;  // 소셜로그인 시 null 가능
   final String nickname;
-  final String email;
+  final String? email;     // 소셜로그인 시 null 가능
 
   UserModel({
-    required this.username,
+    this.username,
     required this.nickname,
-    required this.email,
+    this.email,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>

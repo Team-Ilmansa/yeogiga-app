@@ -298,14 +298,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 .socialLogin(
                                   dio: ref.watch(dioProvider),
                                   token: token,
+                                  platform: 'KAKAO',
                                 );
                             setState(() {
                               loginFailed = user is UserModelError;
                             });
                           } on DioException catch (e) {
                             print('카카오톡 회원가입 실패: ${e.response}');
+                            loginFailed = true;
                           } catch (i) {
                             print('카카오톡 회원가입 실패: ${i}');
+                            loginFailed = true;
                           }
                         },
                         child: Center(
