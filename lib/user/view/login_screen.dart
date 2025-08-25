@@ -71,6 +71,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       final user = await ref
                           .read(userMeProvider.notifier)
                           .login(username: username, password: password);
+
+                      // if (user is UserDeleteModel) {
+                      //   if (!mounted) return;
+                      //   context.go('/userRecovery');
+                      //   return;
+                      // }
+
                       setState(() {
                         loginFailed = user is UserModelError;
                       });

@@ -55,7 +55,7 @@ class UserRecoveryScreen extends ConsumerWidget {
             final success = await ref.read(userMeProvider.notifier).restoreAccount();
             
             if (success) {
-              _showRecoverySuccessDialog(context);
+              _showRecoverySuccessDialog(context, ref);
             } else {
               _showRecoveryFailDialog(context);
             }
@@ -192,7 +192,7 @@ class UserRecoveryScreen extends ConsumerWidget {
     );
   }
 
-  void _showRecoverySuccessDialog(BuildContext context) {
+  void _showRecoverySuccessDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -207,8 +207,11 @@ class UserRecoveryScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
+              // 복구 성공 시 로그아웃하여 state를 null로 변경
+              await ref.read(userMeProvider.notifier).logout();
+              if (!context.mounted) return;
               context.go('/login');
             },
             child: Text(
