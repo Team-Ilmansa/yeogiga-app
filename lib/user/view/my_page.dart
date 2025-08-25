@@ -192,6 +192,8 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   if (tripId == null) return;
 
                   // 참가 확인 다이얼로그
+                  // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                  if (!mounted) return;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder:

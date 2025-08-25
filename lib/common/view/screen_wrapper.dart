@@ -74,6 +74,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                             .postTrip(title: nameController.text);
                         //혹시나 해서 실패했을 경우 만듬
                         if (trip is! SettingTripModel) {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           GoRouter.of(context).pop(); // 기존 다이얼로그 닫기
                           await showDialog(
                             context: context,
@@ -99,6 +101,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                                 ),
                           );
                         } else {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           Navigator.of(context).pop();
                           GoRouter.of(context).push('/dateRangePicker');
                         }

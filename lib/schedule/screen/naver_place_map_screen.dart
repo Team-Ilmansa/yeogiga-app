@@ -293,7 +293,9 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
               errorMsg = e.toString();
             }
           }
-          ScaffoldMessenger.of(context).showSnackBar(
+          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 success
@@ -314,6 +316,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
               duration: const Duration(seconds: 2),
             ),
           );
+          }
         }
       },
     );
