@@ -75,8 +75,12 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         password: password,
       );
 
+      // 디버깅용 로그 추가
+      print('로그인 응답: ${resp.code} / ${resp.message} / ${resp.data}');
+      print('코드 타입: ${resp.code.runtimeType}');
+
       // U003: 탈퇴한 사용자 - 복구 페이지로 리다이렉트  
-      if (resp.code == "U003") {
+      if (resp.code.toString() == "U003") {
         final deletedData = UserDeletedData.fromJson(resp.data as Map<String, dynamic>);
         state = UserDeleteModel(
           code: resp.code.toString(),
@@ -107,6 +111,25 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       state = userResp;
       print('login end');
       return userResp;
+    } on DioException catch (e) {
+      // 서버 에러 응답에서 U003 코드 확인
+      if (e.response?.data != null) {
+        final responseData = e.response!.data;
+        print('DioException 응답: $responseData');
+        
+        if (responseData is Map<String, dynamic> && responseData['code'] == 'U003') {
+          final deletedData = UserDeletedData.fromJson(responseData['data'] as Map<String, dynamic>);
+          state = UserDeleteModel(
+            code: responseData['code'].toString(),
+            message: responseData['message'] ?? '이미 회원탈퇴한 사용자입니다.',
+            data: deletedData,
+          );
+          return state!;
+        }
+      }
+      
+      state = UserModelError(message: '로그인에 실패했습니다.');
+      return state!;
     } catch (e) {
       state = UserModelError(message: '로그인에 실패했습니다.');
       return state!;
@@ -145,8 +168,8 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       );
 
       if (response['code'] == 200) {
-        // 복구 성공 시 상태를 null로 변경하여 다시 로그인 유도
-        state = null;
+        // 복구 성공 시 state는 그대로 두고 성공만 반환
+        // 다이얼로그에서 확인 버튼을 누를 때 state를 변경
         return true;
       } else {
         return false;
