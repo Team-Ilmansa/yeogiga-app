@@ -284,6 +284,8 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           .read(confirmScheduleProvider.notifier)
                           .fetchAll(tripState.tripId);
                       //TODO: 지도로 이동
+                      // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                      if (!mounted) return;
                       GoRouter.of(context).push('/ingTripMap');
                     },
                   ),

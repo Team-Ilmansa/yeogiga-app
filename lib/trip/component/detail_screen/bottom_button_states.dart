@@ -205,6 +205,8 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                         if (await requestImagePermission()) {
                         } else {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('권한을 설정해주세요'),
@@ -227,6 +229,8 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                             );
 
                         if (result == null || result.files.isEmpty) {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('사진을 선택하지 않았습니다.')),
                           );
