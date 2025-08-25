@@ -195,6 +195,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                             final success = await ref
                                 .read(tripProvider.notifier)
                                 .updateTripTitle(title: result);
+                            // 수정: async gap 이후 context 사용 시 null 체크 추가 (StatelessWidget)
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

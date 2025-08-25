@@ -32,6 +32,40 @@ class UserModel extends UserModelBase {
       _$UserModelFromJson(json);
 }
 
+// 탈퇴한 사용자 정보
+@JsonSerializable()
+class UserDeletedData {
+  final int userId;
+  final String nickname;
+  final String? imageUrl;
+  final String deletionExpiration;
+
+  UserDeletedData({
+    required this.userId,
+    required this.nickname,
+    this.imageUrl,
+    required this.deletionExpiration,
+  });
+
+  factory UserDeletedData.fromJson(Map<String, dynamic> json) =>
+      _$UserDeletedDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserDeletedDataToJson(this);
+}
+
+// 탈퇴한 사용자 상태
+class UserDeleteModel extends UserModelBase {
+  final String code;
+  final String message;
+  final UserDeletedData data;
+
+  UserDeleteModel({
+    required this.code,
+    required this.message,
+    required this.data,
+  });
+}
+
 @JsonSerializable()
 class UserResponseModel extends UserModelBase {
   final int code;

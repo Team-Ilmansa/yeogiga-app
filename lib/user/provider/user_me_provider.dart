@@ -7,6 +7,7 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/repository/auth_repository.dart';
 import 'package:yeogiga/user/repository/user_me_repository.dart';
 import 'package:yeogiga/user/repository/fcm_token_repository.dart';
+import 'package:yeogiga/common/model/login_response.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
@@ -74,17 +75,29 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         password: password,
       );
 
+      // U003: 탈퇴한 사용자 - 복구 페이지로 리다이렉트  
+      if (resp.code == "U003") {
+        final deletedData = UserDeletedData.fromJson(resp.data as Map<String, dynamic>);
+        state = UserDeleteModel(
+          code: resp.code.toString(),
+          message: resp.message,
+          data: deletedData,
+        );
+        return state!;
+      }
+
       // code와 data로 성공/실패 판단
       if (resp.code != 200 || resp.data == null) {
         state = UserModelError(message: resp.message);
         return state!;
       }
 
+      final loginData = LoginResponse.fromJson(resp.data as Map<String, dynamic>);
       await storage.write(
         key: REFRESH_TOKEN_KEY,
-        value: resp.data!.refreshToken,
+        value: loginData.refreshToken,
       );
-      await storage.write(key: ACCESS_TOKEN_KEY, value: resp.data!.accessToken);
+      await storage.write(key: ACCESS_TOKEN_KEY, value: loginData.accessToken);
 
       // 로그인 성공 시 FCM 토큰 등록
       await registerFcmToken(ref);
@@ -117,5 +130,29 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       storage.delete(key: REFRESH_TOKEN_KEY),
       storage.delete(key: ACCESS_TOKEN_KEY),
     ]);
+  }
+
+  // 계정 복구하기
+  Future<bool> restoreAccount() async {
+    final currentState = state;
+    if (currentState is! UserDeleteModel) {
+      return false;
+    }
+
+    try {
+      final response = await authRepository.restore(
+        userId: currentState.data.userId,
+      );
+
+      if (response['code'] == 200) {
+        // 복구 성공 시 상태를 null로 변경하여 다시 로그인 유도
+        state = null;
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
   }
 }

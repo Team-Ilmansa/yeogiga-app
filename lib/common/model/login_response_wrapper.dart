@@ -7,7 +7,7 @@ part 'login_response_wrapper.g.dart';
 class LoginResponseWrapper {
   final dynamic code; // int or String
   final String message;
-  final LoginResponse? data;
+  final dynamic data; // LoginResponse or UserDeletedData
 
   LoginResponseWrapper({
     required this.code,

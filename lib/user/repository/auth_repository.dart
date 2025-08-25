@@ -41,4 +41,19 @@ class AuthRepository {
 
     return LoginResponse.fromJson(resp.data['data']);
   }
+
+  Future<Map<String, dynamic>> restore({required int userId}) async {
+    final resp = await dio.post(
+      '$baseUrl/api/v1/auth/restore',
+      options: Options(
+        headers: {
+          'device': 'MOBILE',
+          'accessToken': 'true',
+        },
+      ),
+      data: {'userId': userId},
+    );
+
+    return resp.data;
+  }
 }
