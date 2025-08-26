@@ -47,9 +47,9 @@ class AddNoticeState extends StatelessWidget {
         //     style: ElevatedButton.styleFrom(
         //       backgroundColor: Color(0xff8287ff),
         //       shape: RoundedRectangleBorder(
-        //         borderRadius: BorderRadius.circular(42.r),
+        //         borderRadius: BorderRadius.circular(12.r),
         //       ),
-        //       minimumSize: Size.fromHeight(156.h),
+        //       minimumSize: Size.fromHeight(46.h),
         //       elevation: 0,
         //       padding: EdgeInsets.zero,
         //     ),
@@ -62,33 +62,33 @@ class AddNoticeState extends StatelessWidget {
         //       children: [
         //         SvgPicture.asset(
         //           'asset/icon/add_schedule.svg',
-        //           width: 72.w,
-        //           height: 72.h,
+        //           width: 21.w,
+        //           height: 21.h,
         //         ),
-        //         SizedBox(width: 30.w),
+        //         SizedBox(width: 9.w),
         //         Text(
         //           '일정 추가하기',
         //           style: TextStyle(
         //             color: Colors.white,
-        //             fontSize: 48.sp,
+        //             fontSize: 14.sp,
         //             fontWeight: FontWeight.w600,
-        //             letterSpacing: -0.3,
+        //             letterSpacing: -0.1,
         //           ),
         //         ),
         //       ],
         //     ),
         //   ),
         // ),
-        // SizedBox(width: 36.w),
-        SizedBox(width: 40.w),
+        // SizedBox(width: 11.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xff8287ff),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              minimumSize: Size.fromHeight(156.h),
+              minimumSize: Size.fromHeight(46.h),
               elevation: 0,
               padding: EdgeInsets.zero,
             ),
@@ -100,24 +100,24 @@ class AddNoticeState extends StatelessWidget {
               children: [
                 SvgPicture.asset(
                   'asset/icon/gong_ji.svg',
-                  width: 72.w,
-                  height: 72.h,
+                  width: 21.w,
+                  height: 21.h,
                 ),
-                SizedBox(width: 30.w),
+                SizedBox(width: 9.w),
                 Text(
                   '공지 추가하기',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 48.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.3,
+                    letterSpacing: -0.1,
                   ),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(width: 40.w),
+        SizedBox(width: 12.w),
       ],
     );
   }
@@ -148,7 +148,7 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          height: 160.h,
+          height: 48.h,
           child: PageView(
             controller: _pageController,
             onPageChanged: (idx) => setState(() => _currentPage = idx),
@@ -156,15 +156,15 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
               // 사진 업로드 버튼
               Row(
                 children: [
-                  SizedBox(width: 40.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8287ff),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(42.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        minimumSize: Size.fromHeight(156.h),
+                        minimumSize: Size.fromHeight(46.h),
                         elevation: 0,
                         padding: EdgeInsets.zero,
                       ),
@@ -301,40 +301,40 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         children: [
                           SvgPicture.asset(
                             'asset/icon/add_picture.svg',
-                            width: 72.w,
-                            height: 72.h,
+                            width: 21.w,
+                            height: 21.h,
                           ),
-                          SizedBox(width: 30.w),
+                          SizedBox(width: 9.w),
                           Text(
                             widget.selectedDayIndex == 0
                                 ? '날짜를 선택해주세요'
                                 : '${widget.selectedDayIndex}일 차 사진 업로드하기',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 48.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.1,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  Icon(Icons.chevron_right, size: 40.sp),
+                  Icon(Icons.chevron_right, size: 12.sp),
                 ],
               ),
               // 사진 매핑/리매핑 버튼 (두 개를 Row로 묶어서 한 페이지에)
               Row(
                 children: [
-                  Icon(Icons.chevron_left, size: 40.sp),
+                  Icon(Icons.chevron_left, size: 12.sp),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8287ff),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(42.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        minimumSize: Size.fromHeight(156.h),
+                        minimumSize: Size.fromHeight(46.h),
                         elevation: 0,
                         padding: EdgeInsets.zero,
                       ),
@@ -411,24 +411,24 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                             '사진 맵핑하기',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 48.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.1,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(width: 36.w),
+                  SizedBox(width: 11.w),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff8287ff),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(42.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        minimumSize: Size.fromHeight(156.h),
+                        minimumSize: Size.fromHeight(46.h),
                         elevation: 0,
                         padding: EdgeInsets.zero,
                       ),
@@ -495,30 +495,30 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                             '리매핑하기',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 48.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.1,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(width: 40.w),
+                  SizedBox(width: 12.w),
                 ],
               ),
             ],
           ),
         ),
-        // SizedBox(height: 18.h),
+        // SizedBox(height: 5.h),
         // Row(
         //   mainAxisAlignment: MainAxisAlignment.center,
         //   children: List.generate(
         //     2,
         //     (idx) => Container(
-        //       width: 18.w,
-        //       height: 18.w,
-        //       margin: EdgeInsets.symmetric(horizontal: 6.w),
+        //       width: 5.w,
+        //       height: 5.w,
+        //       margin: EdgeInsets.symmetric(horizontal: 2.w),
         //       decoration: BoxDecoration(
         //         shape: BoxShape.circle,
         //         color:
@@ -547,7 +547,7 @@ class PictureOptionState extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Transform.translate(
-      offset: const Offset(0, 3),
+      offset: const Offset(0, 1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -557,7 +557,7 @@ class PictureOptionState extends ConsumerWidget {
                 foregroundColor: const Color(0xffc6c6c6),
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
+                  borderRadius: BorderRadius.circular(9.r),
                 ),
               ),
               onPressed: () async {
@@ -619,13 +619,13 @@ class PictureOptionState extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset('asset/icon/delete.svg'),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 2.h),
                   Text(
                     '삭제',
                     style: TextStyle(
                       color: Color(0xffc6c6c6),
-                      fontSize: 36.sp,
-                      letterSpacing: -0.3,
+                      fontSize: 11.sp,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ],
@@ -638,7 +638,7 @@ class PictureOptionState extends ConsumerWidget {
                 foregroundColor: const Color(0xffc6c6c6),
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
+                  borderRadius: BorderRadius.circular(9.r),
                 ),
               ),
               onPressed: () async {
@@ -656,13 +656,13 @@ class PictureOptionState extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset('asset/icon/share.svg'),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 2.h),
                   Text(
                     '공유',
                     style: TextStyle(
                       color: Color(0xffc6c6c6),
-                      fontSize: 36.sp,
-                      letterSpacing: -0.3,
+                      fontSize: 11.sp,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ],
@@ -675,7 +675,7 @@ class PictureOptionState extends ConsumerWidget {
                 foregroundColor: const Color(0xffc6c6c6),
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.r),
+                  borderRadius: BorderRadius.circular(9.r),
                 ),
               ),
               onPressed: () async {
@@ -690,13 +690,13 @@ class PictureOptionState extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset('asset/icon/download.svg'),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 2.h),
                   Text(
                     '내 갤러리에 저장',
                     style: TextStyle(
                       color: Color(0xffc6c6c6),
-                      fontSize: 36.sp,
-                      letterSpacing: -0.3,
+                      fontSize: 11.sp,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ],
@@ -722,16 +722,16 @@ class ConfirmScheduleState extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        SizedBox(width: 40.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8287FF),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               elevation: 0,
-              minimumSize: Size.fromHeight(156.h),
+              minimumSize: Size.fromHeight(46.h),
               padding: EdgeInsets.zero,
             ),
             onPressed: () async {
@@ -742,13 +742,13 @@ class ConfirmScheduleState extends ConsumerWidget {
                     (context) => Dialog(
                       backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(48.r),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
-                      insetPadding: EdgeInsets.all(48.w),
+                      insetPadding: EdgeInsets.all(14.w),
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                          vertical: 40.h,
-                          horizontal: 40.w,
+                          vertical: 12.h,
+                          horizontal: 12.w,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -756,19 +756,19 @@ class ConfirmScheduleState extends ConsumerWidget {
                             Icon(
                               Icons.info_outline,
                               color: Color(0xFF8287FF),
-                              size: 120.w,
+                              size: 36.w,
                             ),
-                            SizedBox(height: 48.h),
+                            SizedBox(height: 14.h),
                             Text(
                               '정말 여행 일정을 확정하시겠습니까?',
                               style: TextStyle(
-                                fontSize: 56.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xff313131),
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            SizedBox(height: 50.h),
+                            SizedBox(height: 15.h),
                             Row(
                               children: [
                                 Expanded(
@@ -777,11 +777,11 @@ class ConfirmScheduleState extends ConsumerWidget {
                                       backgroundColor: const Color(0xffc6c6c6),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                          42.r,
+                                          12.r,
                                         ),
                                       ),
                                       elevation: 0,
-                                      minimumSize: Size.fromHeight(156.h),
+                                      minimumSize: Size.fromHeight(46.h),
                                       padding: EdgeInsets.zero,
                                     ),
                                     onPressed:
@@ -789,25 +789,25 @@ class ConfirmScheduleState extends ConsumerWidget {
                                     child: Text(
                                       '취소',
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 32.w),
+                                SizedBox(width: 10.w),
                                 Expanded(
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF8287FF),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                          42.r,
+                                          12.r,
                                         ),
                                       ),
                                       elevation: 0,
-                                      minimumSize: Size.fromHeight(156.h),
+                                      minimumSize: Size.fromHeight(46.h),
                                       padding: EdgeInsets.zero,
                                     ),
                                     onPressed:
@@ -815,7 +815,7 @@ class ConfirmScheduleState extends ConsumerWidget {
                                     child: Text(
                                       '확정',
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -855,13 +855,13 @@ class ConfirmScheduleState extends ConsumerWidget {
                       (context) => Dialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(48.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
-                        insetPadding: EdgeInsets.all(48.w),
+                        insetPadding: EdgeInsets.all(14.w),
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            vertical: 40.h,
-                            horizontal: 40.w,
+                            vertical: 12.h,
+                            horizontal: 12.w,
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -874,21 +874,21 @@ class ConfirmScheduleState extends ConsumerWidget {
                                     success
                                         ? const Color(0xFF8287FF)
                                         : Colors.red,
-                                size: 120.w,
+                                size: 36.w,
                               ),
-                              SizedBox(height: 48.h),
+                              SizedBox(height: 14.h),
                               Text(
                                 success
                                     ? '여행 일정이 확정되었습니다!'
                                     : '일정 확정에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
                                 style: TextStyle(
-                                  fontSize: 56.sp,
+                                  fontSize: 17.sp,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xff313131),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              SizedBox(height: 50.h),
+                              SizedBox(height: 15.h),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
@@ -898,17 +898,17 @@ class ConfirmScheduleState extends ConsumerWidget {
                                             ? const Color(0xFF8287FF)
                                             : Colors.red,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(42.r),
+                                      borderRadius: BorderRadius.circular(12.r),
                                     ),
                                     elevation: 0,
-                                    minimumSize: Size.fromHeight(156.h),
+                                    minimumSize: Size.fromHeight(46.h),
                                     padding: EdgeInsets.zero,
                                   ),
                                   onPressed: () => Navigator.of(context).pop(),
                                   child: Text(
                                     '확인',
                                     style: TextStyle(
-                                      fontSize: 48.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.white,
                                     ),
@@ -925,14 +925,14 @@ class ConfirmScheduleState extends ConsumerWidget {
             child: Text(
               '여행 일정 확정하기',
               style: TextStyle(
-                fontSize: 48.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
           ),
         ),
-        SizedBox(width: 40.w),
+        SizedBox(width: 12.w),
       ],
     );
   }
@@ -945,16 +945,16 @@ class ConfirmCalendarState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 40.w),
+        SizedBox(width: 12.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8287FF),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               elevation: 0,
-              minimumSize: Size.fromHeight(156.h),
+              minimumSize: Size.fromHeight(46.h),
               padding: EdgeInsets.zero,
             ),
             onPressed: () {
@@ -964,14 +964,14 @@ class ConfirmCalendarState extends StatelessWidget {
             child: Text(
               '여행 날짜 확정하기',
               style: TextStyle(
-                fontSize: 48.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
           ),
         ),
-        SizedBox(width: 40.w),
+        SizedBox(width: 12.w),
       ],
     );
   }

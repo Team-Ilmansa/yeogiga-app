@@ -40,7 +40,7 @@ class ConfirmedScheduleView extends StatelessWidget {
         }
         return CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
             SliverToBoxAdapter(
               child: DaySelector(
                 itemCount: dynamicDays.length + 1, // +1 for 전체
@@ -48,7 +48,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                 onChanged: onDaySelected,
               ),
             ),
-            SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 6.h)),
             //여기
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -96,41 +96,41 @@ class ConfirmedScheduleView extends StatelessWidget {
   ) {
     final hasPlaces = daySchedule.places.isNotEmpty;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
       // decoration: BoxDecoration(
       //   color: Colors.white,
-      //   borderRadius: BorderRadius.circular(54.r),
+      //   borderRadius: BorderRadius.circular(16.r),
       //   boxShadow: [
       //     BoxShadow(
       //       color: Colors.black.withOpacity(0.04),
-      //       blurRadius: 24.r,
-      //       offset: Offset(0, 12.h),
+      //       blurRadius: 2.r,
+      //       offset: Offset(0, 4.h),
       //     ),
       //   ],
       // ),
       child: ExpansionTile(
         // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(54.r),
+        //   borderRadius: BorderRadius.circular(16.r),
         // ),
         // collapsedShape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(54.r),
+        //   borderRadius: BorderRadius.circular(16.r),
         // ),
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color(0xffd9d9d9)),
         ),
-        minTileHeight: 186.h,
+        minTileHeight: 55.h,
         title: Text(
           dayLabel,
           style: TextStyle(
-            fontSize: 48.sp,
+            fontSize: 14.sp,
             color: Color(0xff7d7d7d),
-            letterSpacing: -0.3,
+            letterSpacing: -0.1,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -247,7 +247,7 @@ class ConfirmedScheduleView extends StatelessWidget {
               child: Text(
                 '등록된 일정이 없습니다.',
                 style: TextStyle(
-                  fontSize: 48.sp,
+                  fontSize: 14.sp,
                   color: const Color(0xffc6c6c6),
                   fontWeight: FontWeight.w500,
                 ),
@@ -262,7 +262,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                   tripState.status.toString().contains('COMPLETED');
               if (isCompleted) return SizedBox.shrink();
               return Padding(
-                padding: EdgeInsets.only(bottom: 20.h),
+                padding: EdgeInsets.only(bottom: 6.h),
                 child: Builder(
                   builder:
                       (buttonContext) => TextButton(
@@ -280,7 +280,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                         child: Text(
                           '+ 일정 담으러 가기',
                           style: TextStyle(
-                            fontSize: 48.sp,
+                            fontSize: 14.sp,
                             color: const Color(0xff8287ff),
                             fontWeight: FontWeight.w600,
                           ),

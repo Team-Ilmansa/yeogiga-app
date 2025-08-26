@@ -16,7 +16,7 @@ class SettingSliderPanel extends StatelessWidget {
     return SafeArea(
       top: true,
       child: SlidingUpPanelWidget(
-        controlHeight: 50.h,
+        controlHeight: 15.h,
         panelController: panelController,
         onTap: () {
           if (SlidingUpPanelStatus.expanded == panelController.status) {
@@ -31,15 +31,15 @@ class SettingSliderPanel extends StatelessWidget {
             color: Colors.white,
             shadows: [
               BoxShadow(
-                blurRadius: 2.0,
+                blurRadius: 1,
                 spreadRadius: 2.0,
                 color: const Color(0x11000000),
               ),
             ],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0.r),
-                topRight: Radius.circular(10.0.r),
+                topLeft: Radius.circular(3.r),
+                topRight: Radius.circular(3.r),
               ),
             ),
           ),
@@ -49,17 +49,17 @@ class SettingSliderPanel extends StatelessWidget {
               Container(
                 color: Colors.white,
                 alignment: Alignment.center,
-                height: 50.0.h,
+                height: 15.h,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(Icons.menu, size: 30.sp),
-                    Padding(padding: EdgeInsets.only(left: 8.0.w)),
-                    Text('click or drag', style: TextStyle(fontSize: 16.sp)),
+                    Icon(Icons.menu, size: 9.sp),
+                    Padding(padding: EdgeInsets.only(left: 2.w)),
+                    Text('click or drag', style: TextStyle(fontSize: 5.sp)),
                   ],
                 ),
               ),
-              Divider(height: 0.5.h, color: Colors.grey[300]),
+              Divider(height: 1.h, color: Colors.grey[300]),
               Flexible(
                 child: Container(
                   color: Colors.white,
@@ -70,12 +70,12 @@ class SettingSliderPanel extends StatelessWidget {
                       return ListTile(
                         title: Text(
                           'list item $index',
-                          style: TextStyle(fontSize: 16.sp),
+                          style: TextStyle(fontSize: 5.sp),
                         ),
                       );
                     },
                     separatorBuilder: (context, index) {
-                      return Divider(height: 0.5.h);
+                      return Divider(height: 1.h);
                     },
                     shrinkWrap: true,
                     itemCount: 20,

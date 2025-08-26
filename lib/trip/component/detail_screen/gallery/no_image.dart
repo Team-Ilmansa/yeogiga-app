@@ -10,18 +10,18 @@ class NoImage extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(height: 100.h),
+        SizedBox(height: 30.h),
         SvgPicture.asset(
           'asset/icon/no_picture.svg',
-          height: 168.h,
-          width: 168.w,
+          height: 50.h,
+          width: 50.w,
           color: const Color(0xffc6c6c6),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 7.h),
         Text(
           '업로드된 이미지가 없어요',
           style: TextStyle(
-            fontSize: 42.sp,
+            fontSize: 12.sp,
             color: const Color(0xffc6c6c6),
             fontWeight: FontWeight.w500,
           ),

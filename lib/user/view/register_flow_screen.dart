@@ -59,18 +59,18 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 144.h),
+            SizedBox(height: 43.h),
             Text(
               '로그인에 사용할\n이메일을 입력해주세요',
-              style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
               textAlign: TextAlign.start,
             ),
-            SizedBox(height: 36.h),
+            SizedBox(height: 11.h),
             Text(
               '입력하신 이메일로 회원여부 확인 및 서비스 가입을 도와드릴게요',
-              style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+              style: TextStyle(color: Colors.black54, fontSize: 12.sp),
             ),
-            SizedBox(height: 96.h),
+            SizedBox(height: 29.h),
           ],
         ),
         //이메일 입력칸
@@ -79,9 +79,9 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           children: [
             Text(
               '이메일',
-              style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 7.h),
             CustomTextFormField(
               controller: _emailController,
               enabled: !emailSent && _emailVerifyController.text.isEmpty,
@@ -90,20 +90,20 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
             ),
             if (emailErrorText != null)
               SizedBox(
-                height: 54.h,
+                height: 16.h,
                 child: Padding(
-                  padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                  padding: EdgeInsets.only(top: 4.h, right: 4.w),
                   child: Text(
                     emailErrorText!,
-                    style: TextStyle(color: Colors.red, fontSize: 30.sp),
+                    style: TextStyle(color: Colors.red, fontSize: 9.sp),
                     textAlign: TextAlign.right, // 오른쪽 정렬
                   ),
                 ),
               )
             else
-              SizedBox(height: 54.h),
+              SizedBox(height: 16.h),
 
-            SizedBox(height: 42.h),
+            SizedBox(height: 12.h),
           ],
         ),
         //이메일 확인 입력칸
@@ -112,16 +112,16 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           children: [
             Text(
               '이메일 확인',
-              style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 7.h),
             CustomVerifyTextFormField(
               controller: _emailVerifyController,
               enabled: _emailController.text.isNotEmpty && !isEmailVerified,
               hintText: '인증번호 6자리를 입력해주세요',
               onChanged: (value) => setState(() {}),
               suffix: Padding(
-                padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 40.w),
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
                 child: ElevatedButton(
                   onPressed: () async {
                     final dio = ref.watch(dioProvider);
@@ -209,13 +209,13 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                     backgroundColor: const Color(0xff8287ff),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(54.r),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
                     elevation: 0,
                     minimumSize: Size.zero,
                     padding: EdgeInsets.symmetric(
-                      horizontal: 35.w,
-                      vertical: 20.h,
+                      horizontal: 10.w,
+                      vertical: 6.h,
                     ),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -225,31 +225,31 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                         : emailSent
                         ? '재전송'
                         : '전송',
-                    style: TextStyle(fontSize: 36.sp),
+                    style: TextStyle(fontSize: 11.sp),
                   ),
                 ),
               ),
             ),
             if (emailVerifyErrorText != null)
               Padding(
-                padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                padding: EdgeInsets.only(top: 4.h, right: 4.w),
                 child: Text(
                   emailVerifyErrorText!,
-                  style: TextStyle(color: Colors.red, fontSize: 30.sp),
+                  style: TextStyle(color: Colors.red, fontSize: 9.sp),
                   textAlign: TextAlign.right, // 오른쪽 정렬
                 ),
               )
             else if (emailVerifyInfoText != null)
               Padding(
-                padding: EdgeInsets.only(top: 12.h, right: 12.w),
+                padding: EdgeInsets.only(top: 4.h, right: 4.w),
                 child: Text(
                   emailVerifyInfoText!,
-                  style: TextStyle(color: Colors.blue, fontSize: 30.sp),
+                  style: TextStyle(color: Colors.blue, fontSize: 9.sp),
                   textAlign: TextAlign.right, // 오른쪽 정렬
                 ),
               )
             else
-              SizedBox(height: 24.h),
+              SizedBox(height: 7.h),
           ],
         ),
       ],
@@ -265,17 +265,17 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 144.h),
+            SizedBox(height: 43.h),
             Text(
               '아이디와 비밀번호를\n설정해주세요',
-              style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 7.h),
             Text(
               '영문, 숫자, 특수기호 포함 8~20자이내로 설정할 수 있어요',
-              style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+              style: TextStyle(color: Colors.black54, fontSize: 12.sp),
             ),
-            SizedBox(height: 96.h),
+            SizedBox(height: 29.h),
           ],
         ),
         // 아이디 입력 및 버튼
@@ -284,16 +284,16 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           children: [
             Text(
               '아이디',
-              style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 7.h),
             Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Color(0xFFF6F6F6),
-                      borderRadius: BorderRadius.circular(36.r),
+                      borderRadius: BorderRadius.circular(11.r),
                     ),
                     child: CustomTextFormField(
                       controller: _usernameController,
@@ -309,7 +309,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 24.w),
+                SizedBox(width: 7.w),
                 ElevatedButton(
                   onPressed:
                       _usernameController.text.isNotEmpty
@@ -329,23 +329,23 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                             : Colors.grey[400],
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
-                      horizontal: 54.w,
-                      vertical: 42.h,
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
+                      borderRadius: BorderRadius.circular(9.r),
                     ),
                     elevation: 0,
                   ),
-                  child: Text('중복확인', style: TextStyle(fontSize: 45.sp)),
+                  child: Text('중복확인', style: TextStyle(fontSize: 13.sp)),
                 ),
               ],
             ),
             Padding(
-              padding: EdgeInsets.only(top: 24.h, left: 12.w),
+              padding: EdgeInsets.only(top: 7.h, left: 4.w),
               child: SizedBox(
                 width: double.infinity,
-                height: 60.h,
+                height: 18.h,
                 child:
                     usernameAvailable != null
                         ? usernameAvailable == true
@@ -353,7 +353,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                               '사용 가능한 아이디에요',
                               style: TextStyle(
                                 color: Color(0xff8287ff),
-                                fontSize: 39.sp,
+                                fontSize: 12.sp,
                               ),
                               textAlign: TextAlign.end,
                             )
@@ -361,27 +361,27 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                               '이미 사용중인 아이디에요',
                               style: TextStyle(
                                 color: Colors.red,
-                                fontSize: 39.sp,
+                                fontSize: 12.sp,
                               ),
                               textAlign: TextAlign.end,
                             )
                         : null,
               ),
             ),
-            SizedBox(height: 84.h),
+            SizedBox(height: 25.h),
           ],
         ),
 
         // 비밀번호
         Text(
           '비밀번호',
-          style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 7.h),
         Container(
           decoration: BoxDecoration(
             color: Color(0xFFF6F6F6),
-            borderRadius: BorderRadius.circular(36.r),
+            borderRadius: BorderRadius.circular(11.r),
           ),
           child: Stack(
             alignment: Alignment.centerRight,
@@ -397,17 +397,17 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
             ],
           ),
         ),
-        SizedBox(height: 72.h),
+        SizedBox(height: 21.h),
         // 비밀번호 확인
         Text(
           '비밀번호 확인',
-          style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 7.h),
         Container(
           decoration: BoxDecoration(
             color: Color(0xFFF6F6F6),
-            borderRadius: BorderRadius.circular(36.r),
+            borderRadius: BorderRadius.circular(11.r),
           ),
           child: CustomTextFormField(
             controller: _pwCheckController,
@@ -424,10 +424,10 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
             padding: EdgeInsets.only(top: 8.0, left: 4.0),
             child: Text(
               '비밀번호가 일치하지 않아요',
-              style: TextStyle(color: Colors.red, fontSize: 39.sp),
+              style: TextStyle(color: Colors.red, fontSize: 12.sp),
             ),
           ),
-        SizedBox(height: 72.h),
+        SizedBox(height: 21.h),
       ],
     ),
 
@@ -437,15 +437,15 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
     Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 144.h),
+        SizedBox(height: 43.h),
         Text(
           '서비스 이용약관에\n동의해주세요',
-          style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 36.h),
+        SizedBox(height: 11.h),
         Text(
           '정확한 데이터 조회와 더 원활한 서비스 이용을 위해 꼭 필요해요',
-          style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+          style: TextStyle(color: Colors.black54, fontSize: 12.sp),
         ),
       ],
     ),
@@ -456,22 +456,22 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
     Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 144.h),
+        SizedBox(height: 43.h),
         Text(
           '서비스에서 사용할\n닉네임을 입력해주세요',
-          style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 36.h),
+        SizedBox(height: 11.h),
         Text(
           '가입 후 언제든지 수정이 가능해요',
-          style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+          style: TextStyle(color: Colors.black54, fontSize: 12.sp),
         ),
-        SizedBox(height: 96.h),
+        SizedBox(height: 29.h),
         Text(
           '닉네임',
-          style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 7.h),
         CustomTextFormField(
           controller: _nicknameController,
           hintText: '닉네임을 입력해주세요',
@@ -495,10 +495,10 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           },
         ),
         Padding(
-          padding: EdgeInsets.only(top: 24.h, left: 12.w),
+          padding: EdgeInsets.only(top: 7.h, left: 4.w),
           child: SizedBox(
             width: double.infinity,
-            height: 60.h,
+            height: 18.h,
             child:
                 nicknameAvailable != null
                     ? nicknameAvailable == true
@@ -506,13 +506,13 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                           '사용 가능한 닉네임이에요',
                           style: TextStyle(
                             color: Color(0xff8287ff),
-                            fontSize: 39.sp,
+                            fontSize: 12.sp,
                           ),
                           textAlign: TextAlign.end,
                         )
                         : Text(
                           '이미 사용중인 닉네임이에요',
-                          style: TextStyle(color: Colors.red, fontSize: 39.sp),
+                          style: TextStyle(color: Colors.red, fontSize: 12.sp),
                           textAlign: TextAlign.end,
                         )
                     : null,
@@ -530,15 +530,15 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 144.h),
+              SizedBox(height: 43.h),
               Text(
                 '${_usernameController.text}님\n여기가 가입을 축하드려요!',
-                style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 36.h),
+              SizedBox(height: 11.h),
               Text(
                 '여기가와 함께 더 체계적인 단체여행을 즐겨봐요',
-                style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+                style: TextStyle(color: Colors.black54, fontSize: 12.sp),
               ),
             ],
           );
@@ -547,22 +547,22 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 144.h),
+              SizedBox(height: 43.h),
               Text(
                 '회원가입을 다시 진행해주세요 ㅠㅠ',
-                style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 36.h),
+              SizedBox(height: 11.h),
               if (_registerResult!.message != null)
                 Text(
                   _registerResult!.message!,
-                  style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+                  style: TextStyle(color: Colors.black54, fontSize: 12.sp),
                 ),
               if (_registerResult!.errors != null)
                 ..._registerResult!.errors!.entries.map(
                   (e) => Text(
                     '${e.key}: ${e.value}',
-                    style: TextStyle(color: Colors.black54, fontSize: 39.sp),
+                    style: TextStyle(color: Colors.black54, fontSize: 12.sp),
                   ),
                 ),
             ],
@@ -572,15 +572,15 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 144.h),
+              SizedBox(height: 43.h),
               Text(
                 '구이님\n여기가 가입을 축하드려요!',
-                style: TextStyle(fontSize: 78.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 23.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 36.h),
+              SizedBox(height: 11.h),
               Text(
                 '여기가와 함께 더 체계적인 단체여행을 즐겨봐요',
-                style: TextStyle(color: Colors.black54, fontSize: 42.sp),
+                style: TextStyle(color: Colors.black54, fontSize: 12.sp),
               ),
             ],
           );
@@ -659,31 +659,31 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 48.w),
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: SingleChildScrollView(
               physics: ClampingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 12),
+                  SizedBox(height: 4),
                   SizedBox(
                     height:
                         MediaQuery.of(context).size.height -
                         MediaQuery.of(context).padding.top -
                         kToolbarHeight -
-                        450.h, // 버튼/인디케이터 높이만큼 여유
+                        134.h, // 버튼/인디케이터 높이만큼 여유
                     child: steps[currentStep],
                   ),
-                  SizedBox(height: 60.h),
+                  SizedBox(height: 18.h),
                   // 페이지 인디케이터 (동그라미)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       stepCount - 1,
                       (idx) => Container(
-                        width: 24.w,
-                        height: 24.h,
-                        margin: EdgeInsets.symmetric(horizontal: 12.w),
+                        width: 7.w,
+                        height: 7.h,
+                        margin: EdgeInsets.symmetric(horizontal: 4.w),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color:
@@ -694,7 +694,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 60.h),
+                  SizedBox(height: 18.h),
                 ],
               ),
             ),
@@ -706,10 +706,10 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
-          48.w,
-          36.h,
-          48.w,
-          MediaQuery.of(context).viewInsets.bottom + 60.h,
+          14.w,
+          11.h,
+          14.w,
+          MediaQuery.of(context).viewInsets.bottom + 18.h,
         ),
         child:
             currentStep < stepCount - 1
@@ -745,26 +745,26 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                             ? const Color(0xff8287ff)
                             : Colors.grey[400],
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 48.h),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(36.r),
+                      borderRadius: BorderRadius.circular(11.r),
                     ),
                     elevation: 0,
                   ),
                   child:
                       _isRegistering
                           ? SizedBox(
-                            width: 66.w,
-                            height: 66.h,
+                            width: 20.w,
+                            height: 20.h,
                             child: CircularProgressIndicator(
                               color: Colors.white,
-                              strokeWidth: 7.5.w,
+                              strokeWidth: 2.w,
                             ),
                           )
                           : Text(
                             currentStep == 3 ? '가입 완료' : '다음 단계로',
                             style: TextStyle(
-                              fontSize: 48.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -777,16 +777,16 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff8287ff),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 48.h),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(36.r),
+                      borderRadius: BorderRadius.circular(11.r),
                     ),
                     elevation: 0,
                   ),
                   child: Text(
                     '확인',
                     style: TextStyle(
-                      fontSize: 48.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

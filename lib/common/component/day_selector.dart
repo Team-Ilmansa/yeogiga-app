@@ -16,12 +16,12 @@ class DaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90.h,
+      height: 27.h,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 48.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        separatorBuilder: (_, __) => SizedBox(width: 4.w),
         itemBuilder: (context, index) {
           final isSelected = index == selectedIndex;
           final label = index == 0 ? '여행 전체' : 'DAY $index';
@@ -33,9 +33,9 @@ class DaySelector extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              padding: EdgeInsets.symmetric(horizontal: 30.w),
+              padding: EdgeInsets.symmetric(horizontal: 9.w),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(90.r),
+                borderRadius: BorderRadius.circular(27.r),
                 border: Border.all(color: const Color(0xffd9d9d9)),
                 color: isSelected ? const Color(0xff8287ff) : Colors.white,
               ),
@@ -45,12 +45,12 @@ class DaySelector extends StatelessWidget {
                 curve: Curves.easeInOut,
                 style: TextStyle(
                   color: isSelected ? Colors.white : const Color(0xff7d7d7d),
-                  fontSize: 42.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: -0.6,
+                  letterSpacing: -0.2,
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(top: 3.h),
+                  padding: EdgeInsets.only(top: 1.h),
                   child: Text(label),
                 ),
               ),

@@ -84,7 +84,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
         await _controller!.updateCamera(
           NCameraUpdate.fitBounds(
             bounds,
-            padding: EdgeInsets.all(100.w),
+            padding: EdgeInsets.all(30.w),
           ), // 기존 60.w에서 100.w로 padding 확대
         );
       }
@@ -103,21 +103,21 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
     if (allPlaces.isEmpty) {
       _controller = null;
       return SizedBox(
-        height: 600.h,
+        height: 178.h,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.map_outlined,
-                size: 80.sp,
+                size: 24.sp,
                 color: const Color(0xffc6c6c6),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 7.h),
               Text(
                 '등록된 목적지가 없습니다.',
                 style: TextStyle(
-                  fontSize: 36.sp,
+                  fontSize: 11.sp,
                   color: const Color(0xffc6c6c6),
                   fontWeight: FontWeight.w500,
                 ),
@@ -129,9 +129,9 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
     }
 
     return SizedBox(
-      height: 600.h,
+      height: 178.h,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(54.r),
+        borderRadius: BorderRadius.circular(16.r),
         child: Stack(
           children: [
             NaverMap(
