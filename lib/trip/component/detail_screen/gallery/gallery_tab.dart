@@ -222,7 +222,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     if (widget.sliverMode) {
       return CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: SizedBox(height: 48.h)),
+          SliverToBoxAdapter(child: SizedBox(height: 14.h)),
           SliverToBoxAdapter(
             child: Builder(
               builder: (context) {
@@ -254,11 +254,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
               },
             ),
           ),
-          SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+          SliverToBoxAdapter(child: SizedBox(height: 6.h)),
           //TODO: 그리드 뷰 부분 (사진 없으면 NoImage();)
           if (allImages.isEmpty && allPendingImages.isEmpty)
             SliverToBoxAdapter(
-              child: SizedBox(height: 1350.h, child: NoImage()),
+              child: SizedBox(height: 401.h, child: NoImage()),
             )
           else
             SliverList(
@@ -266,16 +266,16 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                 return Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${allImages.length}장',
                             style: TextStyle(
-                              fontSize: 60.sp,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.1,
                               color: Color(0xff313131),
                             ),
                           ),
@@ -296,8 +296,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                       ? '${selectedMatchedOrUnMatchedPictures.length}개 선택됨'
                                       : '선택하기',
                                   style: TextStyle(
-                                    fontSize: 39.sp,
-                                    letterSpacing: -0.6,
+                                    fontSize: 12.sp,
+                                    letterSpacing: -0.2,
                                     color:
                                         selectionMode
                                             ? Color(0xff8287ff)
@@ -309,11 +309,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             ),
                                   ),
                                 ),
-                                SizedBox(width: 6.w),
+                                SizedBox(width: 2.w),
                                 SvgPicture.asset(
                                   'asset/icon/check.svg',
-                                  width: 48.w,
-                                  height: 48.h,
+                                  width: 14.w,
+                                  height: 14.h,
                                   color:
                                       selectionMode
                                           ? Color(0xff8287ff)
@@ -325,16 +325,16 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 5.h),
                     // TODO: 매칭 끝난 사진 그리드뷰
                     GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
+                        crossAxisSpacing: 4.w,
+                        mainAxisSpacing: 4.h,
                         childAspectRatio: 1,
                       ),
                       itemCount: allImages.length,
@@ -367,7 +367,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                       builder:
                                           (_) => Dialog(
                                             backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(100.w),
+                                            insetPadding: EdgeInsets.all(30.w),
                                             child: GestureDetector(
                                               onTap:
                                                   () =>
@@ -385,8 +385,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                       width: double.infinity,
                                                       padding:
                                                           EdgeInsets.symmetric(
-                                                            vertical: 12.h,
-                                                            horizontal: 24.w,
+                                                            vertical: 4.h,
+                                                            horizontal: 7.w,
                                                           ),
                                                       child: Text(
                                                         image.type ==
@@ -397,7 +397,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                             : "기타",
                                                         style: TextStyle(
                                                           color: Colors.white,
-                                                          fontSize: 50.sp,
+                                                          fontSize: 15.sp,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
@@ -405,12 +405,12 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                             TextAlign.center,
                                                       ),
                                                     ),
-                                                    SizedBox(height: 20.h),
+                                                    SizedBox(height: 6.h),
                                                     // 이미지 (아래)
                                                     ClipRRect(
                                                       borderRadius:
                                                           BorderRadiusGeometry.circular(
-                                                            24.r,
+                                                            7.r,
                                                           ),
                                                       child: InteractiveViewer(
                                                         child: Image.network(
@@ -435,7 +435,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                                 error,
                                                                 stackTrace,
                                                               ) => Container(
-                                                                height: 400.h,
+                                                                height: 119.h,
                                                                 color:
                                                                     Colors
                                                                         .grey[300],
@@ -443,7 +443,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                                   child: Icon(
                                                                     Icons
                                                                         .broken_image,
-                                                                    size: 48.sp,
+                                                                    size: 14.sp,
                                                                   ),
                                                                 ),
                                                               ),
@@ -463,7 +463,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               fit: StackFit.expand,
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                   child: Image.network(
                                     image.url,
                                     fit: BoxFit.cover,
@@ -474,8 +474,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                 ),
                                 // 타입별 표시 (오른쪽 위)
                                 Positioned(
-                                  top: 8.r,
-                                  right: 8.r,
+                                  top: 2.r,
+                                  right: 2.r,
                                   child: _typeBadge(image.type),
                                 ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
@@ -483,11 +483,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Color(0xff8287ff).withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                       // TODO: 테두리 있어야하나????
                                       // border: Border.all(
                                       //   color: Color(0xff8287ff),
-                                      //   width: 4.r,
+                                      //   width: 1.r,
                                       // ),
                                     ),
                                     // TODO: 체크표시 해놓을까????
@@ -495,7 +495,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                     //   child: Icon(
                                     //     Icons.check_circle,
                                     //     color: Color.fromARGB(154, 130, 134, 255),
-                                    //     size: 48.sp,
+                                    //     size: 14.sp,
                                     //   ),
                                     // ),
                                   ),
@@ -506,7 +506,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                       },
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(48.w, 80.h, 48.w, 20.h),
+                      padding: EdgeInsets.fromLTRB(14.w, 24.h, 14.w, 6.h),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -514,21 +514,21 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                           style: TextStyle(
                             color: Color(0xff7d7d7d),
                             fontWeight: FontWeight.w600,
-                            fontSize: 42.sp,
-                            letterSpacing: -0.9.sp,
+                            fontSize: 12.sp,
+                            letterSpacing: -0.3.sp,
                           ),
                         ),
                       ),
                     ),
                     // TODO: 임시 저장 그리드뷰
                     GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
+                        crossAxisSpacing: 4.w,
+                        mainAxisSpacing: 4.h,
                         childAspectRatio: 1,
                       ),
                       itemCount: allPendingImages.length,
@@ -542,7 +542,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               builder:
                                   (_) => Dialog(
                                     backgroundColor: Colors.transparent,
-                                    insetPadding: EdgeInsets.all(100.w),
+                                    insetPadding: EdgeInsets.all(30.w),
                                     child: GestureDetector(
                                       onTap: () => Navigator.of(context).pop(),
                                       child: Container(
@@ -553,24 +553,24 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(
                                               width: double.infinity,
                                               padding: EdgeInsets.symmetric(
-                                                vertical: 12.h,
-                                                horizontal: 24.w,
+                                                vertical: 4.h,
+                                                horizontal: 7.w,
                                               ),
                                               child: Text(
                                                 "임시저장",
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 50.sp,
+                                                  fontSize: 15.sp,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
                                             ),
-                                            SizedBox(height: 20.h),
+                                            SizedBox(height: 6.h),
                                             ClipRRect(
                                               borderRadius:
                                                   BorderRadiusGeometry.circular(
-                                                    24.r,
+                                                    7.r,
                                                   ),
                                               child: InteractiveViewer(
                                                 child: Image.network(
@@ -594,12 +594,12 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                         error,
                                                         stackTrace,
                                                       ) => Container(
-                                                        height: 400.h,
+                                                        height: 119.h,
                                                         color: Colors.grey[300],
                                                         child: Center(
                                                           child: Icon(
                                                             Icons.broken_image,
-                                                            size: 48.sp,
+                                                            size: 14.sp,
                                                           ),
                                                         ),
                                                       ),
@@ -619,7 +619,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               fit: StackFit.expand,
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                   child: Image.network(
                                     image.url,
                                     fit: BoxFit.cover,
@@ -630,8 +630,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                 ),
                                 // 타입별 표시 (오른쪽 위)
                                 Positioned(
-                                  top: 8.r,
-                                  right: 8.r,
+                                  top: 2.r,
+                                  right: 2.r,
                                   child: _typeBadge(image.type),
                                 ),
                               ],
@@ -644,7 +644,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                 );
               }, childCount: 1),
             ),
-          SliverToBoxAdapter(child: SizedBox(height: 60.h)),
+          SliverToBoxAdapter(child: SizedBox(height: 18.h)),
         ],
       );
     }
@@ -652,7 +652,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     else {
       return SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(top: 48.h, bottom: 60.h),
+          padding: EdgeInsets.only(top: 14.h, bottom: 18.h),
           child: Column(
             children: [
               if (widget.showDaySelector)
@@ -686,25 +686,25 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                     );
                   },
                 ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 6.h),
 
               // NoImage or Image Section
               if (allImages.isEmpty && allPendingImages.isEmpty)
-                SizedBox(height: 1350.h, child: NoImage())
+                SizedBox(height: 401.h, child: NoImage())
               else
                 Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${allImages.length}장',
                             style: TextStyle(
-                              fontSize: 60.sp,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.1,
                               color: Color(0xff313131),
                             ),
                           ),
@@ -725,8 +725,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                       ? '${selectedMatchedOrUnMatchedPictures.length}개 선택됨'
                                       : '선택하기',
                                   style: TextStyle(
-                                    fontSize: 39.sp,
-                                    letterSpacing: -0.6,
+                                    fontSize: 12.sp,
+                                    letterSpacing: -0.2,
                                     color:
                                         selectionMode
                                             ? Color(0xff8287ff)
@@ -738,11 +738,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             ),
                                   ),
                                 ),
-                                SizedBox(width: 6.w),
+                                SizedBox(width: 2.w),
                                 SvgPicture.asset(
                                   'asset/icon/check.svg',
-                                  width: 48.w,
-                                  height: 48.h,
+                                  width: 14.w,
+                                  height: 14.h,
                                   color:
                                       selectionMode
                                           ? Color(0xff8287ff)
@@ -754,17 +754,17 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 5.h),
 
                     // 매칭 끝난 사진 그리드뷰
                     GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
+                        crossAxisSpacing: 4.w,
+                        mainAxisSpacing: 4.h,
                         childAspectRatio: 1,
                       ),
                       itemCount: allImages.length,
@@ -794,7 +794,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                       builder:
                                           (_) => Dialog(
                                             backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(100.w),
+                                            insetPadding: EdgeInsets.all(30.w),
                                             child: GestureDetector(
                                               onTap:
                                                   () =>
@@ -812,8 +812,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                       width: double.infinity,
                                                       padding:
                                                           EdgeInsets.symmetric(
-                                                            vertical: 12.h,
-                                                            horizontal: 24.w,
+                                                            vertical: 4.h,
+                                                            horizontal: 7.w,
                                                           ),
                                                       child: Text(
                                                         image.type ==
@@ -824,7 +824,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                             : "기타",
                                                         style: TextStyle(
                                                           color: Colors.white,
-                                                          fontSize: 50.sp,
+                                                          fontSize: 15.sp,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
@@ -832,12 +832,12 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                             TextAlign.center,
                                                       ),
                                                     ),
-                                                    SizedBox(height: 20.h),
+                                                    SizedBox(height: 6.h),
                                                     // 이미지 (아래)
                                                     ClipRRect(
                                                       borderRadius:
                                                           BorderRadiusGeometry.circular(
-                                                            24.r,
+                                                            7.r,
                                                           ),
                                                       child: InteractiveViewer(
                                                         child: Image.network(
@@ -862,7 +862,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                                 error,
                                                                 stackTrace,
                                                               ) => Container(
-                                                                height: 400.h,
+                                                                height: 119.h,
                                                                 color:
                                                                     Colors
                                                                         .grey[300],
@@ -870,7 +870,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                                   child: Icon(
                                                                     Icons
                                                                         .broken_image,
-                                                                    size: 48.sp,
+                                                                    size: 14.sp,
                                                                   ),
                                                                 ),
                                                               ),
@@ -890,7 +890,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               fit: StackFit.expand,
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                   child: Image.network(
                                     image.url,
                                     fit: BoxFit.cover,
@@ -901,8 +901,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                 ),
                                 // 타입별 표시 (오른쪽 위)
                                 Positioned(
-                                  top: 8.r,
-                                  right: 8.r,
+                                  top: 2.r,
+                                  right: 2.r,
                                   child: _typeBadge(image.type),
                                 ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
@@ -910,11 +910,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Color(0xff8287ff).withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                       // TODO: 테두리 있어야하나????
                                       // border: Border.all(
                                       //   color: Color(0xff8287ff),
-                                      //   width: 4.r,
+                                      //   width: 1.r,
                                       // ),
                                     ),
                                     // TODO: 체크표시 해놓을까????
@@ -922,7 +922,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                     //   child: Icon(
                                     //     Icons.check_circle,
                                     //     color: Color.fromARGB(154, 130, 134, 255),
-                                    //     size: 48.sp,
+                                    //     size: 14.sp,
                                     //   ),
                                     // ),
                                   ),
@@ -933,7 +933,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                       },
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(48.w, 80.h, 48.w, 20.h),
+                      padding: EdgeInsets.fromLTRB(14.w, 24.h, 14.w, 6.h),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -941,21 +941,21 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                           style: TextStyle(
                             color: Color(0xff7d7d7d),
                             fontWeight: FontWeight.w600,
-                            fontSize: 42.sp,
-                            letterSpacing: -0.9.sp,
+                            fontSize: 12.sp,
+                            letterSpacing: -0.3.sp,
                           ),
                         ),
                       ),
                     ),
                     // TODO: 임시 저장 그리드뷰
                     GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 48.w),
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 5,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
+                        crossAxisSpacing: 4.w,
+                        mainAxisSpacing: 4.h,
                         childAspectRatio: 1,
                       ),
                       itemCount: allPendingImages.length,
@@ -969,7 +969,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               builder:
                                   (_) => Dialog(
                                     backgroundColor: Colors.transparent,
-                                    insetPadding: EdgeInsets.all(100.w),
+                                    insetPadding: EdgeInsets.all(30.w),
                                     child: GestureDetector(
                                       onTap: () => Navigator.of(context).pop(),
                                       child: Container(
@@ -980,24 +980,24 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(
                                               width: double.infinity,
                                               padding: EdgeInsets.symmetric(
-                                                vertical: 12.h,
-                                                horizontal: 24.w,
+                                                vertical: 4.h,
+                                                horizontal: 7.w,
                                               ),
                                               child: Text(
                                                 "임시저장",
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 50.sp,
+                                                  fontSize: 15.sp,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
                                             ),
-                                            SizedBox(height: 20.h),
+                                            SizedBox(height: 6.h),
                                             ClipRRect(
                                               borderRadius:
                                                   BorderRadiusGeometry.circular(
-                                                    24.r,
+                                                    7.r,
                                                   ),
                                               child: InteractiveViewer(
                                                 child: Image.network(
@@ -1021,12 +1021,12 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                                         error,
                                                         stackTrace,
                                                       ) => Container(
-                                                        height: 400.h,
+                                                        height: 119.h,
                                                         color: Colors.grey[300],
                                                         child: Center(
                                                           child: Icon(
                                                             Icons.broken_image,
-                                                            size: 48.sp,
+                                                            size: 14.sp,
                                                           ),
                                                         ),
                                                       ),
@@ -1046,7 +1046,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                               fit: StackFit.expand,
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                   child: Image.network(
                                     image.url,
                                     fit: BoxFit.cover,
@@ -1057,8 +1057,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                 ),
                                 // 타입별 표시 (오른쪽 위)
                                 Positioned(
-                                  top: 8.r,
-                                  right: 8.r,
+                                  top: 2.r,
+                                  right: 2.r,
                                   child: _typeBadge(image.type),
                                 ),
                               ],
@@ -1082,10 +1082,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
 Widget _typeBadge(GalleryImageType type) {
   switch (type) {
     case GalleryImageType.matched:
-      return Icon(Icons.check_circle, color: Colors.green, size: 28.sp);
+      return Icon(Icons.check_circle, color: Colors.green, size: 8.sp);
     case GalleryImageType.unmatched:
-      return Icon(Icons.error, color: Colors.red, size: 28.sp);
+      return Icon(Icons.error, color: Colors.red, size: 8.sp);
     case GalleryImageType.pending:
-      return Icon(Icons.hourglass_empty, color: Colors.orange, size: 28.sp);
+      return Icon(Icons.hourglass_empty, color: Colors.orange, size: 8.sp);
   }
 }

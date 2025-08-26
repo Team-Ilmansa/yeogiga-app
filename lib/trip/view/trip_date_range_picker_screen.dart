@@ -70,43 +70,43 @@ class _TripDateRangePickerScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. 상단 안내 영역
-            SizedBox(height: 36.h),
+            SizedBox(height: 11.h),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 60.w),
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
               child: Text(
                 '여행날짜를\n선택해주세요',
                 style: TextStyle(
-                  fontSize: 84.sp,
+                  fontSize: 25.sp,
                   fontWeight: FontWeight.bold,
                   color: Color(0xff222222),
                   height: 1.2,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.1,
                 ),
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 9.h),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 60.w),
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
               child: Text(
                 '아직 확정된 날짜는 아니며, 추후 수정이 가능해요',
                 style: TextStyle(
-                  fontSize: 48.sp,
+                  fontSize: 14.sp,
                   color: Color(0xff818181),
                   fontWeight: FontWeight.w400,
-                  letterSpacing: -0.2,
+                  letterSpacing: -0.1,
                 ),
               ),
             ),
-            SizedBox(height: 120.h),
+            SizedBox(height: 36.h),
             // 2. 무한 스크롤 달력 영역
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 36.w),
+                padding: EdgeInsets.symmetric(horizontal: 11.w),
                 //TODO: 아이템 빌더에 아이템 수 안넣어도 무한대로 생성되나 ??
                 itemBuilder: (context, index) {
                   final month = DateTime(now.year, now.month + index);
                   return Padding(
-                    padding: EdgeInsets.only(bottom: 84.h),
+                    padding: EdgeInsets.only(bottom: 25.h),
                     child: _buildMonthCalendar(month),
                   );
                 },
@@ -120,26 +120,26 @@ class _TripDateRangePickerScreenState
           (_startDate != null && _endDate != null)
               ? Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(72.r),
+                  borderRadius: BorderRadius.circular(21.r),
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withOpacity(0.08),
                       offset: const Offset(0, -2),
-                      blurRadius: 1,
+                      blurRadius: 4,
                       spreadRadius: 0,
                     ),
                   ],
                 ),
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(36.w, 36.h, 36.w, 75.h),
+                  padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff8287ff),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(48.r),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
-                      minimumSize: Size.fromHeight(180.h),
+                      minimumSize: Size.fromHeight(53.h),
                       elevation: 0,
                     ),
                     onPressed:
@@ -202,8 +202,8 @@ class _TripDateRangePickerScreenState
                     child:
                         _isLoading
                             ? SizedBox(
-                              height: 72.h,
-                              width: 72.w,
+                              height: 21.h,
+                              width: 21.w,
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 3,
@@ -214,7 +214,7 @@ class _TripDateRangePickerScreenState
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 54.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -249,7 +249,7 @@ class _TripDateRangePickerScreenState
                               ? const Color(0xff6d8fff)
                               : const Color(0xffbdbdbd)),
                   fontWeight: FontWeight.w600,
-                  fontSize: 42.sp,
+                  fontSize: 12.sp,
                 ),
               ),
             ),
@@ -257,7 +257,7 @@ class _TripDateRangePickerScreenState
         }),
       ),
     );
-    dayWidgets.add(const SizedBox(height: 10));
+    dayWidgets.add(const SizedBox(height: 3));
 
     // TODO: 다시한번 로직 검토하기
     // 날짜 그리드
@@ -298,7 +298,7 @@ class _TripDateRangePickerScreenState
                   });
                 },
                 child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 24.h),
+                  margin: EdgeInsets.symmetric(vertical: 7.h),
                   decoration:
                       isSelected
                           ? BoxDecoration(
@@ -306,19 +306,19 @@ class _TripDateRangePickerScreenState
                             borderRadius: BorderRadius.horizontal(
                               left:
                                   isRangeEdge && thisDay == _startDate
-                                      ? Radius.circular(150.r)
+                                      ? Radius.circular(45.r)
                                       : Radius.zero,
                               right:
                                   isRangeEdge && thisDay == _endDate
-                                      ? Radius.circular(150.r)
+                                      ? Radius.circular(45.r)
                                       : Radius.zero,
                             ),
                           )
                           : null,
                   child: Center(
                     child: Container(
-                      width: 114.w,
-                      height: 114.h,
+                      width: 34.w,
+                      height: 34.h,
                       decoration:
                           isRangeEdge
                               ? BoxDecoration(
@@ -345,7 +345,7 @@ class _TripDateRangePickerScreenState
                                                     DateTime.saturday
                                                 ? const Color(0xff6d8fff)
                                                 : const Color(0xff313131)))),
-                            fontSize: 42.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -373,7 +373,7 @@ class _TripDateRangePickerScreenState
             child: Text(
               '${month.year}년 ${month.month}월',
               style: TextStyle(
-                fontSize: 54.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: Color(0xff222222),
               ),

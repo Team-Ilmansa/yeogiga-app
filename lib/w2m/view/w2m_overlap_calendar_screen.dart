@@ -61,34 +61,34 @@ class _W2MOverlapCalendarScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 36.h),
+                SizedBox(height: 11.h),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 60.w),
+                  padding: EdgeInsets.symmetric(horizontal: 18.w),
                   child: Text(
                     '여행날짜를\n확정해주세요',
                     style: TextStyle(
-                      fontSize: 84.sp,
+                      fontSize: 25.sp,
                       fontWeight: FontWeight.bold,
                       color: Color(0xff222222),
                       height: 1.2,
-                      letterSpacing: -0.5,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ),
-                SizedBox(height: 30.h),
+                SizedBox(height: 9.h),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 60.w),
+                  padding: EdgeInsets.symmetric(horizontal: 18.w),
                   child: Text(
                     '날짜는 추후 수정이 가능해요',
                     style: TextStyle(
-                      fontSize: 48.sp,
+                      fontSize: 14.sp,
                       color: Color(0xff818181),
                       fontWeight: FontWeight.w400,
-                      letterSpacing: -0.2,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ),
-                SizedBox(height: 120.h),
+                SizedBox(height: 36.h),
                 Expanded(
                   child:
                       tripW2m == null || tripW2m.availabilities == null
@@ -111,14 +111,14 @@ class _W2MOverlapCalendarScreenState
                                 }
                               }
                               return ListView.builder(
-                                padding: EdgeInsets.symmetric(horizontal: 36.w),
+                                padding: EdgeInsets.symmetric(horizontal: 11.w),
                                 itemBuilder: (context, index) {
                                   final month = DateTime(
                                     now.year,
                                     now.month + index,
                                   );
                                   return Padding(
-                                    padding: EdgeInsets.only(bottom: 84.h),
+                                    padding: EdgeInsets.only(bottom: 25.h),
                                     child: _buildMonthCalendar(
                                       month,
                                       overlapMap,
@@ -137,26 +137,26 @@ class _W2MOverlapCalendarScreenState
               (_startDate != null && _endDate != null)
                   ? Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(72.r),
+                      borderRadius: BorderRadius.circular(21.r),
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withOpacity(0.08),
                           offset: const Offset(0, -2),
-                          blurRadius: 1,
+                          blurRadius: 4,
                           spreadRadius: 0,
                         ),
                       ],
                     ),
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(36.w, 36.h, 36.w, 75.h),
+                      padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff8287ff),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(48.r),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
-                          minimumSize: Size.fromHeight(180.h),
+                          minimumSize: Size.fromHeight(53.h),
                           elevation: 0,
                         ),
                         onPressed: () async {
@@ -174,7 +174,7 @@ class _W2MOverlapCalendarScreenState
                                     content: Text(
                                       '여행 일정이 저장되었습니다.',
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -185,9 +185,9 @@ class _W2MOverlapCalendarScreenState
                                       121,
                                     ),
                                     behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(16.w),
+                                    margin: EdgeInsets.all(5.w),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     elevation: 0,
                                     duration: const Duration(seconds: 2),
@@ -202,7 +202,7 @@ class _W2MOverlapCalendarScreenState
                                     content: Text(
                                       e.toString(),
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -213,9 +213,9 @@ class _W2MOverlapCalendarScreenState
                                       65,
                                     ),
                                     behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(16.w),
+                                    margin: EdgeInsets.all(5.w),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     elevation: 0,
                                     duration: const Duration(seconds: 2),
@@ -230,15 +230,15 @@ class _W2MOverlapCalendarScreenState
                                   content: Text(
                                     '시작/종료 날짜를 선택해주세요.',
                                     style: TextStyle(
-                                      fontSize: 48.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   backgroundColor: Colors.red,
                                   behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.all(16.w),
+                                  margin: EdgeInsets.all(5.w),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(48.r),
+                                    borderRadius: BorderRadius.circular(14.r),
                                   ),
                                   elevation: 0,
                                   duration: const Duration(seconds: 2),
@@ -252,7 +252,7 @@ class _W2MOverlapCalendarScreenState
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 54.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -320,7 +320,7 @@ class _W2MOverlapCalendarScreenState
                               ? const Color(0xff6d8fff)
                               : const Color(0xffbdbdbd)),
                   fontWeight: FontWeight.w600,
-                  fontSize: 42.sp,
+                  fontSize: 12.sp,
                 ),
               ),
             ),
@@ -328,7 +328,7 @@ class _W2MOverlapCalendarScreenState
         }),
       ),
     );
-    dayWidgets.add(const SizedBox(height: 10));
+    dayWidgets.add(const SizedBox(height: 3));
 
     int day = 1;
     for (int week = 0; week < 6; week++) {
@@ -383,7 +383,7 @@ class _W2MOverlapCalendarScreenState
                   });
                 },
                 child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 24.h),
+                  margin: EdgeInsets.symmetric(vertical: 7.h),
                   decoration:
                       isSelected
                           ? BoxDecoration(
@@ -391,18 +391,18 @@ class _W2MOverlapCalendarScreenState
                             borderRadius: BorderRadius.horizontal(
                               left:
                                   isRangeEdge && thisDay == _startDate
-                                      ? Radius.circular(150.r)
+                                      ? Radius.circular(45.r)
                                       : Radius.zero,
                               right:
                                   isRangeEdge && thisDay == _endDate
-                                      ? Radius.circular(150.r)
+                                      ? Radius.circular(45.r)
                                       : Radius.zero,
                             ),
                           )
                           : null,
                   child: Container(
-                    width: 114.w,
-                    height: 114.h,
+                    width: 34.w,
+                    height: 34.h,
                     decoration:
                         overlapMap[thisDay] != null && overlapMap[thisDay]! > 0
                             ? BoxDecoration(
@@ -412,19 +412,19 @@ class _W2MOverlapCalendarScreenState
                               borderRadius: BorderRadius.horizontal(
                                 left:
                                     _isOverlapRangeStart(thisDay, overlapMap)
-                                        ? Radius.circular(150.r)
+                                        ? Radius.circular(45.r)
                                         : Radius.zero,
                                 right:
                                     _isOverlapRangeEnd(thisDay, overlapMap)
-                                        ? Radius.circular(150.r)
+                                        ? Radius.circular(45.r)
                                         : Radius.zero,
                               ),
                             )
                             : null,
                     child: Center(
                       child: Container(
-                        width: 114.w,
-                        height: 114.h,
+                        width: 34.w,
+                        height: 34.h,
                         decoration:
                             isRangeEdge
                                 ? BoxDecoration(
@@ -447,7 +447,7 @@ class _W2MOverlapCalendarScreenState
                                                       DateTime.saturday
                                                   ? const Color(0xff6d8fff)
                                                   : const Color(0xff313131)))),
-                              fontSize: 42.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -476,7 +476,7 @@ class _W2MOverlapCalendarScreenState
             child: Text(
               '${month.year}년 ${month.month}월',
               style: TextStyle(
-                fontSize: 54.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: Color(0xff222222),
               ),

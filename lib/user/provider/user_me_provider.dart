@@ -7,6 +7,7 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/repository/auth_repository.dart';
 import 'package:yeogiga/user/repository/user_me_repository.dart';
 import 'package:yeogiga/user/repository/fcm_token_repository.dart';
+import 'package:yeogiga/common/model/login_response.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
@@ -74,17 +75,33 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         password: password,
       );
 
+      // 디버깅용 로그 추가
+      print('로그인 응답: ${resp.code} / ${resp.message} / ${resp.data}');
+      print('코드 타입: ${resp.code.runtimeType}');
+
+      // U003: 탈퇴한 사용자 - 복구 페이지로 리다이렉트  
+      if (resp.code.toString() == "U003") {
+        final deletedData = UserDeletedData.fromJson(resp.data as Map<String, dynamic>);
+        state = UserDeleteModel(
+          code: resp.code.toString(),
+          message: resp.message,
+          data: deletedData,
+        );
+        return state!;
+      }
+
       // code와 data로 성공/실패 판단
       if (resp.code != 200 || resp.data == null) {
         state = UserModelError(message: resp.message);
         return state!;
       }
 
+      final loginData = LoginResponse.fromJson(resp.data as Map<String, dynamic>);
       await storage.write(
         key: REFRESH_TOKEN_KEY,
-        value: resp.data!.refreshToken,
+        value: loginData.refreshToken,
       );
-      await storage.write(key: ACCESS_TOKEN_KEY, value: resp.data!.accessToken);
+      await storage.write(key: ACCESS_TOKEN_KEY, value: loginData.accessToken);
 
       // 로그인 성공 시 FCM 토큰 등록
       await registerFcmToken(ref);
@@ -94,6 +111,25 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       state = userResp;
       print('login end');
       return userResp;
+    } on DioException catch (e) {
+      // 서버 에러 응답에서 U003 코드 확인
+      if (e.response?.data != null) {
+        final responseData = e.response!.data;
+        print('DioException 응답: $responseData');
+        
+        if (responseData is Map<String, dynamic> && responseData['code'] == 'U003') {
+          final deletedData = UserDeletedData.fromJson(responseData['data'] as Map<String, dynamic>);
+          state = UserDeleteModel(
+            code: responseData['code'].toString(),
+            message: responseData['message'] ?? '이미 회원탈퇴한 사용자입니다.',
+            data: deletedData,
+          );
+          return state!;
+        }
+      }
+      
+      state = UserModelError(message: '로그인에 실패했습니다.');
+      return state!;
     } catch (e) {
       state = UserModelError(message: '로그인에 실패했습니다.');
       return state!;
@@ -117,5 +153,29 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       storage.delete(key: REFRESH_TOKEN_KEY),
       storage.delete(key: ACCESS_TOKEN_KEY),
     ]);
+  }
+
+  // 계정 복구하기
+  Future<bool> restoreAccount() async {
+    final currentState = state;
+    if (currentState is! UserDeleteModel) {
+      return false;
+    }
+
+    try {
+      final response = await authRepository.restore(
+        userId: currentState.data.userId,
+      );
+
+      if (response['code'] == 200) {
+        // 복구 성공 시 state는 그대로 두고 성공만 반환
+        // 다이얼로그에서 확인 버튼을 누를 때 state를 변경
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
   }
 }

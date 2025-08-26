@@ -55,10 +55,10 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
 
       // 중앙 FAB
       floatingActionButton: Transform.translate(
-        offset: Offset(0, 54.h), // 아래로 18px 이동
+        offset: Offset(0, 16.h), // 아래로 18px 이동
         child: SizedBox(
-          width: 240.w,
-          height: 240.h,
+          width: 71.w,
+          height: 71.h,
           child: FloatingActionButton(
             onPressed: () async {
               final nameController = TextEditingController();
@@ -74,6 +74,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                             .postTrip(title: nameController.text);
                         //혹시나 해서 실패했을 경우 만듬
                         if (trip is! SettingTripModel) {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           GoRouter.of(context).pop(); // 기존 다이얼로그 닫기
                           await showDialog(
                             context: context,
@@ -84,12 +86,12 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: SizedBox(
-                                    height: 450.h,
+                                    height: 134.h,
                                     child: Center(
                                       child: Text(
                                         '여행 생성에 실패했어요! ㅠㅠ',
                                         style: TextStyle(
-                                          fontSize: 60.sp,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         textAlign: TextAlign.center,
@@ -99,6 +101,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                                 ),
                           );
                         } else {
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
                           Navigator.of(context).pop();
                           GoRouter.of(context).push('/dateRangePicker');
                         }
@@ -109,7 +113,7 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
             backgroundColor: const Color(0xFF8287FF),
             shape: const CircleBorder(),
             elevation: 0,
-            child: Icon(Icons.add, size: 120.sp, color: Colors.white),
+            child: Icon(Icons.add, size: 36.sp, color: Colors.white),
           ),
         ),
       ),
@@ -118,27 +122,27 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
       // 곡선 하단 바
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(60.r),
-          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6.r)],
+          borderRadius: BorderRadius.circular(18.r),
+          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 1.r)],
           color: Colors.white,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(60.r),
+          borderRadius: BorderRadius.circular(18.r),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(72.r),
+              borderRadius: BorderRadius.circular(21.r),
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.04),
-                  offset: Offset(0, -6.h),
-                  blurRadius: 3.r,
+                  offset: Offset(0, -2.h),
+                  blurRadius: 1.r,
                   spreadRadius: 0,
                 ),
               ],
             ),
             child: SizedBox(
-              height: 260.h,
+              height: 77.h,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -148,7 +152,7 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                     '홈',
                     refresh: () => ref.refresh(mainTripFutureProvider),
                   ),
-                  SizedBox(width: 200.w), // FAB 공간을 줄임
+                  SizedBox(width: 60.w), // FAB 공간을 줄임
                   _buildTabButton(
                     1,
                     'asset/icon/user-02.svg',
@@ -202,20 +206,20 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 8.h, bottom: 0.0),
+            padding: EdgeInsets.only(top: 2.h, bottom: 0.0),
             child: SvgPicture.asset(
               assetPath,
-              width: 96.w,
-              height: 96.h,
+              width: 29.w,
+              height: 29.h,
               color: isSelected ? const Color(0xFF8287FF) : Colors.grey,
             ),
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 1.h),
           Text(
             title,
             style: TextStyle(
-              fontSize: 36.sp,
-              letterSpacing: -0.3,
+              fontSize: 11.sp,
+              letterSpacing: -0.1,
               color:
                   isSelected
                       ? const Color(0xFF8287FF)

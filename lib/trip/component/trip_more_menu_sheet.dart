@@ -24,29 +24,29 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
               onTap: () {},
               child: Container(
                 width: double.infinity,
-                height: 1004.h,
+                height: 298.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(36.r),
+                    top: Radius.circular(11.r),
                   ),
                 ),
                 padding: EdgeInsets.only(
                   left: 0,
                   right: 0,
-                  top: 24.h,
-                  bottom: 36.h + MediaQuery.of(context).viewPadding.bottom,
+                  top: 7.h,
+                  bottom: 11.h + MediaQuery.of(context).viewPadding.bottom,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 333.w,
-                      height: 18.h,
-                      margin: EdgeInsets.only(bottom: 28.h, top: 14.h),
+                      width: 99.w,
+                      height: 5.h,
+                      margin: EdgeInsets.only(bottom: 8.h, top: 4.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEDEDED),
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(3.r),
                       ),
                     ),
 
@@ -66,29 +66,29 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                 ),
-                                insetPadding: EdgeInsets.all(48.w),
+                                insetPadding: EdgeInsets.all(14.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 60.w,
-                                    vertical: 60.h,
+                                    horizontal: 18.w,
+                                    vertical: 18.h,
                                   ),
                                   child: Container(
-                                    width: 0.w,
-                                    height: 200.h,
+                                    width: 1.w,
+                                    height: 59.h,
                                     child: Center(
                                       child: Center(
                                         child: Padding(
                                           padding: EdgeInsets.symmetric(
-                                            horizontal: 15.w,
+                                            horizontal: 4.w,
                                           ),
                                           child: Text(
                                             tripId != null
                                                 ? tripId.toString()
                                                 : '알 수 없음',
                                             style: TextStyle(
-                                              fontSize: 60.sp,
+                                              fontSize: 18.sp,
                                               fontWeight: FontWeight.w600,
                                               color: const Color(0xff8287ff),
                                             ),
@@ -114,13 +114,13 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(60.r),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                insetPadding: EdgeInsets.all(100.w),
+                                insetPadding: EdgeInsets.all(30.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 40.w,
-                                    vertical: 40.h,
+                                    horizontal: 12.w,
+                                    vertical: 12.h,
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -129,21 +129,21 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                     children: [
                                       Padding(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: 15.w,
+                                          horizontal: 4.w,
                                         ),
                                         child: Text(
                                           '여행 개요 수정',
                                           style: TextStyle(
-                                            fontSize: 54.sp,
+                                            fontSize: 16.sp,
                                             fontWeight: FontWeight.bold,
                                             color: const Color(0xff313131),
                                           ),
                                         ),
                                       ),
-                                      SizedBox(height: 48.h),
+                                      SizedBox(height: 14.h),
                                       Padding(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: 15.w,
+                                          horizontal: 4.w,
                                         ),
                                         child: CustomVerifyTextFormField(
                                           controller: controller,
@@ -151,7 +151,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                           onChanged: (value) {},
                                         ),
                                       ),
-                                      SizedBox(height: 40.h),
+                                      SizedBox(height: 12.h),
                                       Align(
                                         alignment: Alignment.center,
                                         child: SizedBox(
@@ -163,10 +163,10 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                               ),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(42.r),
+                                                    BorderRadius.circular(12.r),
                                               ),
                                               elevation: 0,
-                                              minimumSize: Size(0, 150.h),
+                                              minimumSize: Size(0, 45.h),
                                               padding: EdgeInsets.zero,
                                             ),
                                             onPressed: () {
@@ -177,7 +177,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                             child: Text(
                                               '확인',
                                               style: TextStyle(
-                                                fontSize: 48.sp,
+                                                fontSize: 14.sp,
                                                 fontWeight: FontWeight.w600,
                                                 color: Colors.white,
                                               ),
@@ -195,6 +195,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                             final success = await ref
                                 .read(tripProvider.notifier)
                                 .updateTripTitle(title: result);
+                            // 수정: async gap 이후 context 사용 시 null 체크 추가 (StatelessWidget)
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -217,9 +218,9 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                           65,
                                         ),
                                 behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.all(16.w),
+                                margin: EdgeInsets.all(5.w),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                 ),
                                 elevation: 0,
                                 duration: const Duration(seconds: 2),
@@ -243,15 +244,15 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                 content: Text(
                                   '여행 이름 수정에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
                                   style: TextStyle(
-                                    fontSize: 48.sp,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.all(16.w),
+                                margin: EdgeInsets.all(5.w),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                 ),
                                 elevation: 0,
                                 duration: const Duration(seconds: 2),
@@ -283,39 +284,39 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(60.r),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                insetPadding: EdgeInsets.all(100.w),
+                                insetPadding: EdgeInsets.all(30.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    vertical: 50.h,
-                                    horizontal: 50.w,
+                                    vertical: 15.h,
+                                    horizontal: 15.w,
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(height: 10.h),
+                                      SizedBox(height: 3.h),
                                       Text(
                                         '${trip.title}을 정말로 삭제하시겠어요?',
                                         style: TextStyle(
-                                          fontSize: 60.sp,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
-                                          letterSpacing: -0.9.sp,
+                                          letterSpacing: -0.3.sp,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      SizedBox(height: 10.h),
+                                      SizedBox(height: 3.h),
                                       Text(
                                         '해당 작업은 복구할 수 없어요',
                                         style: TextStyle(
                                           color: Color(0xff7d7d7d),
-                                          fontSize: 42.sp,
+                                          fontSize: 12.sp,
                                         ),
                                       ),
-                                      SizedBox(height: 150.h),
+                                      SizedBox(height: 45.h),
                                       Row(
                                         children: [
                                           Expanded(
@@ -327,12 +328,12 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                        42.r,
+                                                        12.r,
                                                       ),
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  160.h,
+                                                  48.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -343,14 +344,14 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                               child: Text(
                                                 '취소',
                                                 style: TextStyle(
-                                                  fontSize: 48.sp,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          SizedBox(width: 32.w),
+                                          SizedBox(width: 10.w),
                                           Expanded(
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -360,12 +361,12 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                        42.r,
+                                                        12.r,
                                                       ),
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  160.h,
+                                                  48.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -376,7 +377,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                               child: Text(
                                                 '삭제하기',
                                                 style: TextStyle(
-                                                  fontSize: 48.sp,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.red,
                                                 ),
@@ -405,7 +406,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                   content: Text(
                                     success ? '여행이 삭제되었습니다.' : '여행 삭제에 실패했습니다.',
                                     style: TextStyle(
-                                      fontSize: 48.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -424,9 +425,9 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                             65,
                                           ),
                                   behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.all(16.w),
+                                  margin: EdgeInsets.all(5.w),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(48.r),
+                                    borderRadius: BorderRadius.circular(14.r),
                                   ),
                                   elevation: 0,
                                   duration: const Duration(seconds: 2),
@@ -456,15 +457,15 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                   content: Text(
                                     '여행 삭제에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
                                     style: TextStyle(
-                                      fontSize: 48.sp,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   backgroundColor: Colors.red,
                                   behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.all(16.w),
+                                  margin: EdgeInsets.all(5.w),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(48.r),
+                                    borderRadius: BorderRadius.circular(14.r),
                                   ),
                                   elevation: 0,
                                   duration: const Duration(seconds: 2),
@@ -510,29 +511,29 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
               onTap: () {},
               child: Container(
                 width: double.infinity,
-                height: 620.h,
+                height: 184.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(36.r),
+                    top: Radius.circular(11.r),
                   ),
                 ),
                 padding: EdgeInsets.only(
                   left: 0,
                   right: 0,
-                  top: 24.h,
-                  bottom: 36.h + MediaQuery.of(context).viewPadding.bottom,
+                  top: 7.h,
+                  bottom: 11.h + MediaQuery.of(context).viewPadding.bottom,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 333.w,
-                      height: 18.h,
-                      margin: EdgeInsets.only(bottom: 28.h, top: 14.h),
+                      width: 99.w,
+                      height: 5.h,
+                      margin: EdgeInsets.only(bottom: 8.h, top: 4.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEDEDED),
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(3.r),
                       ),
                     ),
                     // 여행 ID 확인하기
@@ -551,28 +552,28 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                 ),
-                                insetPadding: EdgeInsets.all(48.w),
+                                insetPadding: EdgeInsets.all(14.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 60.w,
-                                    vertical: 60.h,
+                                    horizontal: 18.w,
+                                    vertical: 18.h,
                                   ),
                                   child: Container(
-                                    width: 0.w,
-                                    height: 200.h,
+                                    width: 1.w,
+                                    height: 59.h,
                                     child: Center(
                                       child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: 15.w,
+                                          horizontal: 4.w,
                                         ),
                                         child: Text(
                                           tripId != null
                                               ? tripId.toString()
                                               : '알 수 없음',
                                           style: TextStyle(
-                                            fontSize: 60.sp,
+                                            fontSize: 18.sp,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xff8287ff),
                                           ),
@@ -596,13 +597,13 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                               (context) => Dialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(48.r),
+                                  borderRadius: BorderRadius.circular(14.r),
                                 ),
-                                insetPadding: EdgeInsets.all(48.w),
+                                insetPadding: EdgeInsets.all(14.w),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    vertical: 40.h,
-                                    horizontal: 40.w,
+                                    vertical: 12.h,
+                                    horizontal: 12.w,
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -610,19 +611,19 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                       Icon(
                                         Icons.warning_amber_rounded,
                                         color: Colors.red,
-                                        size: 120.w,
+                                        size: 36.w,
                                       ),
-                                      SizedBox(height: 48.h),
+                                      SizedBox(height: 14.h),
                                       Text(
                                         '정말 탈퇴하시겠습니까?',
                                         style: TextStyle(
-                                          fontSize: 56.sp,
+                                          fontSize: 17.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      SizedBox(height: 50.h),
+                                      SizedBox(height: 15.h),
                                       Row(
                                         children: [
                                           Expanded(
@@ -634,12 +635,12 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                        42.r,
+                                                        12.r,
                                                       ),
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  156.h,
+                                                  46.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -650,14 +651,14 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                               child: Text(
                                                 '취소',
                                                 style: TextStyle(
-                                                  fontSize: 48.sp,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.white,
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          SizedBox(width: 32.w),
+                                          SizedBox(width: 10.w),
                                           Expanded(
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -667,12 +668,12 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                        42.r,
+                                                        12.r,
                                                       ),
                                                 ),
                                                 elevation: 0,
                                                 minimumSize: Size.fromHeight(
-                                                  156.h,
+                                                  46.h,
                                                 ),
                                                 padding: EdgeInsets.zero,
                                               ),
@@ -683,7 +684,7 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                               child: Text(
                                                 '탈퇴',
                                                 style: TextStyle(
-                                                  fontSize: 48.sp,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.white,
                                                 ),
@@ -712,7 +713,7 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                     content: Text(
                                       success ? '여행에서 탈퇴했습니다.' : '탈퇴에 실패했습니다.',
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -731,9 +732,9 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                               65,
                                             ),
                                     behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(16.w),
+                                    margin: EdgeInsets.all(5.w),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     elevation: 0,
                                     duration: const Duration(seconds: 2),
@@ -761,7 +762,7 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                     content: Text(
                                       errorMsg,
                                       style: TextStyle(
-                                        fontSize: 48.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -772,9 +773,9 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                                       65,
                                     ),
                                     behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(16.w),
+                                    margin: EdgeInsets.all(5.w),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(48.r),
+                                      borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     elevation: 0,
                                     duration: const Duration(seconds: 2),
@@ -815,17 +816,17 @@ class _TripMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: 192.h,
+        height: 57.h,
         child: Row(
           children: [
-            SizedBox(width: 40.w),
-            // Icon(icon, color: Colors.black87, size: 72.sp),
-            SvgPicture.asset(svgUrl, height: 72.h, width: 72.w),
-            SizedBox(width: 40.w),
+            SizedBox(width: 12.w),
+            // Icon(icon, color: Colors.black87, size: 21.sp),
+            SvgPicture.asset(svgUrl, height: 21.h, width: 21.w),
+            SizedBox(width: 12.w),
             Text(
               text,
               style: TextStyle(
-                fontSize: 48.sp,
+                fontSize: 14.sp,
                 color: Color(0xff313131),
                 fontWeight: FontWeight.w500,
               ),

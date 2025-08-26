@@ -17,10 +17,10 @@ class NoticePanel extends StatelessWidget {
     List<String> notice = ['집결 시간 변경', '숙소 체크인 안내', '저녁 식사 장소 공지'];
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 48.w),
+      padding: EdgeInsets.symmetric(horizontal: 14.w),
       child: Column(
         children: [
-          SizedBox(height: 3.h),
+          SizedBox(height: 1.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -28,17 +28,17 @@ class NoticePanel extends StatelessWidget {
               Text(
                 '현재 공지',
                 style: TextStyle(
-                  fontSize: 60.sp,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
+                  letterSpacing: -0.1,
                   color: const Color(0xff313131),
                 ),
               ),
               Text(
                 '지난 공지 전체보기',
                 style: TextStyle(
-                  fontSize: 39.sp,
-                  letterSpacing: -0.6,
+                  fontSize: 12.sp,
+                  letterSpacing: -0.2,
                   color: const Color.fromARGB(255, 193, 193, 193),
                 ),
               ),
@@ -52,7 +52,7 @@ class NoticePanel extends StatelessWidget {
           // TODO: 일반 공지 있으면
           if (true) NoticeCard(title: 'Text'),
           // ...notice.map((n) => NoticeCard(title: n)),
-          SizedBox(height: 60.h),
+          SizedBox(height: 18.h),
         ],
       ),
     );

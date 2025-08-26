@@ -9,16 +9,16 @@ class TagCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 147.w,
-      height: 84.h,
+      width: 44.w,
+      height: 25.h,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(54.r),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Center(
         child: Text(
           label,
-          style: TextStyle(color: Color(0xff7d7d7d), fontSize: 42.sp),
+          style: TextStyle(color: Color(0xff7d7d7d), fontSize: 12.sp),
           textAlign: TextAlign.center,
         ),
       ),

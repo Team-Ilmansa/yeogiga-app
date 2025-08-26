@@ -76,7 +76,7 @@ class MyApp extends ConsumerWidget {
 
     //고 라우터 적용
     return ScreenUtilInit(
-      designSize: const Size(1320, 2868),
+      designSize: const Size(393, 852),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {

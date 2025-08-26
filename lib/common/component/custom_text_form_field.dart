@@ -57,7 +57,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   Widget build(BuildContext context) {
     final baseBorder = OutlineInputBorder(
       borderSide: const BorderSide(color: Color(0xff8287ff), width: 1),
-      borderRadius: BorderRadius.circular(36.r),
+      borderRadius: BorderRadius.circular(11.r),
     );
 
     return TextFormField(
@@ -68,17 +68,17 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       autofocus: widget.autofocus,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 54.h),
+        contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
         hintText: widget.hintText,
         errorText: widget.errorText,
-        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 42.sp),
+        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
         fillColor: Colors.grey[200],
         filled: true,
         border: baseBorder,
         focusedBorder: baseBorder,
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(36.r),
+          borderRadius: BorderRadius.circular(11.r),
         ),
         errorBorder: baseBorder.copyWith(
           borderSide: const BorderSide(color: Colors.red),
@@ -97,14 +97,14 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
                   },
                   child: Container(
                     margin: EdgeInsets.symmetric(
-                      vertical: 48.h,
-                      horizontal: 48.w,
+                      vertical: 14.h,
+                      horizontal: 14.w,
                     ),
                     decoration: BoxDecoration(
                       color: Color(0xffc6c6c6),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.close, color: Colors.white, size: 36.sp),
+                    child: Icon(Icons.close, color: Colors.white, size: 11.sp),
                   ),
                 )
                 : null,
@@ -173,7 +173,7 @@ class _CustomVerifyTextFormFieldState extends State<CustomVerifyTextFormField> {
   Widget build(BuildContext context) {
     final baseBorder = OutlineInputBorder(
       borderSide: const BorderSide(color: Color(0xff8287ff), width: 1),
-      borderRadius: BorderRadius.circular(36.r),
+      borderRadius: BorderRadius.circular(11.r),
     );
 
     return TextFormField(
@@ -187,17 +187,17 @@ class _CustomVerifyTextFormFieldState extends State<CustomVerifyTextFormField> {
         LengthLimitingTextInputFormatter(6), // 최대 6글자 제한
       ],
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 54.h),
+        contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
         hintText: widget.hintText,
         errorText: widget.errorText,
-        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 42.sp),
+        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
         fillColor: Colors.grey[200],
         filled: true,
         border: baseBorder,
         focusedBorder: baseBorder,
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(36.r),
+          borderRadius: BorderRadius.circular(11.r),
         ),
         errorBorder: baseBorder.copyWith(
           borderSide: const BorderSide(color: Colors.red),
