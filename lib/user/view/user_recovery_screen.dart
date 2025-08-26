@@ -36,10 +36,10 @@ class UserRecoveryScreen extends ConsumerWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withOpacity(0.08),
               spreadRadius: 0,
-              blurRadius: 7,
-              offset: const Offset(0, -4),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
             ),
           ],
         ),
@@ -58,7 +58,7 @@ class UserRecoveryScreen extends ConsumerWidget {
             if (success) {
               _showRecoverySuccessDialog(context, ref);
             } else {
-              _showRecoveryFailDialog(context);
+              _showRecoveryFailDialog(context, ref);
             }
           },
           style: ElevatedButton.styleFrom(
@@ -72,7 +72,11 @@ class UserRecoveryScreen extends ConsumerWidget {
           ),
           child: Text(
             '계정 복구하기',
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
       ),
@@ -111,37 +115,38 @@ class UserRecoveryScreen extends ConsumerWidget {
                   Text(
                     '계정을\n복구하시겠어요?',
                     style: TextStyle(
-                      fontSize: 27.sp,
+                      fontSize: 28.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                       height: 1.4,
                     ),
                   ),
 
-                  SizedBox(height: 18.h),
+                  SizedBox(height: 8.h),
 
                   // 안내 메시지
                   Text(
                     '탈퇴한 계정으로 일주일 이내에 재로그인시 계정 복구가 가능합니다.\n복구를 원하지 않으시다면 뒤로가기를 눌러주세요.',
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.black87,
-                      height: 1.6,
-                      letterSpacing: -0.1,
+                      fontSize: 14.sp,
+                      color: Color(0xff7D7D7D),
+                      height: 1.4,
+                      letterSpacing: -0.3,
                     ),
                   ),
                   // 마감일 안내 (빨간색)
                   Text(
                     '${userData.deletionExpiration} 오전 00:00이후에는 복구가 불가능합니다',
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.red,
+                      fontSize: 14.sp,
+                      color: Color(0xffff0000),
                       fontWeight: FontWeight.w500,
-                      letterSpacing: -0.1,
+                      height: 1.4,
+                      letterSpacing: -0.3,
                     ),
                   ),
 
-                  SizedBox(height: 53.h),
+                  SizedBox(height: 82.h),
 
                   // 중앙 프로필 이미지 영역
                   Center(
@@ -149,8 +154,8 @@ class UserRecoveryScreen extends ConsumerWidget {
                       children: [
                         // 프로필 이미지 (회색 원형)
                         Container(
-                          width: 89.w,
-                          height: 89.w,
+                          width: 160.w,
+                          height: 160.w,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.grey[300],
@@ -170,16 +175,32 @@ class UserRecoveryScreen extends ConsumerWidget {
                                   ),
                         ),
 
-                        SizedBox(height: 14.h),
+                        SizedBox(height: 20.h),
 
                         // 닉네임
-                        Text(
-                          '${nickname}님',
-                          style: TextStyle(
-                            fontSize: 21.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '$nickname',
+                              style: TextStyle(
+                                fontSize: 28.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xff313131),
+                              ),
+                            ),
+                            SizedBox(width: 3.w),
+                            Text(
+                              '님',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff313131),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -201,26 +222,55 @@ class UserRecoveryScreen extends ConsumerWidget {
       barrierDismissible: false,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            contentPadding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 10.h),
+            actionsPadding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
             title: Text(
               '계정 복구 완료',
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
-            content: Text(
-              '계정이 성공적으로 복구되었습니다.\n다시 로그인해주세요.',
-              style: TextStyle(fontSize: 12.sp),
+            content: Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Text(
+                '계정이 성공적으로 복구되었습니다.\n다시 로그인해주세요.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Color(0xff7D7D7D),
+                  height: 1.4,
+                ),
+              ),
             ),
             actions: [
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  // 복구 성공 시 로그아웃하여 state를 null로 변경
-                  await ref.read(userMeProvider.notifier).logout();
-                  if (!context.mounted) return;
-                  context.go('/login');
-                },
-                child: Text(
-                  '확인',
-                  style: TextStyle(fontSize: 12.sp, color: Color(0xff8287ff)),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    // 복구 성공 시 로그아웃하여 state를 null로 변경
+                    await ref.read(userMeProvider.notifier).logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xff8287ff),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    '확인',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -228,27 +278,60 @@ class UserRecoveryScreen extends ConsumerWidget {
     );
   }
 
-  void _showRecoveryFailDialog(BuildContext context) {
+  void _showRecoveryFailDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder:
           (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            contentPadding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 10.h),
+            actionsPadding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
             title: Text(
               '계정 복구 실패',
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
             ),
-            content: Text(
-              '계정 복구에 실패했습니다.\n잠시 후 다시 시도해주세요.',
-              style: TextStyle(fontSize: 12.sp),
+            content: Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Text(
+                '계정 복구에 실패했습니다.\n잠시 후 다시 시도해주세요.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Color(0xff7D7D7D),
+                  height: 1.4,
+                ),
+              ),
             ),
             actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  '확인',
-                  style: TextStyle(fontSize: 12.sp, color: Color(0xff8287ff)),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    await ref.read(userMeProvider.notifier).logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xff8287ff),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    '확인',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
