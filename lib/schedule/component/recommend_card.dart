@@ -9,12 +9,12 @@ class RecommendScheduleCardList extends StatelessWidget {
   Widget build(BuildContext context) {
     final tags = ['태그', '태그', '태그'];
     return SizedBox(
-      height: 540.h,
+      height: 160.h,
       child: ListView.builder(
         primary: false, // <- 세로 스크롤 우선
         shrinkWrap: true, // <- 높이 맞춤
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 48.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         itemCount: 5,
         itemBuilder:
             (_, i) => RecommendScheduleCard(
@@ -39,19 +39,19 @@ class RecommendScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 1140.w,
-      margin: EdgeInsets.only(right: 36.w),
+      width: 339.w,
+      margin: EdgeInsets.only(right: 11.w),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(48.r),
+        borderRadius: BorderRadius.circular(14.r),
         child: Stack(
           children: [
             Positioned.fill(child: Image.asset(imagePath, fit: BoxFit.cover)),
             Positioned(
-              bottom: 30.h,
-              left: 36.w,
-              right: 36.w,
+              bottom: 9.h,
+              left: 11.w,
+              right: 11.w,
               child: Wrap(
-                spacing: 18.w,
+                spacing: 5.w,
                 children: tags.map((tag) => TagCard(label: "#$tag")).toList(),
               ),
             ),

@@ -250,7 +250,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       backgroundColor: Color(0xfffafafa),
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        toolbarHeight: 120.h,
+        toolbarHeight: 36.h,
         backgroundColor: Color(0xfffafafa),
         shadowColor: Colors.transparent, // 그림자도 제거
         foregroundColor: Colors.black,
@@ -260,7 +260,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(Icons.arrow_back_ios_new, size: 56.sp),
+              icon: Icon(Icons.arrow_back_ios_new, size: 17.sp),
               onPressed: () => Navigator.pop(context),
             ),
             Row(
@@ -352,7 +352,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   pinned: true,
                   delegate: TabBarHeaderDelegate(
                     child: SizedBox(
-                      height: 108.h,
+                      height: 32.h,
                       child: Container(
                         color: Color(0xfffafafa),
                         child: TabBar(
@@ -361,7 +361,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             border: Border(
                               bottom: BorderSide(
                                 color: Color(0xFF8287FF),
-                                width: 6.w,
+                                width: 2.w,
                               ),
                             ),
                           ),
@@ -373,8 +373,8 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               child: Text(
                                 '일정 대시보드',
                                 style: TextStyle(
-                                  fontSize: 48.sp,
-                                  letterSpacing: -0.3,
+                                  fontSize: 14.sp,
+                                  letterSpacing: -0.1,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -383,8 +383,8 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               child: Text(
                                 '갤러리',
                                 style: TextStyle(
-                                  fontSize: 48.sp,
-                                  letterSpacing: -0.3,
+                                  fontSize: 14.sp,
+                                  letterSpacing: -0.1,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -443,19 +443,19 @@ class BottomAppBarLayout extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(72.r),
+        borderRadius: BorderRadius.circular(21.r),
         color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
-            offset: const Offset(0, -2),
+            offset: const Offset(0, -1),
             blurRadius: 1,
             spreadRadius: 0,
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(36.w, 36.h, 36.w, 75.h),
+        padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
         child: child,
       ),
     );
@@ -553,9 +553,9 @@ class TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 108.h; // TabBar의 실제 높이와 동일하게!
+  double get maxExtent => 32.h; // TabBar의 실제 높이와 동일하게!
   @override
-  double get minExtent => 108.h;
+  double get minExtent => 32.h;
   @override
   bool shouldRebuild(covariant TabBarHeaderDelegate oldDelegate) => false;
 }

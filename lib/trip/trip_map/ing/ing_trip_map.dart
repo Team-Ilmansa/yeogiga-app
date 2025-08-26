@@ -102,7 +102,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   void _updateMyLocationButtonOffset() {
     final screenHeight = MediaQuery.of(context).size.height;
     final sheetExtent = _sheetController.size;
-    final offset = screenHeight * sheetExtent + 40.h;
+    final offset = screenHeight * sheetExtent + 12.h;
     if (offset != _myLocationButtonOffset) {
       setState(() {
         _myLocationButtonOffset = offset;
@@ -146,7 +146,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       );
       final bounds = NLatLngBounds(southWest: southWest, northEast: northEast);
       await mapController!.updateCamera(
-        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(80.w)),
+        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(24.w)),
       );
     }
   }
@@ -197,7 +197,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
           id: 'member_${member.userId}',
           position: NLatLng(member.latitude, member.longitude),
           icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
-          size: Size(100.w, 100.h),
+          size: Size(30.w, 30.h),
           caption: NOverlayCaption(text: member.nickname),
         );
         _memberMarkers.add(marker);
@@ -212,7 +212,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         coords:
             validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
         color: const Color(0xFF8287FF),
-        width: 12.w,
+        width: 4.w,
       );
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
@@ -245,12 +245,12 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         customBorder: const CircleBorder(),
         onTap: _moveToMyLocation,
         child: SizedBox(
-          width: 120.w,
-          height: 120.w,
+          width: 36.w,
+          height: 36.w,
           child: Icon(
             Icons.my_location_outlined,
             color: Colors.black,
-            size: 60.sp,
+            size: 18.sp,
           ),
         ),
       ),
@@ -400,16 +400,16 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
           ),
           // Custom floating back button
           Positioned(
-            top: 50.h,
-            left: 30.w,
+            top: 15.h,
+            left: 9.w,
             child: SafeArea(
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30.w),
+                  padding: EdgeInsets.symmetric(horizontal: 9.w),
                   child: Icon(
                     Icons.arrow_back_ios_new,
-                    size: 56.w,
+                    size: 17.w,
                     color: Colors.black,
                   ),
                 ),
@@ -418,7 +418,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
           ),
           // 내 위치로 가기 버튼
           Positioned(
-            left: 50.w,
+            left: 15.w,
             bottom: _myLocationButtonOffset,
             child: Align(
               alignment: Alignment.centerLeft,
@@ -435,12 +435,12 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(54.r),
+                    top: Radius.circular(16.r),
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.06),
-                      blurRadius: 10,
+                      blurRadius: 3,
                     ),
                   ],
                 ),
@@ -453,13 +453,13 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                       children: [
                         Center(
                           child: Padding(
-                            padding: EdgeInsets.only(top: 30.h, bottom: 40.h),
+                            padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
                             child: Container(
-                              width: 333.w,
-                              height: 18.h,
+                              width: 99.w,
+                              height: 5.h,
                               decoration: BoxDecoration(
                                 color: const Color(0xffe1e1e1),
-                                borderRadius: BorderRadius.circular(8.r),
+                                borderRadius: BorderRadius.circular(2.r),
                               ),
                             ),
                           ),
@@ -620,7 +620,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                             }
                             final hasPlaces = placeList.isNotEmpty;
                             return SizedBox(
-                              height: 310.h,
+                              height: 92.h,
                               child:
                                   hasPlaces
                                       ? PageView.builder(
@@ -660,7 +660,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                         child: Text(
                                           '등록된 일정이 없습니다.',
                                           style: TextStyle(
-                                            fontSize: 48.sp,
+                                            fontSize: 14.sp,
                                             color: const Color(0xffc6c6c6),
                                             fontWeight: FontWeight.w500,
                                           ),
