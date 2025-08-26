@@ -11,10 +11,7 @@ LoginResponseWrapper _$LoginResponseWrapperFromJson(
 ) => LoginResponseWrapper(
   code: json['code'],
   message: json['message'] as String,
-  data:
-      json['data'] == null
-          ? null
-          : LoginResponse.fromJson(json['data'] as Map<String, dynamic>),
+  data: json['data'],
 );
 
 Map<String, dynamic> _$LoginResponseWrapperToJson(

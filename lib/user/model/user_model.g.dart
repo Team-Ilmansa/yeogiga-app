@@ -18,6 +18,22 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'email': instance.email,
 };
 
+UserDeletedData _$UserDeletedDataFromJson(Map<String, dynamic> json) =>
+    UserDeletedData(
+      userId: (json['userId'] as num).toInt(),
+      nickname: json['nickname'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      deletionExpiration: json['deletionExpiration'] as String,
+    );
+
+Map<String, dynamic> _$UserDeletedDataToJson(UserDeletedData instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'nickname': instance.nickname,
+      'imageUrl': instance.imageUrl,
+      'deletionExpiration': instance.deletionExpiration,
+    };
+
 UserResponseModel _$UserResponseModelFromJson(Map<String, dynamic> json) =>
     UserResponseModel(
       code: (json['code'] as num).toInt(),

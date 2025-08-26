@@ -11,6 +11,7 @@ import 'package:yeogiga/user/view/login_screen.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/view/register_flow_screen.dart';
+import 'package:yeogiga/user/view/user_recovery_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
 
@@ -50,6 +51,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/register',
       name: RegisterFlowScreen.routeName,
       builder: (_, __) => RegisterFlowScreen(),
+    ),
+    GoRoute(
+      path: '/userRecovery',
+      name: UserRecoveryScreen.routeName,
+      builder: (_, __) => UserRecoveryScreen(),
     ),
     GoRoute(
       path: '/dateRangePicker',
@@ -98,6 +104,12 @@ class AuthProvider extends ChangeNotifier {
 
     final loggingInOrRegister =
         state.location == '/login' || state.location == '/register';
+    final userRecoveryPage = state.location == '/userRecovery';
+
+    // 탈퇴한 사용자 - 복구 페이지로 리다이렉트
+    if (user is UserDeleteModel) {
+      return userRecoveryPage ? null : '/userRecovery';
+    }
 
     // 유저 정보가 없는데
     // 로그인/회원가입 중이면 그대로 두고

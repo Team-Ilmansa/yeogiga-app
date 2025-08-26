@@ -42,7 +42,7 @@ class CompletedScheduleView extends StatelessWidget {
         final schedules = completed.data;
         return CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
             //TODO: 날짜 선택기
             SliverToBoxAdapter(
               child: DaySelector(
@@ -51,11 +51,11 @@ class CompletedScheduleView extends StatelessWidget {
                 onChanged: onDaySelected,
               ),
             ),
-            SliverToBoxAdapter(child: SizedBox(height: 40.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 12.h)),
             //TODO: 미니맵
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 42.w),
+                padding: EdgeInsets.symmetric(horizontal: 13.w),
                 child: CompletedTripMiniMap(
                   dayPlaceModels:
                       selectedDayIndex == 0
@@ -69,7 +69,7 @@ class CompletedScheduleView extends StatelessWidget {
                 ),
               ),
             ),
-            SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+            SliverToBoxAdapter(child: SizedBox(height: 6.h)),
             //TODO: 일정들
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -121,41 +121,41 @@ class CompletedScheduleView extends StatelessWidget {
   ) {
     final hasPlaces = daySchedule.places.isNotEmpty;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
       // decoration: BoxDecoration(
       //   color: Colors.white,
-      //   borderRadius: BorderRadius.circular(54.r),
+      //   borderRadius: BorderRadius.circular(16.r),
       //   boxShadow: [
       //     BoxShadow(
       //       color: Colors.black.withOpacity(0.04),
-      //       blurRadius: 24.r,
-      //       offset: Offset(0, 12.h),
+      //       blurRadius: 2.r,
+      //       offset: Offset(0, 4.h),
       //     ),
       //   ],
       // ),
       child: ExpansionTile(
         // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(54.r),
+        //   borderRadius: BorderRadius.circular(16.r),
         // ),
         // collapsedShape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(54.r),
+        //   borderRadius: BorderRadius.circular(16.r),
         // ),
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color(0xffd9d9d9)),
         ),
-        minTileHeight: 186.h,
+        minTileHeight: 55.h,
         title: Text(
           dayLabel,
           style: TextStyle(
-            fontSize: 48.sp,
+            fontSize: 14.sp,
             color: Color(0xff7d7d7d),
-            letterSpacing: -0.3,
+            letterSpacing: -0.1,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -175,12 +175,12 @@ class CompletedScheduleView extends StatelessWidget {
                     .toList()
                 : [
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32.h),
+                    padding: EdgeInsets.symmetric(vertical: 10.h),
                     child: Center(
                       child: Text(
                         '등록된 일정이 없습니다.',
                         style: TextStyle(
-                          fontSize: 48.sp,
+                          fontSize: 14.sp,
                           color: const Color(0xffc6c6c6),
                           fontWeight: FontWeight.w500,
                         ),

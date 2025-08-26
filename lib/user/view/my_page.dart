@@ -89,13 +89,13 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                 }
               },
             ),
-            SizedBox(height: 70.h),
+            SizedBox(height: 21.h),
             // TODO: 여행 참가하기 버튼
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32.r),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   backgroundColor: Color(0xff8287ff),
                 ),
@@ -109,13 +109,13 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                         (context) => Dialog(
                           backgroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(48.r),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
-                          insetPadding: EdgeInsets.all(48.w),
+                          insetPadding: EdgeInsets.all(14.w),
                           child: Padding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 40.w,
-                              vertical: 40.h,
+                              horizontal: 12.w,
+                              vertical: 12.h,
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -123,21 +123,21 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 15.w,
+                                    horizontal: 4.w,
                                   ),
                                   child: Text(
                                     '여행 참가',
                                     style: TextStyle(
-                                      fontSize: 54.sp,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xff313131),
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 48.h),
+                                SizedBox(height: 14.h),
                                 Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: 15.w,
+                                    horizontal: 4.w,
                                   ),
                                   child: CustomVerifyTextFormField(
                                     controller: tripIdController,
@@ -145,7 +145,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                     onChanged: (value) {},
                                   ),
                                 ),
-                                SizedBox(height: 40.h),
+                                SizedBox(height: 12.h),
                                 Align(
                                   alignment: Alignment.center,
                                   child: SizedBox(
@@ -157,11 +157,11 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                         ),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                            48.r,
+                                            14.r,
                                           ),
                                         ),
                                         elevation: 0,
-                                        minimumSize: Size(0, 150.h),
+                                        minimumSize: Size(0, 45.h),
                                         padding: EdgeInsets.zero,
                                       ),
                                       onPressed: () {
@@ -175,7 +175,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                       child: Text(
                                         '확인',
                                         style: TextStyle(
-                                          fontSize: 48.sp,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
                                         ),
@@ -192,18 +192,20 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   if (tripId == null) return;
 
                   // 참가 확인 다이얼로그
+                  // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                  if (!mounted) return;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder:
                         (context) => Dialog(
                           backgroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(48.r),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
                           child: Padding(
                             padding: EdgeInsets.symmetric(
-                              vertical: 38.h,
-                              horizontal: 40.w,
+                              vertical: 11.h,
+                              horizontal: 12.w,
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -211,19 +213,19 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                 Icon(
                                   Icons.info_outline,
                                   color: Color(0xFF8287FF),
-                                  size: 120.w,
+                                  size: 36.w,
                                 ),
-                                SizedBox(height: 48.h),
+                                SizedBox(height: 14.h),
                                 Text(
                                   '해당 여행에 참가하시겠습니까?',
                                   style: TextStyle(
-                                    fontSize: 56.sp,
+                                    fontSize: 17.sp,
                                     fontWeight: FontWeight.w600,
                                     color: Color(0xff313131),
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(height: 50.h),
+                                SizedBox(height: 15.h),
                                 Row(
                                   children: [
                                     Expanded(
@@ -232,7 +234,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                           backgroundColor: Colors.grey,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
-                                              42.r,
+                                              12.r,
                                             ),
                                           ),
                                           elevation: 0,
@@ -245,14 +247,14 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                         child: Text(
                                           '취소',
                                           style: TextStyle(
-                                            fontSize: 48.sp,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white,
                                           ),
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 32.w),
+                                    SizedBox(width: 10.w),
                                     Expanded(
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
@@ -261,7 +263,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                           ),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
-                                              42.r,
+                                              12.r,
                                             ),
                                           ),
                                           elevation: 0,
@@ -273,7 +275,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                         child: Text(
                                           '확인',
                                           style: TextStyle(
-                                            fontSize: 48.sp,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white,
                                           ),
@@ -310,13 +312,13 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                           (context) => Dialog(
                             backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(48.r),
+                              borderRadius: BorderRadius.circular(14.r),
                             ),
-                            insetPadding: EdgeInsets.all(48.w),
+                            insetPadding: EdgeInsets.all(14.w),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                vertical: 40.h,
-                                horizontal: 40.w,
+                                vertical: 12.h,
+                                horizontal: 12.w,
                               ),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -329,21 +331,21 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                         success
                                             ? const Color(0xFF8287FF)
                                             : Colors.red,
-                                    size: 120.w,
+                                    size: 36.w,
                                   ),
-                                  SizedBox(height: 48.h),
+                                  SizedBox(height: 14.h),
                                   Text(
                                     success
                                         ? '여행 참가에 성공했습니다!'
                                         : '여행 참가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
                                     style: TextStyle(
-                                      fontSize: 56.sp,
+                                      fontSize: 17.sp,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xff313131),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  SizedBox(height: 50.h),
+                                  SizedBox(height: 15.h),
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
@@ -354,11 +356,11 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                                 : Colors.red,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                            42.r,
+                                            12.r,
                                           ),
                                         ),
                                         elevation: 0,
-                                        minimumSize: Size.fromHeight(156.h),
+                                        minimumSize: Size.fromHeight(46.h),
                                         padding: EdgeInsets.zero,
                                       ),
                                       onPressed:
@@ -366,7 +368,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                                       child: Text(
                                         '확인',
                                         style: TextStyle(
-                                          fontSize: 48.sp,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
                                         ),
@@ -384,7 +386,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                 child: Text(
                   '여행 참가하기',
                   style: TextStyle(
-                    fontSize: 48.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -403,7 +405,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
               },
               child: Text('로그아웃'),
             ),
-            SizedBox(width: 40.w),
+            SizedBox(width: 12.w),
             ElevatedButton(
               onPressed: () {
                 ref.read(registerRepositoryProvider).deleteUser();
