@@ -124,9 +124,9 @@ class _TripDateRangePickerScreenState
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      offset: const Offset(0, -1),
-                      blurRadius: 1,
+                      color: Colors.black.withOpacity(0.08),
+                      offset: const Offset(0, -2),
+                      blurRadius: 4,
                       spreadRadius: 0,
                     ),
                   ],
