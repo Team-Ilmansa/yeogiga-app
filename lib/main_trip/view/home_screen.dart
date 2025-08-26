@@ -81,15 +81,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                         children: [
                           _HomeAppBar(trip: trip),
                           Transform.translate(
-                            offset: Offset(0, -44.h),
+                            offset: Offset(0, -13.h),
                             child: Column(
                               children: [
                                 ScheduleItemList(),
                                 Container(
-                                  height: 36.h,
+                                  height: 11.h,
                                   color: Color(0xfff0f0f0),
                                 ),
-                                SizedBox(height: 100.h),
+                                SizedBox(height: 30.h),
                               ],
                             ),
                           ),
@@ -114,10 +114,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 },
               ),
               RecommendScheduleCardList(),
-              SizedBox(height: 90.h),
+              SizedBox(height: 27.h),
               SectionTitle("인기급상승 여행스팟"),
               HotScheduleCardGridList(),
-              SizedBox(height: 90.h),
+              SizedBox(height: 27.h),
 
               //TODO: 이거 끝난 여행 리스트 불러오기 상태로 변경해야함.
               SectionTitle("지난여행 돌아보기"),
@@ -126,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                     (context, ref, _) =>
                         PastTripCardList(trips: ref.watch(tripListProvider)),
               ),
-              SizedBox(height: 100.h),
+              SizedBox(height: 30.h),
             ],
           ),
         ),
@@ -144,7 +144,7 @@ class _HomeAppBar extends ConsumerWidget {
     final weatherAsync = ref.watch(weatherProvider);
     final userMe = ref.read(userMeProvider);
     return SizedBox(
-      height: 738.h,
+      height: 219.h,
       child: weatherAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Stack(children: [Center(child: Text(e.toString()))]),
@@ -181,7 +181,7 @@ class _HomeAppBar extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(height: 50.h),
+                    SizedBox(height: 15.h),
                     AppBarTop(
                       trip: trip,
                       weatherMain: weatherMain,
@@ -192,9 +192,9 @@ class _HomeAppBar extends ConsumerWidget {
                     ),
                     Padding(
                       padding: EdgeInsets.only(
-                        top: 48.h,
-                        left: 48.w,
-                        right: 48.w,
+                        top: 14.h,
+                        left: 14.w,
+                        right: 14.w,
                       ),
                       child: Builder(
                         builder: (context) {
@@ -210,9 +210,9 @@ class _HomeAppBar extends ConsumerWidget {
                                 '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
                                 style: TextStyle(
                                   color: Color(0xff313131),
-                                  fontSize: 84.sp,
+                                  fontSize: 25.sp,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
+                                  letterSpacing: -0.1,
                                   height: 1.4,
                                 ),
                               );
@@ -223,9 +223,9 @@ class _HomeAppBar extends ConsumerWidget {
                                 '오늘은\n$title ${day}일차에요!',
                                 style: TextStyle(
                                   color: Color(0xff313131),
-                                  fontSize: 84.sp,
+                                  fontSize: 25.sp,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
+                                  letterSpacing: -0.1,
                                   height: 1.4,
                                 ),
                               );
@@ -236,9 +236,9 @@ class _HomeAppBar extends ConsumerWidget {
                                 '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
                                 style: TextStyle(
                                   color: Color(0xff313131),
-                                  fontSize: 84.sp,
+                                  fontSize: 25.sp,
                                   fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
+                                  letterSpacing: -0.1,
                                   height: 1.4,
                                 ),
                               );
@@ -252,7 +252,7 @@ class _HomeAppBar extends ConsumerWidget {
                 ),
               ),
 
-              // Positioned(child: SizedBox(height: 20)),
+              // Positioned(child: SizedBox(height: 6)),
             ],
           ); // End of Stack in data
         }, // End of data
@@ -280,18 +280,18 @@ class AppBarTop extends StatelessWidget {
     final iconColor = isWhiteTheme ? Colors.white : const Color(0xff313131);
     final tempColor = isWhiteTheme ? Colors.white : Colors.black.withAlpha(204);
     return Padding(
-      padding: EdgeInsets.only(bottom: 48.h, left: 48.w, right: 48.w),
+      padding: EdgeInsets.only(bottom: 14.h, left: 14.w, right: 14.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              Icon(getWeatherIcon(weatherMain), size: 72.sp, color: iconColor),
-              SizedBox(width: 10.w),
+              Icon(getWeatherIcon(weatherMain), size: 21.sp, color: iconColor),
+              SizedBox(width: 3.w),
               Text(
                 '$temp°',
                 style: TextStyle(
-                  fontSize: 54.sp,
+                  fontSize: 16.sp,
                   color: tempColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -304,7 +304,7 @@ class AppBarTop extends StatelessWidget {
                 builder: (context, ref, _) {
                   if (trip != null) {
                     return InkWell(
-                      borderRadius: BorderRadius.circular(24.r),
+                      borderRadius: BorderRadius.circular(7.r),
                       onTap: () async {
                         final mainTripAsync = ref.read(mainTripFutureProvider);
                         final mainTrip =
@@ -337,7 +337,7 @@ class AppBarTop extends StatelessWidget {
                   }
                 },
               ),
-              SizedBox(width: 36.w),
+              SizedBox(width: 11.w),
               Icon(Icons.notifications_none, color: iconColor),
             ],
           ),
@@ -355,14 +355,14 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 36.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
       child: Text(
         title,
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: Colors.black,
-          letterSpacing: -0.4,
+          letterSpacing: -0.1,
         ),
       ),
     );

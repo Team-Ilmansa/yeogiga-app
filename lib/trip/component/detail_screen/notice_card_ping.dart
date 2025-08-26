@@ -12,37 +12,37 @@ class NoticeCardPing extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: EdgeInsets.only(top: 24.h),
+      padding: EdgeInsets.only(top: 7.h),
       child: Container(
         decoration: BoxDecoration(
           color: Color(0xffe6e7ff),
-          borderRadius: BorderRadius.circular(42.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
-        height: 180.h,
+        height: 53.h,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 48.w),
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: Row(
             children: [
               SvgPicture.asset(
                 'asset/icon/ping.svg',
-                width: 75.w,
-                height: 75.h,
+                width: 22.w,
+                height: 22.h,
               ),
-              SizedBox(width: 24.w),
+              SizedBox(width: 7.w),
               Text(
                 'Text',
                 style: TextStyle(
-                  fontSize: 51.sp,
-                  letterSpacing: -0.3,
+                  fontSize: 15.sp,
+                  letterSpacing: -0.1,
                   color: Color(0xff7d7d7d),
                 ),
               ),
-              SizedBox(width: 18.w),
+              SizedBox(width: 5.w),
               Text(
                 'Time',
                 style: TextStyle(
-                  fontSize: 39.sp,
-                  letterSpacing: -0.3,
+                  fontSize: 12.sp,
+                  letterSpacing: -0.1,
                   color: Color(0xff8287ff),
                 ),
               ),

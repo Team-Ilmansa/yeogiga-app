@@ -177,7 +177,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   void _updateMyLocationButtonOffset() {
     final screenHeight = MediaQuery.of(context).size.height;
     final sheetExtent = _sheetController.size;
-    final offset = screenHeight * sheetExtent + 40.h;
+    final offset = screenHeight * sheetExtent + 12.h;
     if (offset != _myLocationButtonOffset) {
       setState(() {
         _myLocationButtonOffset = offset;
@@ -221,7 +221,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       );
       final bounds = NLatLngBounds(southWest: southWest, northEast: northEast);
       await mapController!.updateCamera(
-        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(80.w)),
+        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(24.w)),
       );
     }
   }
@@ -252,7 +252,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         coords:
             validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
         color: const Color(0xFF8287FF),
-        width: 12.w,
+        width: 4.w,
       );
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
@@ -264,7 +264,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         id: 'host_route_polyline',
         coords: hostRouteCoords,
         color: const Color(0xff2ac308), // 빨간색
-        width: 8.w,
+        width: 2.w,
       );
       await mapController!.addOverlay(hostPolyline);
     }
@@ -295,12 +295,12 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         customBorder: const CircleBorder(),
         onTap: _moveToMyLocation,
         child: SizedBox(
-          width: 120.w,
-          height: 120.w,
+          width: 36.w,
+          height: 36.w,
           child: Icon(
             Icons.my_location_outlined,
             color: Colors.black,
-            size: 60.sp,
+            size: 18.sp,
           ),
         ),
       ),
@@ -448,8 +448,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             ),
             // TODO: 뒤로 가기 버튼
             Positioned(
-              top: 50.h,
-              left: 30.w,
+              top: 15.h,
+              left: 9.w,
               child: SafeArea(
                 child: GestureDetector(
                   onTap: () {
@@ -457,10 +457,10 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     Navigator.of(context).pop();
                   },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 30.w),
+                    padding: EdgeInsets.symmetric(horizontal: 9.w),
                     child: Icon(
                       Icons.arrow_back_ios_new,
-                      size: 56.w,
+                      size: 17.w,
                       color: Colors.black,
                     ),
                   ),
@@ -469,7 +469,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             ),
             // TODO: 내 위치로 가기 버튼
             Positioned(
-              left: 50.w,
+              left: 15.w,
               bottom: _myLocationButtonOffset,
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -615,7 +615,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     }
                     final hasPlaces = placeList.isNotEmpty;
                     return SizedBox(
-                      height: 310.h,
+                      height: 92.h,
                       child:
                           hasPlaces
                               ? PageView.builder(
@@ -655,7 +655,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                 child: Text(
                                   '등록된 일정이 없습니다.',
                                   style: TextStyle(
-                                    fontSize: 48.sp,
+                                    fontSize: 14.sp,
                                     color: const Color(0xffc6c6c6),
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -744,9 +744,9 @@ class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(54.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10),
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 3),
         ],
       ),
       child: ListView(
@@ -758,13 +758,13 @@ class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
             children: [
               Center(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 30.h, bottom: 40.h),
+                  padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
                   child: Container(
-                    width: 333.w,
-                    height: 18.h,
+                    width: 99.w,
+                    height: 5.h,
                     decoration: BoxDecoration(
                       color: const Color(0xffe1e1e1),
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
                 ),

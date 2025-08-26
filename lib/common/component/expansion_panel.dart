@@ -9,24 +9,24 @@ class ExpansionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 18.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
       child: ExpansionTile(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(66.r),
+          borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color(0xffd9d9d9)),
         ),
-        minTileHeight: 186.h,
+        minTileHeight: 55.h,
         title: Text(
           dayName,
           style: TextStyle(
-            fontSize: 48.sp,
+            fontSize: 14.sp,
             color: Color(0xff7d7d7d),
-            letterSpacing: -0.3,
+            letterSpacing: -0.1,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -38,7 +38,7 @@ class ExpansionPanel extends StatelessWidget {
           const ScheduleItem(title: 'Text', time: '11:00', done: true),
           const ScheduleItem(title: 'Text', time: '11:00', done: false),
           const ScheduleItem(title: 'Text', time: '11:00', done: false),
-          SizedBox(height: 45.h),
+          SizedBox(height: 13.h),
         ],
       ),
     );
