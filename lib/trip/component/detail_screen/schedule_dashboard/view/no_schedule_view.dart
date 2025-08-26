@@ -10,18 +10,18 @@ class NoScheduleView extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(height: 100.h),
+        SizedBox(height: 30.h),
         SvgPicture.asset(
           'asset/icon/add_schedule.svg',
-          height: 168.h,
-          width: 168.w,
+          height: 50.h,
+          width: 50.w,
           color: const Color(0xffc6c6c6),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 7.h),
         Text(
           '날짜 확정 후 일정을 추가할 수 있어요',
           style: TextStyle(
-            fontSize: 42.sp,
+            fontSize: 12.sp,
             color: const Color(0xffc6c6c6),
             fontWeight: FontWeight.w500,
           ),

@@ -92,58 +92,58 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
             ),
             // 상단 검색창
             Positioned(
-              top: 170.h,
+              top: 51.h,
               left: 0,
               right: 0,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30.w),
+                padding: EdgeInsets.symmetric(horizontal: 9.w),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => GoRouter.of(context).pop(),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 30.w),
+                        padding: EdgeInsets.symmetric(horizontal: 9.w),
                         child: Icon(
                           Icons.arrow_back_ios_new,
-                          size: 56.w,
+                          size: 17.w,
                           color: Colors.black,
                         ),
                       ),
                     ),
-                    SizedBox(width: 24.w),
+                    SizedBox(width: 7.w),
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.only(right: 30.w),
+                        padding: EdgeInsets.only(right: 9.w),
                         child: Container(
-                          height: 138.h,
+                          height: 41.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(48.r),
+                            borderRadius: BorderRadius.circular(14.r),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
-                                blurRadius: 12.r,
-                                offset: Offset(0, 2.h),
+                                blurRadius: 1.r,
+                                offset: Offset(0, 1.h),
                               ),
                             ],
                           ),
                           alignment: Alignment.center,
                           child: Row(
                             children: [
-                              SizedBox(width: 40.w),
+                              SizedBox(width: 12.w),
                               Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.only(left: 20.w),
+                                  padding: EdgeInsets.only(left: 6.w),
                                   child: TextField(
                                     style: TextStyle(
-                                      fontSize: 44.sp,
+                                      fontSize: 13.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: '...을 검색해보세요',
                                       hintStyle: TextStyle(
-                                        fontSize: 44.sp,
+                                        fontSize: 13.sp,
                                         color: const Color(0xFFBDBDBD),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -161,7 +161,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                                 onTap: _searchAndShowMarkers,
                                 child: Icon(Icons.search),
                               ),
-                              SizedBox(width: 32.w),
+                              SizedBox(width: 10.w),
                             ],
                           ),
                         ),
@@ -173,8 +173,8 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
             ),
             // 내 위치로 가기 버튼
             Positioned(
-              left: 70.w,
-              bottom: 200.h,
+              left: 21.w,
+              bottom: 59.h,
               child: _buildMyLocationButton(),
             ),
             // 하단 슬라이더바 머리부분
@@ -218,12 +218,12 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
         customBorder: const CircleBorder(),
         onTap: _moveToMyLocation,
         child: SizedBox(
-          width: 120.w,
-          height: 120.w,
+          width: 36.w,
+          height: 36.w,
           child: Icon(
             Icons.my_location_outlined,
             color: Colors.black,
-            size: 60.sp,
+            size: 18.sp,
           ),
         ),
       ),
@@ -301,16 +301,16 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                 success
                     ? '일정에 성공적으로 추가되었습니다!'
                     : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
-                style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
               ),
               backgroundColor:
                   success
                       ? const Color.fromARGB(212, 56, 212, 121)
                       : const Color.fromARGB(229, 226, 81, 65),
               behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.all(16.w),
+              margin: EdgeInsets.all(5.w),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(48.r),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               elevation: 0, // 그림자 제거
               duration: const Duration(seconds: 2),

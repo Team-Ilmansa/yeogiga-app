@@ -23,71 +23,71 @@ class PlaceCardSliderPanel extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(48.r),
+        borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
-            blurRadius: 24.r,
-            spreadRadius: 2.r,
-            offset: Offset(0, 8.h),
+            blurRadius: 2.r,
+            spreadRadius: 1.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
       child: Padding(
         padding: EdgeInsets.only(
-          right: 36.w,
-          left: 36.w,
-          top: 36.h,
-          bottom: 100.h,
+          right: 11.w,
+          left: 11.w,
+          top: 11.h,
+          bottom: 30.h,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
               child: Container(
-                width: 333.w,
-                height: 18.h,
+                width: 99.w,
+                height: 5.h,
                 decoration: BoxDecoration(
                   color: const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(36.r),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
               ),
             ),
-            SizedBox(height: 40.h),
+            SizedBox(height: 12.h),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 300.w,
-                  height: 300.w,
+                  width: 89.w,
+                  height: 89.w,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4F4F4),
-                    borderRadius: BorderRadius.circular(36.r),
+                    borderRadius: BorderRadius.circular(11.r),
                   ),
                   child:
                       imageUrl != null && imageUrl!.isNotEmpty
                           ? ClipRRect(
-                            borderRadius: BorderRadius.circular(36.r),
+                            borderRadius: BorderRadius.circular(11.r),
                             child: Image.network(
                               imageUrl!,
                               fit: BoxFit.cover,
-                              width: 300.w,
-                              height: 300.w,
+                              width: 89.w,
+                              height: 89.w,
                               errorBuilder:
                                   (_, __, ___) => Icon(
                                     Icons.image,
-                                    size: 64.sp,
+                                    size: 19.sp,
                                     color: Colors.grey[300],
                                   ),
                             ),
                           )
                           : Icon(
                             Icons.image,
-                            size: 100.sp,
+                            size: 30.sp,
                             color: Colors.grey[300],
                           ),
                 ),
-                SizedBox(width: 48.w),
+                SizedBox(width: 14.w),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -95,25 +95,25 @@ class PlaceCardSliderPanel extends StatelessWidget {
                     Text(
                       place?.category ?? '',
                       style: TextStyle(
-                        fontSize: 36.sp,
+                        fontSize: 11.sp,
                         color: const Color(0xFF7D7D7D),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    SizedBox(height: 6.h),
+                    SizedBox(height: 2.h),
                     Text(
                       place?.title ?? '',
                       style: TextStyle(
-                        fontSize: 60.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 4.h),
                     Text(
                       place?.roadAddress ?? place?.address ?? '',
                       style: TextStyle(
-                        fontSize: 36.sp,
+                        fontSize: 11.sp,
                         color: const Color(0xFF313131),
                         fontWeight: FontWeight.w400,
                       ),
@@ -122,15 +122,15 @@ class PlaceCardSliderPanel extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 54.h),
+            SizedBox(height: 16.h),
             SizedBox(
               width: double.infinity,
-              height: 156.h,
+              height: 46.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7C8AFF),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(36.r),
+                    borderRadius: BorderRadius.circular(11.r),
                   ),
                   elevation: 0,
                   padding: EdgeInsets.zero,
@@ -140,20 +140,20 @@ class PlaceCardSliderPanel extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.h),
+                      padding: EdgeInsets.symmetric(horizontal: 6.h),
                       child: SvgPicture.asset(
                         'asset/icon/add_schedule.svg',
-                        width: 72.w,
-                        height: 72.h,
+                        width: 21.w,
+                        height: 21.h,
                       ),
                     ),
                     Text(
                       buttonText,
                       style: TextStyle(
-                        fontSize: 48.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
-                        letterSpacing: -0.3,
+                        letterSpacing: -0.1,
                       ),
                     ),
                   ],

@@ -16,19 +16,19 @@ class PastTripCardList extends StatelessWidget {
       return Center(
         child: Text(
           '여행 내역이 없습니다.',
-          style: TextStyle(fontSize: 48.sp, color: Colors.grey),
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
         ),
       );
     }
     return SizedBox(
-      height: 1080.h,
+      height: 321.h,
       child: ListView.separated(
         primary: false,
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 48.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         itemCount: trips.length,
-        separatorBuilder: (_, __) => SizedBox(width: 36.w),
+        separatorBuilder: (_, __) => SizedBox(width: 11.w),
         itemBuilder: (context, index) {
           final trip = trips[index];
           if (trip == null) return const SizedBox.shrink();
@@ -92,9 +92,9 @@ class PastTripCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(60.r),
+        borderRadius: BorderRadius.circular(18.r),
         child: Container(
-          width: 960.w,
+          width: 286.w,
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage('asset/img/home/sky.jpg'),
@@ -102,7 +102,7 @@ class PastTripCard extends StatelessWidget {
             ),
           ),
           child: Container(
-            padding: EdgeInsets.all(48.w),
+            padding: EdgeInsets.all(14.w),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,11 +112,11 @@ class PastTripCard extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 84.sp,
-                    letterSpacing: -0.3,
+                    fontSize: 25.sp,
+                    letterSpacing: -0.1,
                   ),
                 ),
-                SizedBox(height: 15.h),
+                SizedBox(height: 4.h),
                 TripNameCardByAsset(
                   assetUrl: 'asset/icon/marker-pin-01.svg',
                   name: cityText,
@@ -128,23 +128,23 @@ class PastTripCard extends StatelessWidget {
                   color: Colors.white,
                 ),
 
-                SizedBox(height: 9.h),
+                SizedBox(height: 3.h),
                 Row(
                   children: [
                     SvgPicture.asset(
                       'asset/icon/user-02.svg',
-                      width: 51.w,
-                      height: 51.h,
+                      width: 15.w,
+                      height: 15.h,
                       color: Colors.white,
                     ),
-                    SizedBox(width: 15.w),
+                    SizedBox(width: 4.w),
                     ...List.generate(
                       memberCount,
                       (_) => Padding(
-                        padding: EdgeInsets.only(right: 3.w),
+                        padding: EdgeInsets.only(right: 1.w),
                         child: Icon(
                           Icons.circle,
-                          size: 54.sp,
+                          size: 16.sp,
                           color: Colors.white,
                         ),
                       ),

@@ -23,19 +23,19 @@ class ScheduleItem extends StatelessWidget {
     final textColor = const Color(0xFF7D7D7D);
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 30.w),
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 9.w),
       child: Row(
         children: [
           SizedBox(
-            width: 120.w,
-            height: 180.h,
+            width: 36.w,
+            height: 53.h,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SvgPicture.asset(
                   'asset/icon/category icon.svg',
-                  width: 78.w,
-                  height: 78.h,
+                  width: 23.w,
+                  height: 23.h,
                 ),
                 Positioned(
                   bottom: 0,
@@ -43,23 +43,23 @@ class ScheduleItem extends StatelessWidget {
                     time ?? '',
                     style: TextStyle(
                       color: textColor,
-                      fontSize: 33.sp,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: -0.4,
+                      letterSpacing: -0.1,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 18.w),
+          SizedBox(width: 5.w),
           Expanded(
             child: Container(
-              height: 195.h,
-              padding: EdgeInsets.symmetric(horizontal: 48.w),
+              height: 58.h,
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(54.r),
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,7 +68,7 @@ class ScheduleItem extends StatelessWidget {
                     title,
                     style: TextStyle(
                       color: textColor,
-                      fontSize: 48.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       height: 1,
                     ),
@@ -76,18 +76,18 @@ class ScheduleItem extends StatelessWidget {
                   if (done)
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 39.w,
-                        vertical: 20.h,
+                        horizontal: 12.w,
+                        vertical: 6.h,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFC6C6C6),
-                        borderRadius: BorderRadius.circular(48.r),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
                       child: Text(
                         '완료',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 42.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -130,14 +130,14 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
           return const SizedBox.shrink();
         }
         final places = mainTrip.places;
-        final itemHeight = 204.h;
+        final itemHeight = 61.h;
         final totalItemCount = places.length;
-        final listBottomPadding = 72.h;
+        final listBottomPadding = 21.h;
         // collapsed 상태: 최소 1개, 최대 3.3개
         final collapsedMinHeight = itemHeight * 1 + listBottomPadding;
         final collapsedMaxHeight = itemHeight * 3.3 + listBottomPadding;
         // 펼침 상태: 기존과 동일
-        final maxExpandedHeight = 1500.h;
+        final maxExpandedHeight = 446.h;
         final totalListHeight = itemHeight * totalItemCount;
         final expandedHeight =
             totalListHeight + listBottomPadding < maxExpandedHeight
@@ -171,20 +171,20 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
         }
 
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 48.h),
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
           child: Column(
             children: [
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.only(bottom: 72.h),
+                padding: EdgeInsets.only(bottom: 21.h),
                 decoration: BoxDecoration(
                   color: const Color(0xffffffff),
-                  borderRadius: BorderRadius.circular(48.r),
+                  borderRadius: BorderRadius.circular(14.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 12.r,
-                      spreadRadius: 0.9.r,
+                      blurRadius: 1.r,
+                      spreadRadius: 1.r,
                       offset: Offset(0, 0),
                     ),
                   ],
@@ -192,15 +192,15 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(0, 12.h, 36.w, 0),
+                      padding: EdgeInsets.fromLTRB(0, 4.h, 11.w, 0),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(
-                          padding: EdgeInsets.all(45.sp),
+                          padding: EdgeInsets.all(13.sp),
                           child: Text(
                             titleText,
                             style: TextStyle(
-                              fontSize: 48.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
                               color: Color(0xff7d7d7d),
                               letterSpacing: 0,
@@ -230,20 +230,20 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                         child: Text(
                                           '아직 예정된 일정이 없어요.',
                                           style: TextStyle(
-                                            fontSize: 48.sp,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFFB0B0B0),
                                           ),
                                         ),
                                       ),
-                                      SizedBox(height: 32.h),
+                                      SizedBox(height: 10.h),
                                       // Center(
                                       //   child: TextButton(
                                       //     onPressed: () {},
                                       //     child: Text(
                                       //       '+ 일정 담으러 가기',
                                       //       style: TextStyle(
-                                      //         fontSize: 48.sp,
+                                      //         fontSize: 14.sp,
                                       //         fontWeight: FontWeight.bold,
                                       //         color: Color(0xFF8287ff),
                                       //       ),
@@ -263,7 +263,7 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                           time: null,
                                           done: place.isVisited,
                                         ),
-                                        SizedBox(height: 70.h),
+                                        SizedBox(height: 21.h),
                                       ],
                                     );
                                   } else {
@@ -283,7 +283,7 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                 bottom: 0,
                                 left: 0,
                                 right: 0,
-                                height: 120.h,
+                                height: 36.h,
                                 child: IgnorePointer(
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -308,14 +308,14 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                 ),
               ),
               Transform.translate(
-                offset: Offset(0, -80.h),
+                offset: Offset(0, -24.h),
                 child: ElevatedButton(
                   onPressed: _toggleExpanded,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8287ff),
                     shape: const StadiumBorder(),
-                    fixedSize: Size(420.w, 135.h), // 고정 크기
-                    padding: EdgeInsets.symmetric(horizontal: 48.w),
+                    fixedSize: Size(125.w, 40.h), // 고정 크기
+                    padding: EdgeInsets.symmetric(horizontal: 14.w),
                     elevation: 0,
                   ),
                   child: Row(
@@ -326,16 +326,16 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                         isExpanded ? "일정 접기" : "일정 펼치기",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 45.sp,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(width: 18.w),
+                      SizedBox(width: 5.w),
                       Icon(
                         isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        size: 54.sp,
+                        size: 16.sp,
                         color: Colors.white,
                       ),
                     ],

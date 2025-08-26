@@ -8,16 +8,16 @@ class HotScheduleCardGridList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 900.h,
+      height: 267.h,
       child: GridView.builder(
         primary: false, // <- 세로 스크롤 우선
         shrinkWrap: true, // <- 높이 맞춤
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 48.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: 36.w,
-          crossAxisSpacing: 36.w,
+          mainAxisSpacing: 11.w,
+          crossAxisSpacing: 11.w,
           childAspectRatio: 1,
         ),
         itemCount: 10,
@@ -33,17 +33,17 @@ class HotScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(48.r),
+      borderRadius: BorderRadius.circular(14.r),
       child: Container(
-        height: 360.h,
-        width: 360.w,
+        height: 107.h,
+        width: 107.w,
         decoration: BoxDecoration(color: Colors.white),
         child: Stack(
           children: [
             Positioned.fill(
               child: Image.asset('asset/img/home/sky.jpg', fit: BoxFit.cover),
             ),
-            Positioned(bottom: 36.h, left: 36.w, child: TagCard(label: "#tag")),
+            Positioned(bottom: 11.h, left: 11.w, child: TagCard(label: "#tag")),
           ],
         ),
       ),

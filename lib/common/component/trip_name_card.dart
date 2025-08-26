@@ -19,11 +19,11 @@ class TripNameCardByAsset extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SvgPicture.asset(assetUrl, width: 51.w, height: 51.h, color: color),
-        SizedBox(width: 18.w),
+        SvgPicture.asset(assetUrl, width: 15.w, height: 15.h, color: color),
+        SizedBox(width: 5.w),
         Text(
           name,
-          style: TextStyle(color: color, fontSize: 42.sp, letterSpacing: -0.3),
+          style: TextStyle(color: color, fontSize: 12.sp, letterSpacing: -0.1),
         ),
       ],
     );
