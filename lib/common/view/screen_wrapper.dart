@@ -11,6 +11,7 @@ import 'package:yeogiga/user/view/my_page.dart';
 import 'package:yeogiga/trip/component/create_trip/trip_name_dialog.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
+import 'package:yeogiga/user/view/my_page_screen.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -166,7 +167,7 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
             _selectedIndex = index;
           });
         },
-        children: const [HomeScreen(), MyPage()],
+        children: const [HomeScreen(), MyPageScreen()],
       ),
     );
   }
@@ -252,7 +253,8 @@ class ConvexBottomBarPainter extends CustomPainter {
 
     final centerX = size.width / 2;
     final radius = 50.w;
-    final cornerRadius = 30.r;
+    final cornerRadius = 20.r;
+    //20으로 낮추기
     final semicircleCenterY = 30.h; // 15.h + 10.h + 5.h = 30.h
 
     final connectionOffset = sqrt(

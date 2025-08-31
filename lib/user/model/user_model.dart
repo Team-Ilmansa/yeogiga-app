@@ -15,17 +15,22 @@ class UserModelError extends UserModelBase {
 //로그인 중일 때 쓸거
 class UserModelLoading extends UserModelBase {}
 
+//닉네임 반드시 추가해줘야하는 놈
+class UserModelGuest extends UserModelBase {}
+
 // 유저 모델
 @JsonSerializable()
 class UserModel extends UserModelBase {
-  final String username;
+  final String? username;  // 소셜로그인 시 null 가능
   final String nickname;
-  final String email;
+  final String? email;     // 소셜로그인 시 null 가능
+  final String? imageUrl;
 
   UserModel({
-    required this.username,
+    this.username,
     required this.nickname,
-    required this.email,
+    this.email,
+    this.imageUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>

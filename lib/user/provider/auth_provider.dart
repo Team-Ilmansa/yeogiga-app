@@ -12,6 +12,7 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/view/register_flow_screen.dart';
 import 'package:yeogiga/user/view/user_recovery_screen.dart';
+import 'package:yeogiga/user/view/nickname_setup_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
 
@@ -56,6 +57,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/userRecovery',
       name: UserRecoveryScreen.routeName,
       builder: (_, __) => UserRecoveryScreen(),
+    ),
+    GoRoute(
+      path: '/nickname',
+      name: NicknameSetupScreen.routeName,
+      builder: (_, __) => NicknameSetupScreen(),
     ),
     GoRoute(
       path: '/dateRangePicker',
@@ -114,6 +120,11 @@ class AuthProvider extends ChangeNotifier {
     // 유저 정보가 없는데
     // 로그인/회원가입 중이면 그대로 두고
     // 그 외에는 로그인 페이지로 이동
+    // 게스트일 경우 닉네임 페이지로 이동
+    if (user is UserModelGuest) {
+      return '/nickname';
+    }
+
     if (user is! UserResponseModel) {
       return loggingInOrRegister ? null : '/login';
     }

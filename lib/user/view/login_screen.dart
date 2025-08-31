@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/common/const/data.dart';
+import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 
@@ -65,9 +69,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
           child: ElevatedButton(
             onPressed:
-                state is UserModelLoading
+                state is UserModelLoading ||
+                        username.isEmpty ||
+                        password.isEmpty
                     ? null
                     : () async {
+                      //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
                       final user = await ref
                           .read(userMeProvider.notifier)
                           .login(username: username, password: password);
@@ -83,10 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       });
                     },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  (username.isNotEmpty && password.isNotEmpty)
-                      ? const Color(0xff8287ff)
-                      : Colors.grey[400],
+              backgroundColor: const Color(0xff8287ff),
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(vertical: 14.h),
               shape: RoundedRectangleBorder(
@@ -281,8 +285,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       // 카카오톡 로그인 버튼
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           // TODO: 카카오 로그인 로직
+                          try {
+                            // 휴대폰에 카카오톡이 깔려있는지 bool 값으로 반환해주는 함수
+                            bool installed = await isKakaoTalkInstalled();
+
+                            // 깔려있다면 UserApi.instance.loginWithKakaoTalk() 으로 카카오톡 오픈 후 동의
+                            // 깔려있지 않다면 UserApi.instance.loginWithKakaoAccount() 으로 웹을통한 인증
+                            OAuthToken token =
+                                installed
+                                    ? await UserApi.instance
+                                        .loginWithKakaoTalk()
+                                    : await UserApi.instance
+                                        .loginWithKakaoAccount();
+
+                            final user = await ref
+                                .read(userMeProvider.notifier)
+                                .socialLogin(
+                                  dio: ref.watch(dioProvider),
+                                  token: token,
+                                  platform: 'KAKAO',
+                                );
+                            setState(() {
+                              loginFailed = user is UserModelError;
+                            });
+                          } on DioException catch (e) {
+                            print('카카오톡 회원가입 실패: ${e.response}');
+                            loginFailed = true;
+                          } catch (i) {
+                            print('카카오톡 회원가입 실패: ${i}');
+                            loginFailed = true;
+                          }
                         },
                         child: Center(
                           child: Image.asset('asset/img/oauth/kakao.png'),

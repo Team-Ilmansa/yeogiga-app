@@ -80,6 +80,10 @@ dependencies:
   share_plus: ^7.2.1
   path_provider: ^2.1.2
 
+  # 카카오 유저 기능 모음
+  kakao_flutter_sdk_user: ^1.9.7+3
+  kakao_flutter_sdk_auth: ^1.9.7+3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

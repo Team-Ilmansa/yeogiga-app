@@ -54,7 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromARGB(255, 248, 248, 248),
+      color: Color(0xfffafafa),
       child: SingleChildScrollView(
         physics: ClampingScrollPhysics(),
         child: SafeArea(
