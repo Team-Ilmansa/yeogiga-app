@@ -141,7 +141,7 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
       final result = await tripRepository.leaveTrip(tripId: tripId);
       if (result) {
         // 여행 탈퇴 후 tripListProvider 갱신
-        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+        await ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
       }
       return result;
     } catch (e) {
@@ -157,7 +157,7 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
       final result = await tripRepository.deleteTrip(tripId: tripId);
       if (result) {
         // 여행 삭제 후 tripListProvider 갱신
-        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+        await ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
       }
       return result;
     } catch (e) {
@@ -171,7 +171,7 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
       final result = await tripRepository.joinTrip(tripId: tripId);
       if (result) {
         // 여행 참가 성공 시 tripListProvider 갱신
-        await ref.read(tripListProvider.notifier).fetchAndSetTrips();
+        await ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
         return true;
       } else {
         // 실패 시 예외 발생

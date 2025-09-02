@@ -86,7 +86,7 @@ class ProfileCard extends ConsumerWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${userState is UserResponseModel && userState.data != null ? userState.data!.email : '이메일을 불러오는 중...'}',
+                        '${userState is UserResponseModel && userState.data!.email != null ? userState.data!.email : '이메일을 불러오는 중...'}',
                         style: TextStyle(
                           fontSize: 14.sp,
                           height: 1.4,
