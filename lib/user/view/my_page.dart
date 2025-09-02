@@ -29,7 +29,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(tripListProvider.notifier).fetchAndSetTrips();
+      ref.read(allTripListProvider.notifier).fetchAndSetAllTrips();
     });
   }
 
@@ -50,7 +50,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
   @override
   void didPopNext() {
     // 마이페이지가 다시 보일 때마다 새로고침
-    ref.read(tripListProvider.notifier).fetchAndSetTrips();
+    ref.read(allTripListProvider.notifier).fetchAndSetAllTrips();
     super.didPopNext();
   }
 
@@ -64,7 +64,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
           children: [
             SectionTitle("내 여행 모두 보기"),
             PastTripCardList(
-              trips: ref.watch(tripListProvider),
+              trips: ref.watch(allTripListProvider),
               onTap: (tripId) async {
                 ref.invalidate(tripProvider); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
                 ref.invalidate(

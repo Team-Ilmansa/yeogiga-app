@@ -7,7 +7,7 @@ class TripW2mModel {
 }
 
 //watch 하는 순간 로직 돌아가면서 w2m 담김.
-final tripW2mProvider = FutureProvider.family<TripW2mModel?, int>((
+final tripW2mProvider = AutoDisposeFutureProvider.family<TripW2mModel?, int>((
   ref,
   tripId,
 ) async {

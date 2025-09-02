@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/common/component/setting_trip_card.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/common/component/past_trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
+import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/common/provider/weather_provider.dart';
@@ -16,6 +20,8 @@ import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/common/route_observer.dart';
+import 'package:yeogiga/w2m/model/user_w2m_model.dart';
+import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -39,16 +45,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   @override
   void didPopNext() {
-    // 홈 화면 복귀 시 필요한 새로고침 로직 추가
-    // 예시: ref.invalidate(mainTripFutureProvider);
-    // print('HomeScreen didPopNext');
+    // 홈 화면 복귀 시 데이터 새로고침
+    ref.read(mainTripFutureProvider);
+    ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
+    ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
     super.didPopNext();
   }
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(mainTripFutureProvider));
+    Future.microtask(() {
+      ref.read(mainTripFutureProvider);
+      ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
+      ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
+    });
   }
 
   @override
@@ -82,16 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                           _HomeAppBar(trip: trip),
                           Transform.translate(
                             offset: Offset(0, -13.h),
-                            child: Column(
-                              children: [
-                                ScheduleItemList(),
-                                Container(
-                                  height: 11.h,
-                                  color: Color(0xfff0f0f0),
-                                ),
-                                SizedBox(height: 30.h),
-                              ],
-                            ),
+                            child: ScheduleItemList(),
                           ),
                         ],
                       );
@@ -99,34 +101,95 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                   );
                 },
               ),
+              Transform.translate(
+                offset: Offset(0, -30.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height: 11.h, color: Color(0xfff0f0f0)),
 
-              Consumer(
-                builder: (context, ref, _) {
-                  final userState = ref.watch(userMeProvider);
-                  String nickname = '회원';
-                  if (userState is UserModel) {
-                    nickname = userState.nickname;
-                  } else if (userState is UserResponseModel &&
-                      userState.data != null) {
-                    nickname = userState.data!.nickname;
-                  }
-                  return SectionTitle("$nickname님께 딱 맞을 것 같은 스팟");
-                },
-              ),
-              RecommendScheduleCardList(),
-              SizedBox(height: 27.h),
-              SectionTitle("인기급상승 여행스팟"),
-              HotScheduleCardGridList(),
-              SizedBox(height: 27.h),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final settingTrips = ref.watch(settingTripListProvider);
+                        if (settingTrips.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 30.h),
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(14.w, 0, 0, 12.h),
+                              child: Text(
+                                '${settingTrips.length}개의 준비중인 여행',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 20.sp,
+                                  height: 1.4,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ),
+                            SettingTripCardList(
+                              trips: settingTrips,
+                              onTap: (tripId) async {
+                                ref.invalidate(
+                                  tripProvider,
+                                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                                await ref
+                                    .read(tripProvider.notifier)
+                                    .getTrip(tripId: tripId);
+                                final tripState = ref.read(tripProvider);
+                                final userW2mState = ref.read(userW2mProvider);
+                                if (context.mounted) {
+                                  if (tripState is SettingTripModel &&
+                                      userW2mState is NoUserW2mModel) {
+                                    GoRouter.of(
+                                      context,
+                                    ).push('/dateRangePicker');
+                                  } else {
+                                    GoRouter.of(
+                                      context,
+                                    ).push('/tripDetailScreen');
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    SizedBox(height: 27.h),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final userState = ref.watch(userMeProvider);
+                        String nickname = '회원';
+                        if (userState is UserModel) {
+                          nickname = userState.nickname;
+                        } else if (userState is UserResponseModel &&
+                            userState.data != null) {
+                          nickname = userState.data!.nickname;
+                        }
+                        return SectionTitle("$nickname님께 딱 맞을 것 같은 스팟");
+                      },
+                    ),
+                    RecommendScheduleCardList(),
+                    SizedBox(height: 27.h),
+                    SectionTitle("인기급상승 여행스팟"),
+                    HotScheduleCardGridList(),
+                    SizedBox(height: 27.h),
 
-              //TODO: 이거 끝난 여행 리스트 불러오기 상태로 변경해야함.
-              SectionTitle("지난여행 돌아보기"),
-              Consumer(
-                builder:
-                    (context, ref, _) =>
-                        PastTripCardList(trips: ref.watch(tripListProvider)),
+                    //TODO: 이거 끝난 여행 리스트 불러오기 상태로 변경해야함.
+                    SectionTitle("지난여행 돌아보기"),
+                    Consumer(
+                      builder:
+                          (context, ref, _) => PastTripCardList(
+                            trips: ref.watch(pastTripListProvider),
+                          ),
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: 30.h),
             ],
           ),
         ),

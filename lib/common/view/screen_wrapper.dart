@@ -37,7 +37,7 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
     // ScreenWrapper 진입 시, 로그인/유저정보(mainTripFutureProvider, userMeProvider) 제외 모든 provider refresh
     Future.microtask(() {
       ref.refresh(tripProvider);
-      ref.refresh(tripListProvider);
+      ref.refresh(pastTripListProvider);
       ref.refresh(userW2mProvider);
       ref.refresh(confirmScheduleProvider);
       ref.refresh(pendingScheduleProvider);
@@ -150,8 +150,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                     refresh:
                         () =>
                             ref
-                                .read(tripListProvider.notifier)
-                                .fetchAndSetTrips(),
+                                .read(allTripListProvider.notifier)
+                                .fetchAndSetAllTrips(),
                   ),
                 ),
               ],
@@ -162,6 +162,7 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
 
       body: PageView(
         controller: _pageController,
+        physics: ClampingScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _selectedIndex = index;

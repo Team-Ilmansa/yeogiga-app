@@ -133,28 +133,26 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
         final itemHeight = 61.h;
         final totalItemCount = places.length;
         final listBottomPadding = 21.h;
-        // collapsed 상태: 최소 1개, 최대 3.3개
-        final collapsedMinHeight = itemHeight * 1 + listBottomPadding;
-        final collapsedMaxHeight = itemHeight * 3.3 + listBottomPadding;
-        // 펼침 상태: 기존과 동일
-        final maxExpandedHeight = 446.h;
-        final totalListHeight = itemHeight * totalItemCount;
+
+        // 아이템이 없는 경우의 높이 설정
+        final emptyCollapsedHeight = 50.h; // "아직 예정된 일정이 없어요" 텍스트만 보이는 높이
+        final emptyExpandedHeight = 100.h; // 텍스트 아래 빈공간이 더 보이는 높이
+
+        // 아이템이 있는 경우의 높이 설정
+        final collapsedHeight =
+            itemHeight * 1 + listBottomPadding; // 접힌 상태: 1개만
         final expandedHeight =
-            totalListHeight + listBottomPadding < maxExpandedHeight
-                ? totalListHeight + listBottomPadding
-                : maxExpandedHeight;
+            itemHeight * 3.3 + listBottomPadding; // 펼친 상태: 3.3개
+
         double calculatedHeight;
-        if (isExpanded) {
-          calculatedHeight = expandedHeight;
+
+        if (totalItemCount == 0) {
+          // 아이템이 없는 경우
+          calculatedHeight =
+              isExpanded ? emptyExpandedHeight : emptyCollapsedHeight;
         } else {
-          // 1개만 있을 때는 1개만, 2~3개면 그 개수만큼, 4개 이상이면 3.3개만
-          if (totalItemCount <= 1) {
-            calculatedHeight = collapsedMinHeight;
-          } else if (totalItemCount < 4) {
-            calculatedHeight = itemHeight * totalItemCount + listBottomPadding;
-          } else {
-            calculatedHeight = collapsedMaxHeight;
-          }
+          // 아이템이 있는 경우
+          calculatedHeight = isExpanded ? expandedHeight : collapsedHeight;
         }
 
         // 날짜 타이틀 로직
@@ -308,7 +306,7 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                 ),
               ),
               Transform.translate(
-                offset: Offset(0, -24.h),
+                offset: Offset(0, -22.h),
                 child: ElevatedButton(
                   onPressed: _toggleExpanded,
                   style: ElevatedButton.styleFrom(
