@@ -4,21 +4,27 @@ import 'package:yeogiga/schedule/repository/confirm_schedule_repository.dart';
 
 final completedScheduleProvider = StateNotifierProvider<
   CompletedScheduleNotifier,
-  CompletedTripDayPlaceListModel?
+  AsyncValue<CompletedTripDayPlaceListModel?>
 >((ref) {
   final repo = ref.watch(confirmScheduleRepositoryProvider);
   return CompletedScheduleNotifier(repo);
 });
 
 class CompletedScheduleNotifier
-    extends StateNotifier<CompletedTripDayPlaceListModel?> {
+    extends StateNotifier<AsyncValue<CompletedTripDayPlaceListModel?>> {
   final ConfirmScheduleRepository repo;
-  CompletedScheduleNotifier(this.repo) : super(null);
+  CompletedScheduleNotifier(this.repo) : super(const AsyncValue.data(null));
 
   Future<void> fetch(int tripId) async {
-    final result = await repo.fetchCompletedTripDayPlaces(tripId: tripId);
-    state = result;
+    state = const AsyncValue.loading();
+    
+    try {
+      final result = await repo.fetchCompletedTripDayPlaces(tripId: tripId);
+      state = AsyncValue.data(result);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
-  void clear() => state = null;
+  void clear() => state = const AsyncValue.data(null);
 }

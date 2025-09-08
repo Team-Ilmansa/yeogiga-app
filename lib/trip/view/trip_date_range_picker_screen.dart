@@ -155,7 +155,7 @@ class _TripDateRangePickerScreenState
                               });
                               try {
                                 // tripProvider에서 tripId 가져오기
-                                final tripState = ref.read(tripProvider);
+                                final tripState = ref.read(tripProvider).valueOrNull;
                                 int? tripId;
                                 if (tripState is TripModel) {
                                   tripId = tripState.tripId;

@@ -8,7 +8,7 @@ import 'package:yeogiga/trip/provider/trip_provider.dart';
 final tripMemberLocationProvider = FutureProvider<List<TripMemberLocation>>((
   ref,
 ) async {
-  final tripState = ref.watch(tripProvider);
+  final tripState = ref.watch(tripProvider).valueOrNull;
   String? tripId;
   if (tripState is InProgressTripModel) {
     tripId = tripState.tripId.toString();

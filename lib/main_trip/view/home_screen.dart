@@ -106,7 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 11.h, color: Color(0xfff0f0f0)),
+                    Container(height: 11.h, color: Colors.transparent),
 
                     Consumer(
                       builder: (context, ref, _) {
@@ -139,7 +139,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                 await ref
                                     .read(tripProvider.notifier)
                                     .getTrip(tripId: tripId);
-                                final tripState = ref.read(tripProvider);
+                                final tripState = ref.read(tripProvider).valueOrNull;
                                 final userW2mState = ref.read(userW2mProvider);
                                 if (context.mounted) {
                                   if (tripState is SettingTripModel &&

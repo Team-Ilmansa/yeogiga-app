@@ -77,7 +77,7 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   completedScheduleProvider,
                 ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
                 await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
-                final tripState = ref.read(tripProvider);
+                final tripState = ref.read(tripProvider).valueOrNull;
                 final userW2mState = ref.read(userW2mProvider);
                 if (context.mounted) {
                   if (tripState is SettingTripModel &&

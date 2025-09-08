@@ -65,15 +65,15 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
-    final trip = ref.read(tripProvider) as TripModel;
+    final trip = ref.read(tripProvider).valueOrNull as TripModel;
     // 지도에서는 fetchAll(tripId) 호출하지 않음! 이미 state에 들어온 schedules만 사용
-    var scheduleAsync = ref.read(confirmScheduleProvider);
+    var scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
     var schedules = scheduleAsync?.schedules ?? [];
 
     // schedules가 비어있으면 그냥 리턴 (혹시나 state 반영이 늦을 때는 잠깐 기다렸다가 한 번 더 시도)
     if (schedules.isEmpty) {
       await Future.delayed(const Duration(milliseconds: 10));
-      scheduleAsync = ref.read(confirmScheduleProvider);
+      scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
       schedules = scheduleAsync?.schedules ?? [];
       if (schedules.isEmpty) {
         // 한 번 더 시도 (재귀, 무한루프 방지)
@@ -288,7 +288,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tripState = ref.watch(tripProvider);
+    final tripState = ref.watch(tripProvider).valueOrNull;
     final days = getDaysForTrip(tripState);
 
     return Scaffold(
@@ -301,7 +301,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               if (!_allDaysFetched) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final scheduleAsync = ref.watch(confirmScheduleProvider);
+              final scheduleAsync = ref.watch(confirmScheduleProvider).valueOrNull;
               final schedules = scheduleAsync?.schedules ?? [];
               List<ConfirmedPlaceModel> placeList = [];
               if (selectedDayIndex == 0) {
@@ -474,10 +474,10 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                             await Future.delayed(
                               const Duration(milliseconds: 100),
                             ); // 상태 반영 대기
-                            final tripState = ref.read(tripProvider);
+                            final tripState = ref.read(tripProvider).valueOrNull;
                             final scheduleAsync = ref.read(
                               confirmScheduleProvider,
-                            );
+                            ).valueOrNull;
                             final schedules = scheduleAsync?.schedules ?? [];
                             if (index == 0) {
                               // 전체 보기: 모든 day의 place를 순서대로 합쳐서 마커/폴리라인 표시
@@ -584,8 +584,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                           builder: (context, ref, _) {
                             final scheduleAsync = ref.watch(
                               confirmScheduleProvider,
-                            );
-                            final tripState = ref.watch(tripProvider);
+                            ).valueOrNull;
+                            final tripState = ref.watch(tripProvider).valueOrNull;
                             if (scheduleAsync == null) {
                               final trip =
                                   tripState is TripModel ? tripState : null;

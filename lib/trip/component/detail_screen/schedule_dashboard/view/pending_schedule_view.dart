@@ -33,10 +33,10 @@ class PendingScheduleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final scheduleAsync = ref.watch(pendingScheduleProvider);
+        final scheduleAsync = ref.watch(pendingScheduleProvider).valueOrNull;
         if (scheduleAsync == null) {
           // 최초 진입 시 state가 null이면 fetchAll을 한 번만 호출
-          final tripState = ref.read(tripProvider);
+          final tripState = ref.read(tripProvider).valueOrNull;
           if (tripState is SettingTripModel &&
               tripState.startedAt != null &&
               tripState.endedAt != null) {
@@ -181,7 +181,7 @@ class PendingScheduleView extends StatelessWidget {
                                 places.map((p) => p.id).toList(); // 순서만 추출
                             final tripState = ref.read(
                               tripProvider,
-                            ); // tripId는 provider에서 안전하게 가져옴
+                            ).valueOrNull; // tripId는 provider에서 안전하게 가져옴
                             final tripId =
                                 (tripState is SettingTripModel)
                                     ? tripState.tripId.toString()
@@ -205,7 +205,7 @@ class PendingScheduleView extends StatelessWidget {
                                 children: [
                                   SlidableAction(
                                     onPressed: (_) async {
-                                      final tripState = ref.read(tripProvider);
+                                      final tripState = ref.read(tripProvider).valueOrNull;
                                       final tripId =
                                           (tripState is SettingTripModel)
                                               ? tripState.tripId.toString()

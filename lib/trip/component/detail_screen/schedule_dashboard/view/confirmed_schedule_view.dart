@@ -26,10 +26,10 @@ class ConfirmedScheduleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final confirmed = ref.watch(confirmScheduleProvider);
+        final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
         if (confirmed == null) {
           // 최초 진입 시 state가 null이면 fetchAll을 한 번만 호출
-          final tripState = ref.read(tripProvider);
+          final tripState = ref.read(tripProvider).valueOrNull;
           if (tripState is TripModel) {
             final tripId = tripState.tripId;
             Future.microtask(() {
@@ -140,7 +140,7 @@ class ConfirmedScheduleView extends StatelessWidget {
             Consumer(
               builder: (context, ref, _) {
                 // tripProvider에서 tripId 추출
-                final tripState = ref.watch(tripProvider);
+                final tripState = ref.watch(tripProvider).valueOrNull;
                 final tripId =
                     (tripState is TripModel) ? tripState.tripId : null;
 
@@ -255,7 +255,7 @@ class ConfirmedScheduleView extends StatelessWidget {
             ),
           Consumer(
             builder: (context, ref, _) {
-              final tripState = ref.watch(tripProvider);
+              final tripState = ref.watch(tripProvider).valueOrNull;
               // TripStatus.COMPLETED일 때는 버튼 미노출
               final isCompleted =
                   tripState is TripModel &&

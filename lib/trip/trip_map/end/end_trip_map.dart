@@ -31,7 +31,7 @@ class EndTripMapScreen extends ConsumerStatefulWidget {
 class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   // 갤러리탭 리프레쉬
   Future<void> refreshAll() async {
-    final trip = ref.read(tripProvider);
+    final trip = ref.read(tripProvider).valueOrNull;
     final isCompleted = trip is CompletedTripModel;
     int tripId = (trip is TripModel) ? trip.tripId : 0;
     // invalidate 일정/이미지 provider
@@ -41,7 +41,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     // 일정 fetchAll
     if (isCompleted) {
       await ref.read(completedScheduleProvider.notifier).fetch(tripId);
-      final completed = ref.read(completedScheduleProvider);
+      final completed = ref.read(completedScheduleProvider).valueOrNull;
       if (completed != null && completed.data.isNotEmpty) {
         final pendingDayPlaceInfos =
             completed.data
@@ -83,7 +83,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       }
     } else {
       await ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
-      final confirmed = ref.read(confirmScheduleProvider);
+      final confirmed = ref.read(confirmScheduleProvider).valueOrNull;
       if (confirmed != null && confirmed.schedules.isNotEmpty) {
         final matchedDayPlaceInfos =
             confirmed.schedules
@@ -153,15 +153,15 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
-    final trip = ref.read(tripProvider);
+    final trip = ref.read(tripProvider).valueOrNull;
     if (trip is! CompletedTripModel) return;
     await ref.read(completedScheduleProvider.notifier).fetch(trip.tripId);
     // 모든 day의 데이터가 provider에 들어올 때까지 대기
-    var completedAsync = ref.read(completedScheduleProvider);
+    var completedAsync = ref.read(completedScheduleProvider).valueOrNull;
     var schedules = completedAsync?.data ?? [];
     if (schedules.isEmpty) {
       await Future.delayed(const Duration(milliseconds: 10));
-      completedAsync = ref.read(completedScheduleProvider);
+      completedAsync = ref.read(completedScheduleProvider).valueOrNull;
       schedules = completedAsync?.data ?? [];
       if (schedules.isEmpty) {
         return;
@@ -340,7 +340,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tripState = ref.watch(tripProvider);
+    final tripState = ref.watch(tripProvider).valueOrNull;
     final days = getDaysForTrip(tripState);
     final hostRouteAsync = ref.watch(tripHostRouteProvider);
     return WillPopScope(
@@ -361,7 +361,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             // TODO: 네이버 지도 파트
             Consumer(
               builder: (context, ref, _) {
-                final completedAsync = ref.watch(completedScheduleProvider);
+                final completedAsync = ref.watch(completedScheduleProvider).valueOrNull;
                 if (completedAsync == null || completedAsync.data.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -493,12 +493,12 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     });
 
                     // 기존 DaySelector onChanged의 지도 마커/폴리라인 갱신 로직
-                    final tripState = ref.read(tripProvider);
+                    final tripState = ref.read(tripProvider).valueOrNull;
                     if (index == 0) {
                       // 전체 보기: 지도 전체 리셋
                       final completedAsync = ref.read(
                         completedScheduleProvider,
-                      );
+                      ).valueOrNull;
                       final schedules = completedAsync?.data ?? [];
                       final allPlaces =
                           [for (final day in schedules) ...day.places]
@@ -527,7 +527,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     } else {
                       final completedAsync = ref.read(
                         completedScheduleProvider,
-                      );
+                      ).valueOrNull;
                       final schedules = completedAsync?.data ?? [];
                       final daySchedule = schedules.firstWhere(
                         (s) => s.day == index,
@@ -569,8 +569,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     }
                   },
                   buildPlaceList: () {
-                    final completedAsync = ref.watch(completedScheduleProvider);
-                    final tripState = ref.watch(tripProvider);
+                    final completedAsync = ref.watch(completedScheduleProvider).valueOrNull;
+                    final tripState = ref.watch(tripProvider).valueOrNull;
 
                     if (completedAsync == null) {
                       final trip =

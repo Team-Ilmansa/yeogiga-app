@@ -27,10 +27,10 @@ class CompletedScheduleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final completed = ref.watch(completedScheduleProvider);
+        final completed = ref.watch(completedScheduleProvider).valueOrNull;
         if (completed == null) {
           // 최초 진입 시 state가 null이면 fetch를 한 번만 호출
-          final tripState = ref.read(tripProvider);
+          final tripState = ref.read(tripProvider).valueOrNull;
           if (tripState is TripModel) {
             final tripId = tripState.tripId;
             Future.microtask(() {

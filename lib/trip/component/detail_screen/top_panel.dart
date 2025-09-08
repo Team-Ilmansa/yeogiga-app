@@ -13,7 +13,7 @@ class TopPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final tripState = ref.watch(tripProvider);
+        final tripState = ref.watch(tripProvider).valueOrNull;
         // 상태 텍스트
         String tripStatusText = '진행중인 여행';
         if (tripState is SettingTripModel) {
