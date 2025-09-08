@@ -183,7 +183,7 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         if (tripState is CompletedTripModel) {
                           final completed = ref.watch(
                             completedScheduleProvider,
-                          );
+                          ).valueOrNull;
 
                           final match = completed!.data.firstWhere(
                             (e) => e.day == widget.selectedDayIndex,
@@ -193,7 +193,7 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider);
+                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
                           if (confirmed != null &&
                               confirmed.schedules.isNotEmpty) {
                             final match = confirmed.schedules.firstWhere(
@@ -348,14 +348,14 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         if (tripState is CompletedTripModel) {
                           final completed = ref.watch(
                             completedScheduleProvider,
-                          );
+                          ).valueOrNull;
 
                           tripDayPlaceIds =
                               completed!.data.map((e) => e.id).toList();
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider);
+                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
                           tripDayPlaceIds =
                               confirmed!.schedules.map((e) => e.id).toList();
                         }
@@ -442,14 +442,14 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         if (tripState is CompletedTripModel) {
                           final completed = ref.watch(
                             completedScheduleProvider,
-                          );
+                          ).valueOrNull;
 
                           tripDayPlaceIds =
                               completed!.data.map((e) => e.id).toList();
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider);
+                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
                           tripDayPlaceIds =
                               confirmed!.schedules.map((e) => e.id).toList();
                         }

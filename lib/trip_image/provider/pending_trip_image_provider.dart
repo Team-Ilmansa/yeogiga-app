@@ -8,7 +8,7 @@ import 'package:yeogiga/trip_image/repository/pending_trip_image_repository.dart
 
 final pendingDayTripImagesProvider = StateNotifierProvider<
   PendingDayTripImageNotifier,
-  List<PendingDayTripImage>
+  AsyncValue<List<PendingDayTripImage>>
 >((ref) {
   final repo = ref.watch(pendingTripImageRepository);
   return PendingDayTripImageNotifier(repo);
@@ -22,41 +22,54 @@ class PendingTripDayPlaceInfo {
 }
 
 class PendingDayTripImageNotifier
-    extends StateNotifier<List<PendingDayTripImage>> {
+    extends StateNotifier<AsyncValue<List<PendingDayTripImage>>> {
   final PendingTripImageRepository repo;
 
-  PendingDayTripImageNotifier(this.repo) : super([]);
+  PendingDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
   // 임시 저장 이미지 전부 불러오기
   Future<void> fetchAll(
     int tripId,
     List<PendingTripDayPlaceInfo> dayPlaceIds,
   ) async {
-    state = await Future.wait(
-      dayPlaceIds.map(
-        (e) => repo.fetchPendingDayTripImages(
-          tripId: tripId,
-          tripDayPlaceId: e.tripDayPlaceId,
-          day: e.day,
+    state = const AsyncValue.loading();
+    
+    try {
+      final result = await Future.wait(
+        dayPlaceIds.map(
+          (e) => repo.fetchPendingDayTripImages(
+            tripId: tripId,
+            tripDayPlaceId: e.tripDayPlaceId,
+            day: e.day,
+          ),
         ),
-      ),
-    );
+      );
+      state = AsyncValue.data(result);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   // 하루의 이미지만 새로 fetch해서 state에 반영 (state의 index와 day, tripDayPlaceId가 일치해야 함)
   Future<void> fetchDay(int tripId, int day, String tripDayPlaceId) async {
-    final index = state.indexWhere(
+    final currentState = state.valueOrNull ?? [];
+    final index = currentState.indexWhere(
       (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
     );
     if (index == -1) return;
-    final newItem = await repo.fetchPendingDayTripImages(
-      tripId: tripId,
-      tripDayPlaceId: tripDayPlaceId,
-      day: day,
-    );
-    final newState = [...state];
-    newState[index] = newItem;
-    state = newState;
+    
+    try {
+      final newItem = await repo.fetchPendingDayTripImages(
+        tripId: tripId,
+        tripDayPlaceId: tripDayPlaceId,
+        day: day,
+      );
+      final newState = [...currentState];
+      newState[index] = newItem;
+      state = AsyncValue.data(newState);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   // 이미지 여러 장 업로드

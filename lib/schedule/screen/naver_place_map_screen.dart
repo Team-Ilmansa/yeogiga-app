@@ -248,7 +248,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
       imageUrl: null, // 썸네일 이미지 URL 또는 null
       buttonText: '일정에 추가하기',
       onAddPressed: () async {
-        final tripState = ref.read(tripProvider);
+        final tripState = ref.read(tripProvider).valueOrNull;
         if (tripState is TripModel) {
           bool success = false;
           String? errorMsg;

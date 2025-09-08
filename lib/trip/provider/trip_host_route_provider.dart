@@ -6,7 +6,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 
 /// 여행 방장 위치 전체 이력 Provider (완료된 여행에서만 사용)
 final tripHostRouteProvider = FutureProvider<List<TripHostRouteDay>>((ref) async {
-  final tripState = ref.watch(tripProvider);
+  final tripState = ref.watch(tripProvider).valueOrNull;
   String? tripId;
   if (tripState is CompletedTripModel) {
     tripId = tripState.tripId.toString();

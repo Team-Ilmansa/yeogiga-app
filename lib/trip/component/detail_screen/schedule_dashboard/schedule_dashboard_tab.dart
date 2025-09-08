@@ -28,7 +28,7 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final tripState = ref.read(tripProvider);
+    final tripState = ref.read(tripProvider).valueOrNull;
     if (tripState is SettingTripModel &&
         tripState.startedAt != null &&
         tripState.endedAt != null &&
@@ -73,7 +73,7 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    final tripState = ref.watch(tripProvider);
+    final tripState = ref.watch(tripProvider).valueOrNull;
     if (tripState is SettingTripModel &&
         (tripState.startedAt == null || tripState.endedAt == null)) {
       return const NoScheduleView();

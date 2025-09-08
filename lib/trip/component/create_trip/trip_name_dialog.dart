@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
 
-class TripNameDialog extends StatefulWidget {
+class TripNameDialog extends ConsumerStatefulWidget {
   final TextEditingController nameController;
   final VoidCallback? onConfirm;
 
@@ -13,11 +15,11 @@ class TripNameDialog extends StatefulWidget {
   });
 
   @override
-  State<TripNameDialog> createState() => _TripNameDialogState();
+  ConsumerState<TripNameDialog> createState() => _TripNameDialogState();
 }
 
-class _TripNameDialogState extends State<TripNameDialog> {
-  bool get _canConfirm => widget.nameController.text.trim().isNotEmpty;
+class _TripNameDialogState extends ConsumerState<TripNameDialog> {
+  bool get _hasText => widget.nameController.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -123,23 +125,68 @@ class _TripNameDialogState extends State<TripNameDialog> {
                 SizedBox(
                   width: 125.w,
                   height: 58.h,
-                  child: ElevatedButton(
-                    onPressed: _canConfirm ? widget.onConfirm : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff8287ff),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      '확인',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final tripAsync = ref.watch(tripProvider);
+                      
+                      return tripAsync.when(
+                        loading: () => ElevatedButton(
+                          onPressed: null, // 로딩 중에는 비활성화
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffcccccc),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: SizedBox(
+                            width: 20.w,
+                            height: 20.h,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        data: (trip) => ElevatedButton(
+                          onPressed: _hasText ? widget.onConfirm : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _hasText ? const Color(0xff8287ff) : const Color(0xffcccccc),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            '확인',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        error: (error, stack) => ElevatedButton(
+                          onPressed: _hasText ? widget.onConfirm : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _hasText ? const Color(0xff8287ff) : const Color(0xffcccccc),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            '확인',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

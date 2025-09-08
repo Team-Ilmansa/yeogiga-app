@@ -90,11 +90,13 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                           builder:
                               (context) => TripNameDialog(
                                 nameController: nameController,
-                                onConfirm: () async {
-                                  TripBaseModel trip = await ref
-                                      .read(tripProvider.notifier)
-                                      .postTrip(title: nameController.text);
-                                  if (trip is! SettingTripModel) {
+                                onConfirm: ref.watch(tripProvider).isLoading 
+                                    ? null 
+                                    : () async {
+                                        TripBaseModel trip = await ref
+                                            .read(tripProvider.notifier)
+                                            .postTrip(title: nameController.text);
+                                        if (trip is! SettingTripModel) {
                                     if (!mounted) return;
                                     GoRouter.of(context).pop();
                                     await showDialog(

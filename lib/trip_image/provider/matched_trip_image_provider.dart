@@ -4,7 +4,7 @@ import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart
 
 final matchedTripImagesProvider = StateNotifierProvider<
   MatchedDayTripImageNotifier,
-  List<MatchedDayTripPlaceImage>
+  AsyncValue<List<MatchedDayTripPlaceImage>>
 >((ref) {
   final repo = ref.watch(matchedTripImageRepository);
   return MatchedDayTripImageNotifier(repo);
@@ -24,38 +24,45 @@ class MatchedDayPlaceInfo {
 }
 
 class MatchedDayTripImageNotifier
-    extends StateNotifier<List<MatchedDayTripPlaceImage>> {
+    extends StateNotifier<AsyncValue<List<MatchedDayTripPlaceImage>>> {
   final MatchedTripImageRepository repo;
 
-  MatchedDayTripImageNotifier(this.repo) : super([]);
+  MatchedDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
   /// 모든 일차-장소별 매칭 이미지 fetch
   Future<void> fetchAll(
     int tripId,
     List<MatchedDayPlaceInfo> dayPlaceInfos,
   ) async {
-    state = await Future.wait(
-      dayPlaceInfos.map((e) async {
-        // 각 dayPlaceInfo의 placeIds 별로 fetchMatchedPlaceImages 실행
-        final placeImagesList = await Future.wait(
-          e.placeIds.map((placeId) async {
-            final result = await repo.fetchMatchedPlaceImages(
-              tripId: tripId,
-              tripDayPlaceId: e.tripDayPlaceId,
-              placeId: placeId,
-            );
-            print('=============$result');
-            return result;
-          }),
-        );
-        // null 필터링 (repo가 null 반환 가능성 대비)
-        return MatchedDayTripPlaceImage(
-          tripDayPlaceId: e.tripDayPlaceId,
-          day: e.day,
-          placeImagesList: placeImagesList,
-        );
-      }),
-    );
+    state = const AsyncValue.loading();
+    
+    try {
+      final result = await Future.wait(
+        dayPlaceInfos.map((e) async {
+          // 각 dayPlaceInfo의 placeIds 별로 fetchMatchedPlaceImages 실행
+          final placeImagesList = await Future.wait(
+            e.placeIds.map((placeId) async {
+              final result = await repo.fetchMatchedPlaceImages(
+                tripId: tripId,
+                tripDayPlaceId: e.tripDayPlaceId,
+                placeId: placeId,
+              );
+              print('=============$result');
+              return result;
+            }),
+          );
+          // null 필터링 (repo가 null 반환 가능성 대비)
+          return MatchedDayTripPlaceImage(
+            tripDayPlaceId: e.tripDayPlaceId,
+            day: e.day,
+            placeImagesList: placeImagesList,
+          );
+        }),
+      );
+      state = AsyncValue.data(result);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   /// 리매핑 (re-assign)

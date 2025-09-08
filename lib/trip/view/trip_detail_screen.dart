@@ -109,7 +109,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     setState(() {
       isRefreshing = true;
     });
-    final trip = ref.read(tripProvider);
+    final trip = ref.read(tripProvider).valueOrNull;
     final isCompleted = trip is CompletedTripModel;
     int tripId = (trip is TripModel) ? trip.tripId : 0;
     // invalidate 일정/이미지 provider
@@ -119,7 +119,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     // 일정 fetchAll
     if (isCompleted) {
       await ref.read(completedScheduleProvider.notifier).fetch(tripId);
-      final completed = ref.read(completedScheduleProvider);
+      final completed = ref.read(completedScheduleProvider).valueOrNull;
       if (completed != null && completed.data.isNotEmpty) {
         final pendingDayPlaceInfos =
             completed.data
@@ -161,7 +161,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       }
     } else {
       await ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
-      final confirmed = ref.read(confirmScheduleProvider);
+      final confirmed = ref.read(confirmScheduleProvider).valueOrNull;
       if (confirmed != null && confirmed.schedules.isNotEmpty) {
         final matchedDayPlaceInfos =
             confirmed.schedules
@@ -210,7 +210,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
   //대쉬보드탭 리프레쉬
   Future<void> refreshSchedule() async {
-    final tripState = ref.read(tripProvider);
+    final tripState = ref.read(tripProvider).valueOrNull;
     if (tripState is SettingTripModel &&
         tripState.startedAt != null &&
         tripState.endedAt != null) {
@@ -237,7 +237,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   Widget build(BuildContext context) {
     final selectionMode = ref.watch(selectionModeProvider);
-    final tripState = ref.watch(tripProvider);
+    final tripState = ref.watch(tripProvider).valueOrNull;
     final userMe = ref.watch(userMeProvider);
 
     if (_tabController.index == 0) {
@@ -469,7 +469,7 @@ Widget? _getBottomNavigationBar(
   Map<String, List<String>> matchedOrUnmatchedPayload,
   Map<String, List<String>> pendingPayload,
 ) {
-  final tripState = ref.watch(tripProvider);
+  final tripState = ref.watch(tripProvider).valueOrNull;
   final userMe = ref.watch(userMeProvider);
   // 여행 상태가 SETTING이고 날짜 미지정이면 '여행 날짜 확정하기' 버튼
   if (tripState is SettingTripModel) {

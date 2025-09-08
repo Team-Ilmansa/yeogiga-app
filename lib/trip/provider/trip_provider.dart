@@ -7,7 +7,7 @@ import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 
 //프로바이더 등록!!
-final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
+final tripProvider = StateNotifierProvider<TripStateNotifier, AsyncValue<TripBaseModel?>>((
   ref,
 ) {
   final tripRepository = ref.watch(tripRepositoryProvider);
@@ -16,16 +16,18 @@ final tripProvider = StateNotifierProvider<TripStateNotifier, TripBaseModel?>((
 });
 
 //프로바이더 구성요소!!
-class TripStateNotifier extends StateNotifier<TripBaseModel?> {
+class TripStateNotifier extends StateNotifier<AsyncValue<TripBaseModel?>> {
   final Ref ref;
   final TripRepository tripRepository;
 
   TripStateNotifier({required this.tripRepository, required this.ref})
-    : super(null);
+    : super(const AsyncValue.data(null));
 
   /// 포스트하고 결과 돌려받고,
   /// 결과로 여행 불러오고, 상태등록 까지
   Future<TripBaseModel> postTrip({required String title}) async {
+    state = const AsyncValue.loading();
+    
     try {
       final postTripResponse = await tripRepository.postTrip(title: title);
 
@@ -35,13 +37,16 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
         );
 
         //생성하면 어차피 무조건 Setting 상태여서 바로 적용
-        state = SettingTripModel(trip: getTripResponse.data!);
-        return state!;
+        final result = SettingTripModel(trip: getTripResponse.data!);
+        state = AsyncValue.data(result);
+        return result;
       } else {
-        state = NoTripModel();
-        return state!;
+        final result = NoTripModel();
+        state = AsyncValue.data(result);
+        return result;
       }
-    } on Exception catch (e) {
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
       return NoTripModel();
     }
   }
@@ -49,41 +54,46 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
   /// 여행 불러오기.
   /// 여행 정보, 본인의 w2m, 여행의 w2m 불러와서 각각 상태저장
   Future<TripBaseModel> getTrip({required int tripId}) async {
+    state = const AsyncValue.loading();
+    
     try {
       final getTripResponse = await tripRepository.getTripByTripId(
         tripId: tripId,
       );
       if (getTripResponse.data == null) {
-        state = NoTripModel();
-        return state!;
+        final result = NoTripModel();
+        state = AsyncValue.data(result);
+        return result;
       }
 
       final tripData = getTripResponse.data!;
+      TripBaseModel result;
       switch (tripData.status) {
         case TripStatus.SETTING:
-          state = SettingTripModel(trip: tripData);
+          result = SettingTripModel(trip: tripData);
           break;
         case TripStatus.PLANNED:
-          state = PlannedTripModel(trip: tripData);
+          result = PlannedTripModel(trip: tripData);
           break;
         case TripStatus.IN_PROGRESS:
-          state = InProgressTripModel(trip: tripData);
+          result = InProgressTripModel(trip: tripData);
           break;
         case TripStatus.COMPLETED:
-          state = CompletedTripModel(trip: tripData);
+          result = CompletedTripModel(trip: tripData);
           break;
         default:
-          state = NoTripModel();
+          result = NoTripModel();
       }
+      state = AsyncValue.data(result);
 
       final userW2mResponse = await ref
           .read(userW2mProvider.notifier)
           .getUserW2m(tripId: tripId);
       final tripW2mResponse = await ref.read(tripW2mProvider(tripId).future);
-      return state!;
-    } on Exception catch (e) {
-      state = NoTripModel();
-      return state!;
+      return result;
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+      return NoTripModel();
     }
   }
 
@@ -92,8 +102,9 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
     required DateTime start,
     required DateTime end,
   }) async {
-    if (state is! TripModel) return false;
-    final tripId = (state as TripModel).tripId;
+    final currentTrip = state.valueOrNull;
+    if (currentTrip is! TripModel) return false;
+    final tripId = currentTrip.tripId;
     try {
       final result = await tripRepository.patchTripTime(
         tripId: tripId,
@@ -117,8 +128,9 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
 
   /// 여행 제목 수정
   Future<bool> updateTripTitle({required String title}) async {
-    if (state is! TripModel) return false;
-    final tripId = (state as TripModel).tripId;
+    final currentTrip = state.valueOrNull;
+    if (currentTrip is! TripModel) return false;
+    final tripId = currentTrip.tripId;
     try {
       final result = await tripRepository.updateTripTitle(
         tripId: tripId,
@@ -135,8 +147,9 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
 
   /// 여행 탈퇴
   Future<bool> leaveTrip() async {
-    if (state is! TripModel) return false;
-    final tripId = (state as TripModel).tripId;
+    final currentTrip = state.valueOrNull;
+    if (currentTrip is! TripModel) return false;
+    final tripId = currentTrip.tripId;
     try {
       final result = await tripRepository.leaveTrip(tripId: tripId);
       if (result) {
@@ -151,8 +164,9 @@ class TripStateNotifier extends StateNotifier<TripBaseModel?> {
 
   /// 여행 삭제
   Future<bool> deleteTrip() async {
-    if (state is! TripModel) return false;
-    final tripId = (state as TripModel).tripId;
+    final currentTrip = state.valueOrNull;
+    if (currentTrip is! TripModel) return false;
+    final tripId = currentTrip.tripId;
     try {
       final result = await tripRepository.deleteTrip(tripId: tripId);
       if (result) {

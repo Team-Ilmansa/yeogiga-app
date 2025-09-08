@@ -25,7 +25,7 @@ class _W2MOverlapCalendarScreenState
   @override
   Widget build(BuildContext context) {
     // tripId를 tripProvider의 상태에서 가져옵니다.
-    final tripState = ref.watch(tripProvider);
+    final tripState = ref.watch(tripProvider).valueOrNull;
     int tripId;
     if (tripState is TripModel) {
       tripId = tripState.tripId;

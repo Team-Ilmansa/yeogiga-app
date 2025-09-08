@@ -65,7 +65,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     if (!selectionMode) {
       selectedMatchedOrUnMatchedPictures.clear();
     }
-    final matchedImages = ref.watch(matchedTripImagesProvider);
+    final matchedImages = ref.watch(matchedTripImagesProvider).valueOrNull ?? [];
     print('===== matchedImages 전체 내용 =====');
     for (final dayPlace in matchedImages) {
       print(
@@ -87,8 +87,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
       }
     }
     print('==============================');
-    final unmatchedImages = ref.watch(unmatchedTripImagesProvider);
-    final pendingImages = ref.watch(pendingDayTripImagesProvider);
+    final unmatchedImages = ref.watch(unmatchedTripImagesProvider).valueOrNull ?? [];
+    final pendingImages = ref.watch(pendingDayTripImagesProvider).valueOrNull ?? [];
     final selectedDay = widget.selectedDayIndex;
 
     // TODO: selectedDay에 따라 사진들 분류 작업 계속 실행됨.
@@ -227,7 +227,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
             child: Builder(
               builder: (context) {
                 // tripProvider에서 trip 정보를 가져와 날짜 개수를 계산
-                final trip = ref.watch(tripProvider);
+                final trip = ref.watch(tripProvider).valueOrNull;
                 int tripDayCount = 0;
                 if (trip is TripModel &&
                     trip.startedAt != null &&
@@ -659,7 +659,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                 // DaySelector
                 Builder(
                   builder: (context) {
-                    final trip = ref.watch(tripProvider);
+                    final trip = ref.watch(tripProvider).valueOrNull;
                     int tripDayCount = 0;
                     if (trip is TripModel &&
                         trip.startedAt != null &&

@@ -4,21 +4,27 @@ import 'package:yeogiga/schedule/repository/confirm_schedule_repository.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
 final confirmScheduleProvider =
-    StateNotifierProvider<ConfirmScheduleNotifier, ConfirmedScheduleModel?>((
+    StateNotifierProvider<ConfirmScheduleNotifier, AsyncValue<ConfirmedScheduleModel?>>((
       ref,
     ) {
       final repo = ref.watch(confirmScheduleRepositoryProvider);
       return ConfirmScheduleNotifier(repo);
     });
 
-class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
+class ConfirmScheduleNotifier extends StateNotifier<AsyncValue<ConfirmedScheduleModel?>> {
   final ConfirmScheduleRepository repo;
-  ConfirmScheduleNotifier(this.repo) : super(null);
+  ConfirmScheduleNotifier(this.repo) : super(const AsyncValue.data(null));
 
   /// 전체 확정 일정 조회 (여행별)
   Future<void> fetchAll(int tripId) async {
-    final result = await repo.fetchConfirmedSchedule(tripId: tripId);
-    state = result;
+    state = const AsyncValue.loading();
+    
+    try {
+      final result = await repo.fetchConfirmedSchedule(tripId: tripId);
+      state = AsyncValue.data(result);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   /// 특정 일차(dayScheduleId)의 일정만 조회 및 상태 반영
@@ -41,16 +47,16 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
 
   /// 내부: 특정 day만 state에 반영 (전체 schedules 중 해당 day만 교체)
   void _updateDayInState(int tripId, ConfirmedDayScheduleModel updatedDay) {
-    final current = state;
+    final current = state.valueOrNull;
     if (current == null) return;
     final newSchedules =
         current.schedules
             .map((d) => d.day == updatedDay.day ? updatedDay : d)
             .toList();
-    state = ConfirmedScheduleModel(
+    state = AsyncValue.data(ConfirmedScheduleModel(
       tripId: current.tripId,
       schedules: newSchedules,
-    );
+    ));
   }
 
   /// 특정 일차에 목적지 추가
@@ -102,24 +108,25 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
   }) async {
     // 1. 기존 daySchedule 백업
     final prevState = state;
+    final currentState = state.valueOrNull;
     final dayIndex =
-        state?.schedules.indexWhere((d) => d.id == tripDayPlaceId) ?? -1;
-    if (dayIndex == -1 || state == null) return false;
-    final originalPlaces = List.of(state!.schedules[dayIndex].places);
+        currentState?.schedules.indexWhere((d) => d.id == tripDayPlaceId) ?? -1;
+    if (dayIndex == -1 || currentState == null) return false;
+    final originalPlaces = List.of(currentState.schedules[dayIndex].places);
 
     // 2. state를 optimistic하게 바로 변경
-    state = state!.copyWith(
+    state = AsyncValue.data(currentState.copyWith(
       schedules: [
-        ...state!.schedules.sublist(0, dayIndex),
-        state!.schedules[dayIndex].copyWith(
+        ...currentState.schedules.sublist(0, dayIndex),
+        currentState.schedules[dayIndex].copyWith(
           places:
               orderedPlaceIds
                   .map((id) => originalPlaces.firstWhere((p) => p.id == id))
                   .toList(),
         ),
-        ...state!.schedules.sublist(dayIndex + 1),
+        ...currentState.schedules.sublist(dayIndex + 1),
       ],
-    );
+    ));
 
     // 3. 서버 요청
     final success = await repo.reorderConfirmedPlaces(
@@ -184,5 +191,5 @@ class ConfirmScheduleNotifier extends StateNotifier<ConfirmedScheduleModel?> {
   }
 
   /// 상태 초기화 (clear)
-  void clear() => state = null;
+  void clear() => state = const AsyncValue.data(null);
 }

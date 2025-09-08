@@ -4,7 +4,7 @@ import 'package:yeogiga/trip_image/repository/unmatched_trip_image_repository.da
 
 final unmatchedTripImagesProvider = StateNotifierProvider<
   UnmatchedDayTripImageNotifier,
-  List<UnMatchedDayTripImage>
+  AsyncValue<List<UnMatchedDayTripImage>>
 >((ref) {
   final repo = ref.watch(unmatchedTripImageRepository);
   return UnmatchedDayTripImageNotifier(repo);
@@ -18,41 +18,54 @@ class UnMatchedTripDayPlaceInfo {
 }
 
 class UnmatchedDayTripImageNotifier
-    extends StateNotifier<List<UnMatchedDayTripImage>> {
+    extends StateNotifier<AsyncValue<List<UnMatchedDayTripImage>>> {
   final UnmatchedTripImageRepository repo;
 
-  UnmatchedDayTripImageNotifier(this.repo) : super([]);
+  UnmatchedDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
   /// TODO: 모든 일차별 매칭되지 않은 이미지 fetch
   Future<void> fetchAll(
     int tripId,
     List<UnMatchedTripDayPlaceInfo> dayPlaceIds,
   ) async {
-    state = await Future.wait(
-      dayPlaceIds.map(
-        (e) => repo.fetchUnmatchedDayTripImages(
-          tripId: tripId,
-          tripDayPlaceId: e.tripDayPlaceId,
-          day: e.day,
+    state = const AsyncValue.loading();
+    
+    try {
+      final result = await Future.wait(
+        dayPlaceIds.map(
+          (e) => repo.fetchUnmatchedDayTripImages(
+            tripId: tripId,
+            tripDayPlaceId: e.tripDayPlaceId,
+            day: e.day,
+          ),
         ),
-      ),
-    );
+      );
+      state = AsyncValue.data(result);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   // TODO: 하루의 이미지만 새로 fetch해서 state에 반영
   // 하루의 이미지만 새로 fetch해서 state에 반영 (state의 index와 day, tripDayPlaceId가 일치해야 함)
   Future<void> fetchDay(int tripId, int day, String tripDayPlaceId) async {
-    final index = state.indexWhere(
+    final currentState = state.valueOrNull ?? [];
+    final index = currentState.indexWhere(
       (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
     );
     if (index == -1) return;
-    final newItem = await repo.fetchUnmatchedDayTripImages(
-      tripId: tripId,
-      tripDayPlaceId: tripDayPlaceId,
-      day: day,
-    );
-    final newState = [...state];
-    newState[index] = newItem;
-    state = newState;
+    
+    try {
+      final newItem = await repo.fetchUnmatchedDayTripImages(
+        tripId: tripId,
+        tripDayPlaceId: tripDayPlaceId,
+        day: day,
+      );
+      final newState = [...currentState];
+      newState[index] = newItem;
+      state = AsyncValue.data(newState);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 }

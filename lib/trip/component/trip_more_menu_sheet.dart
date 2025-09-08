@@ -12,7 +12,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
   const TripMoreMenuSheetLeader({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final trip = ref.watch(tripProvider) as TripModel;
+    final trip = ref.watch(tripProvider).valueOrNull as TripModel?;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.of(context).pop(),
@@ -55,7 +55,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                       svgUrl: 'asset/icon/menu/share_edit.svg',
                       text: '여행 ID 확인하기',
                       onTap: () async {
-                        final tripState = ref.read(tripProvider);
+                        final tripState = ref.read(tripProvider).valueOrNull;
                         int? tripId;
                         if (tripState is TripModel) {
                           tripId = tripState.tripId;
@@ -299,7 +299,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                                     children: [
                                       SizedBox(height: 3.h),
                                       Text(
-                                        '${trip.title}을 정말로 삭제하시겠어요?',
+                                        '${trip?.title ?? '이 여행'}을 정말로 삭제하시겠어요?',
                                         style: TextStyle(
                                           fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
@@ -541,7 +541,7 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                       svgUrl: 'asset/icon/menu/share_edit.svg',
                       text: '여행 ID 확인하기',
                       onTap: () async {
-                        final tripState = ref.read(tripProvider);
+                        final tripState = ref.read(tripProvider).valueOrNull;
                         int? tripId;
                         if (tripState is TripModel) {
                           tripId = tripState.tripId;
