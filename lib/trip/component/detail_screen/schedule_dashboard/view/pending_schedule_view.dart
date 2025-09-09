@@ -137,7 +137,7 @@ class PendingScheduleView extends StatelessWidget {
               color: Color(0xff7d7d7d),
             ),
             children: [
-              // Consumer를 children에 직접 넣으면 타입 오류가 발생하므로, 즉시실행 함수로 감싸서 List<Widget>만 children에 들어가도록 함
+              //TODO: Consumer를 children에 직접 넣으면 타입 오류가 발생하므로, 즉시실행 함수로 감싸서 List<Widget>만 children에 들어가도록 함
               ...(() {
                 return [
                   // Riverpod의 ref를 안전하게 사용하기 위해 children 전체를 Consumer로 감쌈
@@ -179,9 +179,10 @@ class PendingScheduleView extends StatelessWidget {
                             );
                             final orderedPlaceIds =
                                 places.map((p) => p.id).toList(); // 순서만 추출
-                            final tripState = ref.read(
-                              tripProvider,
-                            ).valueOrNull; // tripId는 provider에서 안전하게 가져옴
+                            final tripState =
+                                ref
+                                    .read(tripProvider)
+                                    .valueOrNull; // tripId는 provider에서 안전하게 가져옴
                             final tripId =
                                 (tripState is SettingTripModel)
                                     ? tripState.tripId.toString()
@@ -205,7 +206,8 @@ class PendingScheduleView extends StatelessWidget {
                                 children: [
                                   SlidableAction(
                                     onPressed: (_) async {
-                                      final tripState = ref.read(tripProvider).valueOrNull;
+                                      final tripState =
+                                          ref.read(tripProvider).valueOrNull;
                                       final tripId =
                                           (tripState is SettingTripModel)
                                               ? tripState.tripId.toString()
@@ -230,6 +232,7 @@ class PendingScheduleView extends StatelessWidget {
                               ),
                               child: ScheduleItem(
                                 title: place.name,
+                                category: place.placeCategory,
                                 time: null,
                                 done: false,
                               ),

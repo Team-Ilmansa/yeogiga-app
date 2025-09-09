@@ -247,7 +247,27 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
       place: _selectedPlace,
       imageUrl: null, // 썸네일 이미지 URL 또는 null
       buttonText: '일정에 추가하기',
-      onAddPressed: () async {
+      onAddPressed: (selectedCategoryIndex) async {
+        // 카테고리 index를 문자열로 변환
+        String placeCategory;
+        switch (selectedCategoryIndex) {
+          case 1:
+            placeCategory = 'TOURISM';
+            break;
+          case 2:
+            placeCategory = 'LODGING';
+            break;
+          case 3:
+            placeCategory = 'RESTAURANT';
+            break;
+          case 4:
+            placeCategory = 'ETC';
+            break;
+          default:
+            placeCategory = 'TOURISM'; // 기본값
+        }
+        
+        print('선택된 카테고리: $placeCategory (index: $selectedCategoryIndex)');
         final tripState = ref.read(tripProvider).valueOrNull;
         if (tripState is TripModel) {
           bool success = false;
@@ -266,7 +286,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                       latitude: _selectedPlace!.mapyCoord,
                       longitude: _selectedPlace!.mapxCoord,
                       // placeCategory: _selectedPlace!.category,
-                      placeCategory: '기타',
+                      placeCategory: placeCategory,
                     ),
                   );
             } else {
@@ -281,7 +301,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                       latitude: _selectedPlace!.mapyCoord,
                       longitude: _selectedPlace!.mapxCoord,
                       // placeType: _selectedPlace!.category,
-                      placeType: '기타',
+                      placeType: placeCategory,
                     );
               }
             }
@@ -296,26 +316,29 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
           // 수정: async gap 이후 context 사용 시 mounted 체크 추가
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                success
-                    ? '일정에 성공적으로 추가되었습니다!'
-                    : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-              ),
-              backgroundColor:
+              SnackBar(
+                content: Text(
                   success
-                      ? const Color.fromARGB(212, 56, 212, 121)
-                      : const Color.fromARGB(229, 226, 81, 65),
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.all(5.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
+                      ? '일정에 성공적으로 추가되었습니다!'
+                      : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                backgroundColor:
+                    success
+                        ? const Color.fromARGB(212, 56, 212, 121)
+                        : const Color.fromARGB(229, 226, 81, 65),
+                behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.all(5.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                elevation: 0, // 그림자 제거
+                duration: const Duration(seconds: 2),
               ),
-              elevation: 0, // 그림자 제거
-              duration: const Duration(seconds: 2),
-            ),
-          );
+            );
           }
         }
       },

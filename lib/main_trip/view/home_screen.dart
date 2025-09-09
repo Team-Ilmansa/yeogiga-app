@@ -92,7 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                         children: [
                           _HomeAppBar(trip: trip),
                           Transform.translate(
-                            offset: Offset(0, -13.h),
+                            offset: Offset(0, -40.h),
                             child: ScheduleItemList(),
                           ),
                         ],
@@ -102,12 +102,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 },
               ),
               Transform.translate(
-                offset: Offset(0, -30.h),
+                offset: Offset(0, -62.h), // 40 + 22 해서 62임.
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 11.h, color: Colors.transparent),
-
+                    Container(height: 11.h, color: Color(0xfff0f0f0)),
+                    SizedBox(height: 40.h),
                     Consumer(
                       builder: (context, ref, _) {
                         final settingTrips = ref.watch(settingTripListProvider);
@@ -117,7 +117,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: 30.h),
                             Padding(
                               padding: EdgeInsets.fromLTRB(14.w, 0, 0, 12.h),
                               child: Text(
@@ -139,7 +138,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                 await ref
                                     .read(tripProvider.notifier)
                                     .getTrip(tripId: tripId);
-                                final tripState = ref.read(tripProvider).valueOrNull;
+                                final tripState =
+                                    ref.read(tripProvider).valueOrNull;
                                 final userW2mState = ref.read(userW2mProvider);
                                 if (context.mounted) {
                                   if (tripState is SettingTripModel &&
@@ -207,7 +207,7 @@ class _HomeAppBar extends ConsumerWidget {
     final weatherAsync = ref.watch(weatherProvider);
     final userMe = ref.read(userMeProvider);
     return SizedBox(
-      height: 219.h,
+      height: 238.h,
       child: weatherAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Stack(children: [Center(child: Text(e.toString()))]),
@@ -349,12 +349,12 @@ class AppBarTop extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(getWeatherIcon(weatherMain), size: 21.sp, color: iconColor),
+              Icon(getWeatherIcon(weatherMain), size: 24.sp, color: iconColor),
               SizedBox(width: 3.w),
               Text(
                 '$temp°',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 18.sp,
                   color: tempColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -393,7 +393,11 @@ class AppBarTop extends StatelessWidget {
                           }
                         }
                       },
-                      child: Icon(Icons.map_outlined, color: iconColor),
+                      child: Icon(
+                        Icons.map_outlined,
+                        color: iconColor,
+                        size: 24.sp,
+                      ),
                     );
                   } else {
                     return Container();
@@ -401,7 +405,7 @@ class AppBarTop extends StatelessWidget {
                 },
               ),
               SizedBox(width: 11.w),
-              Icon(Icons.notifications_none, color: iconColor),
+              Icon(Icons.notifications_none, color: iconColor, size: 24.sp),
             ],
           ),
         ],

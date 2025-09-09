@@ -301,7 +301,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               if (!_allDaysFetched) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final scheduleAsync = ref.watch(confirmScheduleProvider).valueOrNull;
+              final scheduleAsync =
+                  ref.watch(confirmScheduleProvider).valueOrNull;
               final schedules = scheduleAsync?.schedules ?? [];
               List<ConfirmedPlaceModel> placeList = [];
               if (selectedDayIndex == 0) {
@@ -474,10 +475,10 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                             await Future.delayed(
                               const Duration(milliseconds: 100),
                             ); // 상태 반영 대기
-                            final tripState = ref.read(tripProvider).valueOrNull;
-                            final scheduleAsync = ref.read(
-                              confirmScheduleProvider,
-                            ).valueOrNull;
+                            final tripState =
+                                ref.read(tripProvider).valueOrNull;
+                            final scheduleAsync =
+                                ref.read(confirmScheduleProvider).valueOrNull;
                             final schedules = scheduleAsync?.schedules ?? [];
                             if (index == 0) {
                               // 전체 보기: 모든 day의 place를 순서대로 합쳐서 마커/폴리라인 표시
@@ -582,15 +583,17 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                         ),
                         Consumer(
                           builder: (context, ref, _) {
-                            final scheduleAsync = ref.watch(
-                              confirmScheduleProvider,
-                            ).valueOrNull;
-                            final tripState = ref.watch(tripProvider).valueOrNull;
+                            final scheduleAsync =
+                                ref.watch(confirmScheduleProvider).valueOrNull;
+                            final tripState =
+                                ref.watch(tripProvider).valueOrNull;
                             if (scheduleAsync == null) {
                               final trip =
                                   tripState is TripModel ? tripState : null;
                               if (trip != null) {
-                                Future.microtask(() {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
                                   ref
                                       .read(confirmScheduleProvider.notifier)
                                       .fetchAll(trip.tripId);
@@ -650,6 +653,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                             child: ScheduleItem(
                                               key: ValueKey(place.id),
                                               title: place.name,
+                                              category: place.placeType,
                                               time: null,
                                               done: false,
                                             ),

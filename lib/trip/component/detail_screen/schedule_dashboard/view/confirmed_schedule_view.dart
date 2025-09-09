@@ -32,7 +32,7 @@ class ConfirmedScheduleView extends StatelessWidget {
           final tripState = ref.read(tripProvider).valueOrNull;
           if (tripState is TripModel) {
             final tripId = tripState.tripId;
-            Future.microtask(() {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
             });
           }
@@ -178,7 +178,10 @@ class ConfirmedScheduleView extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                         border: Border(
-                          right: BorderSide(color: Colors.blue, width: 4.0),
+                          right: BorderSide(
+                            color: Color(0xff8287ff),
+                            width: 4.0,
+                          ),
                         ),
                       ),
                       child: child,
@@ -233,6 +236,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                         child: ScheduleItem(
                           key: ValueKey(place.id),
                           title: place.name,
+                          category: place.placeType,
                           time: null, // 필요시 시간 표시 가능
                           done: place.isVisited,
                         ),

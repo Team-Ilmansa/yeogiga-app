@@ -46,13 +46,13 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
             tripState is InProgressTripModel) &&
         !_confirmedFetched) {
       final tripId = (tripState as TripModel).tripId;
-      Future.microtask(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
       });
       _confirmedFetched = true;
     } else if (tripState is CompletedTripModel && !_completedFetched) {
       final tripId = tripState.tripId;
-      Future.microtask(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(completedScheduleProvider.notifier).fetch(tripId);
       });
       _completedFetched = true;
