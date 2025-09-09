@@ -55,19 +55,21 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     // 탭 컨트롤러 리스너
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      if (_tabController.index != 1) {
+      if (_tabController.index != 1 && _tabController.index != 2) {
         ref.read(selectionModeProvider.notifier).state = false;
       }
       setState(() {
         if (_tabController.index == 0) {
-          bottomAppBarState = 1;
+          bottomAppBarState = 1; // 일정 대시보드
         } else if (_tabController.index == 1) {
-          bottomAppBarState = ref.watch(selectionModeProvider) ? 3 : 2;
+          bottomAppBarState = ref.watch(selectionModeProvider) ? 3 : 2; // 갤러리
+        } else if (_tabController.index == 2) {
+          bottomAppBarState = 4; // 즐겨찾는 사진 (새로운 상태)
         }
       });
     });
@@ -81,7 +83,9 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       _initialized = true;
 
       //앱을 시작할때도 호출
-      refreshAll();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        refreshAll();
+      });
     }
   }
 
@@ -241,9 +245,11 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final userMe = ref.watch(userMeProvider);
 
     if (_tabController.index == 0) {
-      bottomAppBarState = 1;
+      bottomAppBarState = 1; // 일정 대시보드
     } else if (_tabController.index == 1) {
-      bottomAppBarState = selectionMode ? 3 : 2;
+      bottomAppBarState = selectionMode ? 3 : 2; // 갤러리
+    } else if (_tabController.index == 2) {
+      bottomAppBarState = 4; // 즐겨찾는 사진
     }
 
     return Scaffold(
@@ -339,7 +345,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         pendingPayload,
       ),
       body: DefaultTabController(
-        length: 2,
+        length: 3,
         child: NestedScrollView(
           headerSliverBuilder:
               (context, innerBoxIsScrolled) => [
@@ -389,6 +395,16 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 ),
                               ),
                             ),
+                            Tab(
+                              child: Text(
+                                '즐겨찾는 사진',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  letterSpacing: -0.1,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -424,6 +440,18 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     });
                   },
                   onSelectionPayloadChanged: onSelectionPayloadChanged,
+                ),
+              ),
+              // 즐겨찾는 사진 탭
+              Center(
+                child: Text(
+                  '즐겨찾는 사진 탭\n구현 예정',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -531,6 +559,9 @@ Widget? _getBottomNavigationBar(
       // 그 외 상태에서는 하단바 숨김
       return null;
     }
+  } else if (bottomAppBarState == 4) {
+    // 즐겨찾는 사진 탭 - 일단 하단바 숨김 (추후 구현)
+    return null;
   }
   return null;
 }

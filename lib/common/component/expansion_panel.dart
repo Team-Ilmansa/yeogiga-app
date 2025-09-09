@@ -35,9 +35,24 @@ class ExpansionPanel extends StatelessWidget {
           color: Color(0xff7d7d7d),
         ),
         children: [
-          const ScheduleItem(title: 'Text', time: '11:00', done: true),
-          const ScheduleItem(title: 'Text', time: '11:00', done: false),
-          const ScheduleItem(title: 'Text', time: '11:00', done: false),
+          const ScheduleItem(
+            title: 'Text',
+            category: 'asdf',
+            time: '11:00',
+            done: true,
+          ),
+          const ScheduleItem(
+            title: 'Text',
+            category: 'asdf',
+            time: '11:00',
+            done: false,
+          ),
+          const ScheduleItem(
+            title: 'Text',
+            category: 'asdf',
+            time: '11:00',
+            done: false,
+          ),
           SizedBox(height: 13.h),
         ],
       ),

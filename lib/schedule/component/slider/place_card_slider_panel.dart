@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
+import 'package:yeogiga/schedule/component/slider/category_selector.dart';
 
-class PlaceCardSliderPanel extends StatelessWidget {
+class PlaceCardSliderPanel extends StatefulWidget {
   final NaverPlaceItem? place;
   final String? imageUrl;
-  final VoidCallback? onAddPressed;
+  final Function(int selectedCategoryIndex)? onAddPressed; // 카테고리 index 전달
   final String buttonText;
 
   const PlaceCardSliderPanel({
@@ -16,6 +17,13 @@ class PlaceCardSliderPanel extends StatelessWidget {
     this.onAddPressed,
     this.buttonText = '일정에 추가하기',
   }) : super(key: key);
+
+  @override
+  State<PlaceCardSliderPanel> createState() => _PlaceCardSliderPanelState();
+}
+
+class _PlaceCardSliderPanelState extends State<PlaceCardSliderPanel> {
+  int selectedCategoryIndex = 1; // 초기값: 관광지
 
   @override
   Widget build(BuildContext context) {
@@ -33,43 +41,47 @@ class PlaceCardSliderPanel extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          right: 11.w,
-          left: 11.w,
-          top: 11.h,
-          bottom: 30.h,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 12.h),
               child: Container(
-                width: 99.w,
-                height: 5.h,
+                width: 111.w,
+                height: 6.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: const Color(0xFFf0f0f0),
                   borderRadius: BorderRadius.circular(11.r),
                 ),
               ),
             ),
-            SizedBox(height: 12.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 89.w,
-                  height: 89.w,
+          ),
+          SizedBox(height: 20.h),
+          SizedBox(
+            height: 100.h,
+            child: ListView.separated(
+              primary: false,
+              shrinkWrap: true,
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (context, index) => SizedBox(width: 8.w),
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 100.w,
+                  height: 100.w,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4F4F4),
                     borderRadius: BorderRadius.circular(11.r),
                   ),
                   child:
-                      imageUrl != null && imageUrl!.isNotEmpty
+                      widget.imageUrl != null && widget.imageUrl!.isNotEmpty
                           ? ClipRRect(
                             borderRadius: BorderRadius.circular(11.r),
                             child: Image.network(
-                              imageUrl!,
+                              widget.imageUrl!,
                               fit: BoxFit.cover,
                               width: 89.w,
                               height: 89.w,
@@ -86,82 +98,110 @@ class PlaceCardSliderPanel extends StatelessWidget {
                             size: 30.sp,
                             color: Colors.grey[300],
                           ),
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 17.h),
+
+          Padding(
+            padding: EdgeInsets.only(right: 16.w, left: 16.w, bottom: 32.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.place?.title ?? '',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF313131),
+                    letterSpacing: -0.3,
+                    height: 1.4,
+                  ),
                 ),
-                SizedBox(width: 14.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      place?.category ?? '',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: const Color(0xFF7D7D7D),
-                        fontWeight: FontWeight.w400,
+                SizedBox(height: 4.h),
+                Text(
+                  widget.place?.roadAddress ?? widget.place?.address ?? '',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF7d7d7d),
+                    letterSpacing: -0.3,
+                    height: 1.4,
+                  ),
+                ),
+                // Text(
+                //   place?.category ?? '',
+                //   style: TextStyle(
+                //     fontSize: 11.sp,
+                //     color: const Color(0xFF7D7D7D),
+                //     fontWeight: FontWeight.w400,
+                //   ),
+                // ),
+                SizedBox(height: 28.h),
+                Text(
+                  '카테고리를 선택해주세요',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    height: 1.5,
+                    letterSpacing: -0.3,
+                    color: Color(0xff313131),
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                CategorySelector(
+                  initialSelectedIndex: selectedCategoryIndex,
+                  onCategoryChanged: (index) {
+                    setState(() {
+                      selectedCategoryIndex = index;
+                    });
+                    print('선택된 카테고리: $index');
+                  },
+                ),
+                SizedBox(height: 20.h),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52.h,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C8AFF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(11.r),
                       ),
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      place?.title ?? '',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                    onPressed: () {
+                      print('카테고리 $selectedCategoryIndex로 ${widget.place?.title} 추가');
+                      widget.onAddPressed?.call(selectedCategoryIndex);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6.h),
+                          child: SvgPicture.asset(
+                            'asset/icon/add_schedule.svg',
+                            width: 24.w,
+                            height: 24.h,
+                          ),
+                        ),
+                        Text(
+                          widget.buttonText,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: -0.1,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      place?.roadAddress ?? place?.address ?? '',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: const Color(0xFF313131),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
-            SizedBox(
-              width: double.infinity,
-              height: 46.h,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C8AFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(11.r),
-                  ),
-                  elevation: 0,
-                  padding: EdgeInsets.zero,
-                ),
-                onPressed: onAddPressed,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 6.h),
-                      child: SvgPicture.asset(
-                        'asset/icon/add_schedule.svg',
-                        width: 21.w,
-                        height: 21.h,
-                      ),
-                    ),
-                    Text(
-                      buttonText,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                        letterSpacing: -0.1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

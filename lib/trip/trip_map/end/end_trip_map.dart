@@ -361,7 +361,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             // TODO: 네이버 지도 파트
             Consumer(
               builder: (context, ref, _) {
-                final completedAsync = ref.watch(completedScheduleProvider).valueOrNull;
+                final completedAsync =
+                    ref.watch(completedScheduleProvider).valueOrNull;
                 if (completedAsync == null || completedAsync.data.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -496,9 +497,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     final tripState = ref.read(tripProvider).valueOrNull;
                     if (index == 0) {
                       // 전체 보기: 지도 전체 리셋
-                      final completedAsync = ref.read(
-                        completedScheduleProvider,
-                      ).valueOrNull;
+                      final completedAsync =
+                          ref.read(completedScheduleProvider).valueOrNull;
                       final schedules = completedAsync?.data ?? [];
                       final allPlaces =
                           [for (final day in schedules) ...day.places]
@@ -525,9 +525,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                       );
                       await _fitMapToPlaces(allPlaces);
                     } else {
-                      final completedAsync = ref.read(
-                        completedScheduleProvider,
-                      ).valueOrNull;
+                      final completedAsync =
+                          ref.read(completedScheduleProvider).valueOrNull;
                       final schedules = completedAsync?.data ?? [];
                       final daySchedule = schedules.firstWhere(
                         (s) => s.day == index,
@@ -569,7 +568,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     }
                   },
                   buildPlaceList: () {
-                    final completedAsync = ref.watch(completedScheduleProvider).valueOrNull;
+                    final completedAsync =
+                        ref.watch(completedScheduleProvider).valueOrNull;
                     final tripState = ref.watch(tripProvider).valueOrNull;
 
                     if (completedAsync == null) {
@@ -644,6 +644,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                     child: ScheduleItem(
                                       key: ValueKey(place.id),
                                       title: place.name,
+                                      category: place.type,
                                       time: null,
                                       done: true,
                                     ),

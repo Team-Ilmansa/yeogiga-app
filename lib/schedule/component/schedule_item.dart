@@ -7,12 +7,14 @@ import 'package:intl/intl.dart';
 
 class ScheduleItem extends StatelessWidget {
   final String title;
+  final String category;
   final String? time;
   final bool done;
 
   const ScheduleItem({
     super.key,
     required this.title,
+    required this.category,
     this.time,
     required this.done,
   });
@@ -21,6 +23,9 @@ class ScheduleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final backgroundColor = const Color(0xFFF0F0F0); // 모든 항목 동일 배경
     final textColor = const Color(0xFF7D7D7D);
+
+    // 카테고리에 따라 아이콘 경로 결정
+    final categoryIcon = _getCategoryIcon(category);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 9.w),
@@ -32,11 +37,7 @@ class ScheduleItem extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SvgPicture.asset(
-                  'asset/icon/category icon.svg',
-                  width: 23.w,
-                  height: 23.h,
-                ),
+                SvgPicture.asset(categoryIcon, width: 24.w, height: 24.h),
                 Positioned(
                   bottom: 0,
                   child: Text(
@@ -99,6 +100,24 @@ class ScheduleItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // 카테고리에 따라 아이콘 경로 반환
+  String _getCategoryIcon(String category) {
+    print('ScheduleItem category: "$category"'); // 디버그 로그
+    switch (category.toUpperCase()) {
+      case '관광지':
+        return 'asset/icon/category spot.svg';
+      case '숙소':
+        return 'asset/icon/category hotel.svg';
+      case '식당':
+        return 'asset/icon/category restaurant.svg';
+      case '기타':
+        return 'asset/icon/category etc.svg';
+      default:
+        print('Unknown category: "$category" - using default icon'); // 디버그 로그
+        return 'asset/icon/category icon.svg'; // 기본값
+    }
   }
 }
 
@@ -258,6 +277,8 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                       children: [
                                         ScheduleItem(
                                           title: place.name,
+                                          category:
+                                              'TOURISM', // TODO: place에서 카테고리 가져오기
                                           time: null,
                                           done: place.isVisited,
                                         ),
@@ -267,6 +288,8 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                   } else {
                                     return ScheduleItem(
                                       title: place.name,
+                                      category:
+                                          'TOURISM', // TODO: place에서 카테고리 가져오기
                                       time: null,
                                       done: place.isVisited,
                                     );

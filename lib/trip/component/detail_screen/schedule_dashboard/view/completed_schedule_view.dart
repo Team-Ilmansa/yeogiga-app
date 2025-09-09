@@ -166,6 +166,7 @@ class CompletedScheduleView extends StatelessWidget {
                       (place) => ScheduleItem(
                         key: ValueKey(place.id),
                         title: place.name,
+                        category: place.type,
                         time: null, // 필요시 시간 필드 추가
                         // TODO: 일단은 끝나면 전부 다녀왔다고 표시함.
                         done: true,
