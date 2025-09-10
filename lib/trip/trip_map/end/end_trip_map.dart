@@ -134,7 +134,6 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
-  double _myLocationButtonOffset = 0;
 
   int selectedDayIndex = 0;
   bool selectionMode = false;
@@ -145,10 +144,13 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchAllDaysAndUpdateMarkers();
+    // CompletedSchedule 초기 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sheetController.addListener(_updateMyLocationButtonOffset);
-      _updateMyLocationButtonOffset();
+      _fetchAllDaysAndUpdateMarkers();
+      final trip = ref.read(tripProvider).valueOrNull;
+      if (trip is CompletedTripModel) {
+        ref.read(completedScheduleProvider.notifier).fetch(trip.tripId);
+      }
     });
   }
 
@@ -174,20 +176,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     }
   }
 
-  void _updateMyLocationButtonOffset() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final sheetExtent = _sheetController.size;
-    final offset = screenHeight * sheetExtent + 12.h;
-    if (offset != _myLocationButtonOffset) {
-      setState(() {
-        _myLocationButtonOffset = offset;
-      });
-    }
-  }
-
   @override
   void dispose() {
-    _sheetController.removeListener(_updateMyLocationButtonOffset);
     _sheetController.dispose();
     super.dispose();
   }
@@ -277,34 +267,12 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       if (permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse) {
         final pos = await Geolocator.getCurrentPosition();
-        final overlay = await mapController!.getLocationOverlay();
+        final overlay = mapController!.getLocationOverlay();
         overlay.setIsVisible(true);
         overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
         _locationOverlay = overlay;
       }
     } catch (_) {}
-  }
-
-  // TODO: 내 위치로 가기 버튼 생성
-  Widget _buildMyLocationButton() {
-    return Material(
-      color: Colors.white,
-      elevation: 2,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: _moveToMyLocation,
-        child: SizedBox(
-          width: 36.w,
-          height: 36.w,
-          child: Icon(
-            Icons.my_location_outlined,
-            color: Colors.black,
-            size: 18.sp,
-          ),
-        ),
-      ),
-    );
   }
 
   // TODO: 내 위치로 카메라 이동 함수
@@ -468,14 +436,10 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                 ),
               ),
             ),
-            // TODO: 내 위치로 가기 버튼
-            Positioned(
-              left: 15.w,
-              bottom: _myLocationButtonOffset,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: _buildMyLocationButton(),
-              ),
+            // 내 위치로 가기 버튼
+            MyLocationButton(
+              controller: _sheetController,
+              onTap: _moveToMyLocation,
             ),
             // TODO: 하단 슬라이더 위젯
             DraggableScrollableSheet(
@@ -573,15 +537,6 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     final tripState = ref.watch(tripProvider).valueOrNull;
 
                     if (completedAsync == null) {
-                      final trip =
-                          tripState is CompletedTripModel ? tripState : null;
-                      if (trip != null) {
-                        Future.microtask(() {
-                          ref
-                              .read(completedScheduleProvider.notifier)
-                              .fetch(trip.tripId);
-                        });
-                      }
                       return const Center(child: CircularProgressIndicator());
                     }
                     final schedules = completedAsync.data;
@@ -674,6 +629,75 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class MyLocationButton extends StatefulWidget {
+  final DraggableScrollableController controller;
+  final VoidCallback onTap;
+
+  const MyLocationButton({
+    Key? key,
+    required this.controller,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<MyLocationButton> createState() => _MyLocationButtonState();
+}
+
+class _MyLocationButtonState extends State<MyLocationButton> {
+  double _buttonOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_updateButtonPosition);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_updateButtonPosition);
+    super.dispose();
+  }
+
+  void _updateButtonPosition() {
+    if (mounted) {
+      setState(() {
+        // Button should always stay 16.h above the slider bar
+        final screenHeight = MediaQuery.of(context).size.height;
+        final currentSize = widget.controller.size;
+        final sheetHeight = screenHeight * currentSize;
+
+        _buttonOffset = sheetHeight + 16.h;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 18.w,
+      bottom: _buttonOffset, // Always 16.h above slider bar
+      child: Material(
+        color: Colors.white,
+        elevation: 2,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: widget.onTap,
+          child: SizedBox(
+            width: 36.w,
+            height: 36.w,
+            child: Icon(
+              Icons.my_location_outlined,
+              color: Colors.black,
+              size: 18.sp,
+            ),
+          ),
         ),
       ),
     );

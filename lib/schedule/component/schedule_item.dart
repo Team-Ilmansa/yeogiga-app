@@ -157,12 +157,7 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
         final emptyCollapsedHeight = 50.h; // "아직 예정된 일정이 없어요" 텍스트만 보이는 높이
         final emptyExpandedHeight = 100.h; // 텍스트 아래 빈공간이 더 보이는 높이
 
-        // 아이템이 있는 경우의 높이 설정
-        final collapsedHeight =
-            itemHeight * 1 + listBottomPadding; // 접힌 상태: 1개만
-        final expandedHeight =
-            itemHeight * 3.3 + listBottomPadding; // 펼친 상태: 3.3개
-
+        // 높이 계산 로직
         double calculatedHeight;
 
         if (totalItemCount == 0) {
@@ -171,7 +166,17 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
               isExpanded ? emptyExpandedHeight : emptyCollapsedHeight;
         } else {
           // 아이템이 있는 경우
-          calculatedHeight = isExpanded ? expandedHeight : collapsedHeight;
+          if (isExpanded) {
+            // 펼친 상태: 모든 아이템을 보여줄 수 있는 높이
+            calculatedHeight =
+                itemHeight * totalItemCount + listBottomPadding + 10.h;
+          } else {
+            // 접은 상태: 최대 3.5개까지만 보이는 높이
+            final visibleItemCount =
+                totalItemCount > 3.3 ? 3.3 : totalItemCount.toDouble();
+            calculatedHeight =
+                itemHeight * visibleItemCount + listBottomPadding;
+          }
         }
 
         // 날짜 타이틀 로직
@@ -278,7 +283,8 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                         ScheduleItem(
                                           title: place.name,
                                           category:
-                                              'TOURISM', // TODO: place에서 카테고리 가져오기
+                                              place
+                                                  .placeType, // TODO: place에서 카테고리 가져오기
                                           time: null,
                                           done: place.isVisited,
                                         ),
@@ -289,7 +295,8 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
                                     return ScheduleItem(
                                       title: place.name,
                                       category:
-                                          'TOURISM', // TODO: place에서 카테고리 가져오기
+                                          place
+                                              .placeType, // TODO: place에서 카테고리 가져오기
                                       time: null,
                                       done: place.isVisited,
                                     );

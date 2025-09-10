@@ -27,6 +27,14 @@ class MyPageScreen extends ConsumerStatefulWidget {
 
 class _MyWidgetState extends ConsumerState<MyPageScreen> {
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(allTripListProvider.notifier).fetchAndSetAllTrips();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userMeProvider);
 
@@ -134,31 +142,51 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> {
             ),
 
             SizedBox(height: 12.h),
-            //TODO: 지난 여행 전체보기 슬라이드 뷰
-            PastTripCardList(
-              trips: ref.watch(allTripListProvider),
-              onTap: (tripId) async {
-                ref.invalidate(tripProvider); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                ref.invalidate(
-                  confirmScheduleProvider,
-                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                ref.invalidate(
-                  pendingScheduleProvider,
-                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                ref.invalidate(
-                  completedScheduleProvider,
-                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
-                final tripState = ref.read(tripProvider).valueOrNull;
-                final userW2mState = ref.read(userW2mProvider);
-                if (context.mounted) {
-                  if (tripState is SettingTripModel &&
-                      userW2mState is NoUserW2mModel) {
-                    GoRouter.of(context).push('/dateRangePicker');
-                  } else {
-                    GoRouter.of(context).push('/tripDetailScreen');
-                  }
-                }
+            //TODO: 지간 여행 전체보기 슬라이드 뷰
+            Consumer(
+              builder: (context, ref, _) {
+                final tripsAsync = ref.watch(allTripListProvider);
+                return tripsAsync.when(
+                  loading: () => SizedBox(
+                    height: 321.h,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (e, _) => SizedBox(
+                    height: 321.h,
+                    child: Center(
+                      child: Text(
+                        '여행 목록을 불러올 수 없습니다.',
+                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                  data: (trips) => PastTripCardList(
+                    trips: trips,
+                    onTap: (tripId) async {
+                      ref.invalidate(tripProvider); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      ref.invalidate(
+                        confirmScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      ref.invalidate(
+                        pendingScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      ref.invalidate(
+                        completedScheduleProvider,
+                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                      await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
+                      final tripState = ref.read(tripProvider).valueOrNull;
+                      final userW2mState = ref.read(userW2mProvider);
+                      if (context.mounted) {
+                        if (tripState is SettingTripModel &&
+                            userW2mState is NoUserW2mModel) {
+                          GoRouter.of(context).push('/dateRangePicker');
+                        } else {
+                          GoRouter.of(context).push('/tripDetailScreen');
+                        }
+                      }
+                    },
+                  ),
+                );
               },
             ),
             SizedBox(height: 20.h),

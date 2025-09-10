@@ -13,7 +13,7 @@ final upcomingTripListProvider =
     );
 
 final allTripListProvider =
-    StateNotifierProvider<AllTripListNotifier, List<TripModel?>>(
+    StateNotifierProvider<AllTripListNotifier, AsyncValue<List<TripModel?>>>(
       (ref) => AllTripListNotifier(ref.read(tripListRepositoryProvider)),
     );
 
@@ -52,18 +52,23 @@ class UpcomingTripListNotifier extends StateNotifier<List<TripModel?>> {
   }
 }
 
-class AllTripListNotifier extends StateNotifier<List<TripModel?>> {
+class AllTripListNotifier extends StateNotifier<AsyncValue<List<TripModel?>>> {
   final TripListRepository repository;
 
-  AllTripListNotifier(this.repository) : super([]);
+  AllTripListNotifier(this.repository) : super(const AsyncValue.loading());
 
   Future<void> fetchAndSetAllTrips() async {
-    final trips = await repository.fetchAllTripList();
-    state = trips;
+    state = const AsyncValue.loading();
+    try {
+      final trips = await repository.fetchAllTripList();
+      state = AsyncValue.data(trips);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   void clear() {
-    state = [];
+    state = const AsyncValue.data([]);
   }
 }
 

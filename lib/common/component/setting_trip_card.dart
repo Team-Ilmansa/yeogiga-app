@@ -74,15 +74,21 @@ class SettingTripCard extends StatelessWidget {
     }
   }
 
-  int _getDaysUntilTrip() {
-    if (startedAt == null) return 0;
+  String _getDaysUntilTrip() {
+    if (startedAt == null) return '-??';
     try {
       final startDate = DateTime.parse(startedAt!);
       final now = DateTime.now();
       final difference = startDate.difference(now).inDays;
-      return difference < 0 ? 0 : difference + 1;
+      if (difference < -1) {
+        return '+${(-difference - 1).toString()}'; // D+숫자
+      } else if (difference < 0) {
+        return '-0';
+      } else {
+        return '-${(difference + 1).toString()}'; // D-숫자
+      }
     } catch (_) {
-      return 0;
+      return '-??';
     }
   }
 
@@ -136,7 +142,7 @@ class SettingTripCard extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'D-$daysLeft',
+                      'D$daysLeft',
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Color(0xFF8287ff),
