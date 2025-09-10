@@ -82,18 +82,37 @@ class ConfirmScheduleNotifier extends StateNotifier<AsyncValue<ConfirmedSchedule
     return success;
   }
 
-  /// 특정 일차에서 목적지 삭제
+  /// 특정 일차에서 목적지 삭제 (Optimistic UI)
   Future<void> deletePlace({
     required int tripId,
     required String tripDayPlaceId,
     required String placeId,
   }) async {
-    final success = await repo.deleteConfirmedPlace(
-      tripId: tripId,
-      tripDayPlaceId: tripDayPlaceId,
-      placeId: placeId,
-    );
-    if (success) {
+    // 1. 먼저 UI에서 아이템 제거 (Optimistic Update)
+    final currentState = state.valueOrNull;
+    if (currentState != null) {
+      final updatedSchedules = currentState.schedules.map((daySchedule) {
+        if (daySchedule.id == tripDayPlaceId) {
+          final updatedPlaces = daySchedule.places
+              .where((place) => place.id != placeId)
+              .toList();
+          return daySchedule.copyWith(places: updatedPlaces);
+        }
+        return daySchedule;
+      }).toList();
+      
+      state = AsyncValue.data(currentState.copyWith(schedules: updatedSchedules));
+    }
+    
+    // 2. 서버에 삭제 요청
+    try {
+      await repo.deleteConfirmedPlace(
+        tripId: tripId,
+        tripDayPlaceId: tripDayPlaceId,
+        placeId: placeId,
+      );
+    } catch (e) {
+      // 3. 실패 시 전체 데이터 다시 로드 (rollback)
       await fetchAll(tripId);
     }
   }

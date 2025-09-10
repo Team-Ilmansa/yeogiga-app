@@ -313,6 +313,22 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
               errorMsg = e.toString();
             }
           }
+          
+          // 성공 시 슬라이더바 내리기
+          if (success) {
+            setState(() {
+              _showSliderBar = false;
+            });
+            // 애니메이션 완료 후 선택된 장소도 초기화
+            Future.delayed(const Duration(milliseconds: 400), () {
+              if (mounted) {
+                setState(() {
+                  _selectedPlace = null;
+                });
+              }
+            });
+          }
+          
           // 수정: async gap 이후 context 사용 시 mounted 체크 추가
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

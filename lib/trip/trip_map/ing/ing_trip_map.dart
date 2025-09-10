@@ -36,7 +36,6 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   bool _cameraFitted = false;
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
-  double _myLocationButtonOffset = 0;
 
   int selectedDayIndex = 0;
 
@@ -48,11 +47,6 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   void initState() {
     super.initState();
     _fetchAllDaysAndUpdateMarkers();
-    // sheetController 리스너 및 위치 버튼 오프셋 갱신만 등록
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sheetController.addListener(_updateMyLocationButtonOffset);
-      _updateMyLocationButtonOffset();
-    });
   }
 
   @override
@@ -98,21 +92,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     }
   }
 
-  // 내 위치로 가기 버튼 항상 sheet 위에 두기
-  void _updateMyLocationButtonOffset() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final sheetExtent = _sheetController.size;
-    final offset = screenHeight * sheetExtent + 12.h;
-    if (offset != _myLocationButtonOffset) {
-      setState(() {
-        _myLocationButtonOffset = offset;
-      });
-    }
-  }
-
   @override
   void dispose() {
-    _sheetController.removeListener(_updateMyLocationButtonOffset);
     _sheetController.dispose();
     super.dispose();
   }
@@ -227,34 +208,12 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       if (permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse) {
         final pos = await Geolocator.getCurrentPosition();
-        final overlay = await mapController!.getLocationOverlay();
+        final overlay = mapController!.getLocationOverlay();
         overlay.setIsVisible(true);
         overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
         _locationOverlay = overlay;
       }
     } catch (_) {}
-  }
-
-  // 내 위치버튼 생성
-  Widget _buildMyLocationButton() {
-    return Material(
-      color: Colors.white,
-      elevation: 2,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: _moveToMyLocation,
-        child: SizedBox(
-          width: 36.w,
-          height: 36.w,
-          child: Icon(
-            Icons.my_location_outlined,
-            color: Colors.black,
-            size: 18.sp,
-          ),
-        ),
-      ),
-    );
   }
 
   // 내 위치로 이동하기
@@ -418,13 +377,9 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             ),
           ),
           // 내 위치로 가기 버튼
-          Positioned(
-            left: 15.w,
-            bottom: _myLocationButtonOffset,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _buildMyLocationButton(),
-            ),
+          MyLocationButton(
+            controller: _sheetController,
+            onTap: _moveToMyLocation,
           ),
           DraggableScrollableSheet(
             controller: _sheetController,
@@ -681,6 +636,75 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MyLocationButton extends StatefulWidget {
+  final DraggableScrollableController controller;
+  final VoidCallback onTap;
+
+  const MyLocationButton({
+    Key? key,
+    required this.controller,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<MyLocationButton> createState() => _MyLocationButtonState();
+}
+
+class _MyLocationButtonState extends State<MyLocationButton> {
+  double _buttonOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_updateButtonPosition);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_updateButtonPosition);
+    super.dispose();
+  }
+
+  void _updateButtonPosition() {
+    if (mounted) {
+      setState(() {
+        // Button should always stay 16.h above the slider bar
+        final screenHeight = MediaQuery.of(context).size.height;
+        final currentSize = widget.controller.size;
+        final sheetHeight = screenHeight * currentSize;
+        
+        _buttonOffset = sheetHeight + 16.h;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 18.w,
+      bottom: _buttonOffset, // Always 16.h above slider bar
+      child: Material(
+        color: Colors.white,
+        elevation: 2,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: widget.onTap,
+          child: SizedBox(
+            width: 36.w,
+            height: 36.w,
+            child: Icon(
+              Icons.my_location_outlined,
+              color: Colors.black,
+              size: 18.sp,
+            ),
+          ),
+        ),
       ),
     );
   }
