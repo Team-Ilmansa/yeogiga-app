@@ -677,7 +677,7 @@ class _MyLocationButtonState extends State<MyLocationButton> {
         final screenHeight = MediaQuery.of(context).size.height;
         final currentSize = widget.controller.size;
         final sheetHeight = screenHeight * currentSize;
-        
+
         _buttonOffset = sheetHeight + 16.h;
       });
     }

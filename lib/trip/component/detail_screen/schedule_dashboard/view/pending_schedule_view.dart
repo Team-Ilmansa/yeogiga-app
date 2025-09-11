@@ -159,7 +159,7 @@ class PendingScheduleView extends StatelessWidget {
                                 color: Colors.transparent,
                                 border: Border(
                                   right: BorderSide(
-                                    color: Colors.blue,
+                                    color: Color(0xff8287ff),
                                     width: 4.0,
                                   ),
                                 ),
@@ -203,30 +203,73 @@ class PendingScheduleView extends StatelessWidget {
                               key: ValueKey(place.id),
                               endActionPane: ActionPane(
                                 motion: const DrawerMotion(),
+                                extentRatio: 0.2,
                                 children: [
-                                  SlidableAction(
-                                    onPressed: (_) async {
-                                      final tripState =
-                                          ref.read(tripProvider).valueOrNull;
-                                      final tripId =
-                                          (tripState is SettingTripModel)
-                                              ? tripState.tripId.toString()
-                                              : '';
-                                      await ref
-                                          .read(
-                                            pendingScheduleProvider.notifier,
-                                          )
-                                          .deletePlace(
-                                            tripId: tripId,
-                                            day: daySchedule.day,
-                                            placeId: place.id,
-                                          );
-                                    },
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    icon: Icons.delete,
-                                    label: '삭제',
-                                    flex: 1,
+                                  // 커스텀 삭제 버튼
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.only(
+                                        left: 6.w,
+                                        top: 18.h,
+                                        bottom: 18.h,
+                                        right: 20.w,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xfff0f0f0),
+                                        borderRadius: BorderRadius.circular(
+                                          18.r,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.1,
+                                            ),
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            18.r,
+                                          ),
+                                          onTap: () async {
+                                            final tripState =
+                                                ref
+                                                    .read(tripProvider)
+                                                    .valueOrNull;
+                                            final tripId =
+                                                (tripState is SettingTripModel)
+                                                    ? tripState.tripId
+                                                        .toString()
+                                                    : '';
+                                            await ref
+                                                .read(
+                                                  pendingScheduleProvider
+                                                      .notifier,
+                                                )
+                                                .deletePlace(
+                                                  tripId: tripId,
+                                                  day: daySchedule.day,
+                                                  placeId: place.id,
+                                                );
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              '삭제',
+                                              style: TextStyle(
+                                                color: const Color(0xffff0000),
+                                                fontSize: 14.sp,
+                                                height: 1.4,
+                                                letterSpacing: -0.3,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
