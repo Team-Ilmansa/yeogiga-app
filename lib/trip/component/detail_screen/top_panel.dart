@@ -59,7 +59,7 @@ class TopPanel extends StatelessWidget {
         }
 
         return Padding(
-          padding: EdgeInsets.all(14.w),
+          padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -67,50 +67,51 @@ class TopPanel extends StatelessWidget {
                 tripStatusText,
                 style: TextStyle(
                   color: const Color(0xff8287ff),
-                  fontSize: 12.sp,
-                  letterSpacing: -0.1,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                  height: 1.4,
+                  letterSpacing: -0.3,
                 ),
               ),
-              SizedBox(height: 2.h),
               Text(
                 tripTitle,
                 style: TextStyle(
                   color: const Color(0xff313131),
                   fontWeight: FontWeight.w700,
-                  fontSize: 25.sp,
-                  letterSpacing: -0.1,
+                  fontSize: 28.sp,
+                  height: 1.4,
+                  letterSpacing: -0.3,
                 ),
               ),
-              SizedBox(height: 9.h),
+              SizedBox(height: 8.h),
               TripNameCardByAsset(
                 assetUrl: 'asset/icon/marker-pin-01.svg',
                 name: tripCity,
                 color: const Color(0xff7d7d7d),
               ),
-              SizedBox(height: 3.h),
+              SizedBox(height: 4.h),
               TripNameCardByAsset(
                 assetUrl: 'asset/icon/calendar.svg',
                 name: tripDate,
                 color: const Color(0xff7d7d7d),
               ),
-              SizedBox(height: 5.h),
+              SizedBox(height: 4.h),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
                     'asset/icon/user-02.svg',
-                    width: 15.w,
-                    height: 15.h,
+                    width: 18.w,
+                    height: 18.h,
                     color: const Color(0xff7d7d7d),
                   ),
                   SizedBox(width: 4.w),
                   ...List.generate(
                     memberCount,
                     (_) => Padding(
-                      padding: EdgeInsets.only(right: 1.w),
+                      padding: EdgeInsets.only(right: 4.w),
                       child: Icon(
                         Icons.circle,
-                        size: 16.sp,
+                        size: 18.sp,
                         color: const Color.fromARGB(255, 235, 235, 235),
                       ),
                     ),

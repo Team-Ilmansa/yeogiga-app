@@ -17,6 +17,7 @@ import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/repository/register_repository.dart';
 import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
+import 'package:yeogiga/common/route_observer.dart';
 
 class MyPageScreen extends ConsumerStatefulWidget {
   const MyPageScreen({super.key});
@@ -25,7 +26,26 @@ class MyPageScreen extends ConsumerStatefulWidget {
   ConsumerState<MyPageScreen> createState() => _MyWidgetState();
 }
 
-class _MyWidgetState extends ConsumerState<MyPageScreen> {
+class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    myPageRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    myPageRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // 마이페이지 복귀 시 데이터 새로고침
+    ref.read(allTripListProvider.notifier).fetchAndSetAllTrips();
+    super.didPopNext();
+  }
+
   @override
   void initState() {
     super.initState();

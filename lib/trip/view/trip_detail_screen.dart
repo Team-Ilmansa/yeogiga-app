@@ -9,7 +9,7 @@ import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/top_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
-import 'package:yeogiga/trip/component/detail_screen/notice_panel.dart';
+import 'package:yeogiga/notice/component/notice_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/schedule_dashboard_tab.dart';
 import 'package:yeogiga/trip/component/trip_more_menu_sheet.dart';
@@ -265,9 +265,14 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: Icon(Icons.arrow_back_ios_new, size: 17.sp),
-              onPressed: () => Navigator.pop(context),
+            Row(
+              children: [
+                SizedBox(width: 4.w),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
+                ),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -351,8 +356,8 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
               (context, innerBoxIsScrolled) => [
                 // 탑 패널
                 SliverToBoxAdapter(child: TopPanel()),
-                // TODO: 알림이 있으면!
-                // if (true) SliverToBoxAdapter(child: NoticePanel()),
+                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+                SliverToBoxAdapter(child: NoticePanel()),
                 // 탭바
                 SliverPersistentHeader(
                   pinned: true,

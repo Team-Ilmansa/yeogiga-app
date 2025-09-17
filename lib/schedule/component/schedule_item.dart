@@ -192,186 +192,197 @@ class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
           titleText = '${formatter.format(now)} 오늘의 일정';
         }
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(bottom: 21.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xffffffff),
-                  borderRadius: BorderRadius.circular(14.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 1.r,
-                      spreadRadius: 1.r,
-                      offset: Offset(0, 0),
+        return Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(bottom: 21.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffffffff),
+                      borderRadius: BorderRadius.circular(14.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 1.r,
+                          spreadRadius: 1.r,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(0, 4.h, 11.w, 0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: EdgeInsets.all(13.sp),
-                          child: Text(
-                            titleText,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff7d7d7d),
-                              letterSpacing: 0,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(0, 4.h, 11.w, 0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: EdgeInsets.all(13.sp),
+                              child: Text(
+                                titleText,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff7d7d7d),
+                                  letterSpacing: 0,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        height: calculatedHeight,
-                        child: Stack(
-                          children: [
-                            ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: places.isEmpty ? 2 : places.length + 1,
-                              itemBuilder: (context, index) {
-                                if (places.isEmpty && index == 0) {
-                                  // 안내문구 + 일정 담으러 가기 버튼 (둘 다 보여줌)
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Center(
-                                        child: Text(
-                                          '아직 예정된 일정이 없어요.',
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFFB0B0B0),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            height: calculatedHeight,
+                            child: Stack(
+                              children: [
+                                ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount:
+                                      places.isEmpty ? 2 : places.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (places.isEmpty && index == 0) {
+                                      // 안내문구 + 일정 담으러 가기 버튼 (둘 다 보여줌)
+                                      return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Center(
+                                            child: Text(
+                                              '아직 예정된 일정이 없어요.',
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFFB0B0B0),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 10.h),
-                                      // Center(
-                                      //   child: TextButton(
-                                      //     onPressed: () {},
-                                      //     child: Text(
-                                      //       '+ 일정 담으러 가기',
-                                      //       style: TextStyle(
-                                      //         fontSize: 14.sp,
-                                      //         fontWeight: FontWeight.bold,
-                                      //         color: Color(0xFF8287ff),
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      // ),
-                                    ],
-                                  );
-                                } else if (index < places.length &&
-                                    places.isNotEmpty) {
-                                  final place = places[index];
-                                  if (index == places.length - 1) {
-                                    return Column(
-                                      children: [
-                                        ScheduleItem(
+                                          SizedBox(height: 10.h),
+                                          // Center(
+                                          //   child: TextButton(
+                                          //     onPressed: () {},
+                                          //     child: Text(
+                                          //       '+ 일정 담으러 가기',
+                                          //       style: TextStyle(
+                                          //         fontSize: 14.sp,
+                                          //         fontWeight: FontWeight.bold,
+                                          //         color: Color(0xFF8287ff),
+                                          //       ),
+                                          //     ),
+                                          //   ),
+                                          // ),
+                                        ],
+                                      );
+                                    } else if (index < places.length &&
+                                        places.isNotEmpty) {
+                                      final place = places[index];
+                                      if (index == places.length - 1) {
+                                        return Column(
+                                          children: [
+                                            ScheduleItem(
+                                              title: place.name,
+                                              category:
+                                                  place
+                                                      .placeType, // TODO: place에서 카테고리 가져오기
+                                              time: null,
+                                              done: place.isVisited,
+                                            ),
+                                            SizedBox(height: 21.h),
+                                          ],
+                                        );
+                                      } else {
+                                        return ScheduleItem(
                                           title: place.name,
                                           category:
                                               place
                                                   .placeType, // TODO: place에서 카테고리 가져오기
                                           time: null,
                                           done: place.isVisited,
+                                        );
+                                      }
+                                    } else {
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                ),
+                                if (true)
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 36.h,
+                                    child: IgnorePointer(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.white.withOpacity(0.0),
+                                              Colors.white.withOpacity(0.6),
+                                              Colors.white,
+                                            ],
+                                          ),
                                         ),
-                                        SizedBox(height: 21.h),
-                                      ],
-                                    );
-                                  } else {
-                                    return ScheduleItem(
-                                      title: place.name,
-                                      category:
-                                          place
-                                              .placeType, // TODO: place에서 카테고리 가져오기
-                                      time: null,
-                                      done: place.isVisited,
-                                    );
-                                  }
-                                } else {
-                                  return const SizedBox.shrink();
-                                }
-                              },
-                            ),
-                            if (true)
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: 36.h,
-                                child: IgnorePointer(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Colors.white.withOpacity(0.0),
-                                          Colors.white.withOpacity(0.6),
-                                          Colors.white,
-                                        ],
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                          ],
+                              ],
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: Offset(0, -22.h),
+                    child: ElevatedButton(
+                      onPressed: _toggleExpanded,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8287ff),
+                        shape: const StadiumBorder(),
+                        fixedSize: Size(125.w, 40.h), // 고정 크기
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        elevation: 0,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            isExpanded ? "일정 접기" : "일정 펼치기",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(width: 5.w),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 16.sp,
+                            color: Colors.white,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Transform.translate(
-                offset: Offset(0, -22.h),
-                child: ElevatedButton(
-                  onPressed: _toggleExpanded,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8287ff),
-                    shape: const StadiumBorder(),
-                    fixedSize: Size(125.w, 40.h), // 고정 크기
-                    padding: EdgeInsets.symmetric(horizontal: 14.w),
-                    elevation: 0,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        isExpanded ? "일정 접기" : "일정 펼치기",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(width: 5.w),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        size: 16.sp,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -18.h),
+              child: Container(height: 11.h, color: Color(0xfff0f0f0)),
+            ),
+            SizedBox(height: 40.h),
+          ],
         );
       },
     );

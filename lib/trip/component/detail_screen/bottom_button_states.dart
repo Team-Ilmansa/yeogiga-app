@@ -13,6 +13,9 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:yeogiga/notice/provider/notice_provider.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
@@ -35,11 +38,11 @@ Future<bool> requestImagePermission() async {
   return false;
 }
 
-class AddNoticeState extends StatelessWidget {
+class AddNoticeState extends ConsumerWidget {
   const AddNoticeState({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         // Expanded(
@@ -93,7 +96,7 @@ class AddNoticeState extends StatelessWidget {
               padding: EdgeInsets.zero,
             ),
             onPressed: () {
-              // TODO: 공지 추가 액션
+              _showAddNoticeModal(context, ref);
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -181,9 +184,8 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                         // 완료된 여행이라면?
                         if (tripState is CompletedTripModel) {
-                          final completed = ref.watch(
-                            completedScheduleProvider,
-                          ).valueOrNull;
+                          final completed =
+                              ref.watch(completedScheduleProvider).valueOrNull;
 
                           final match = completed!.data.firstWhere(
                             (e) => e.day == widget.selectedDayIndex,
@@ -193,7 +195,8 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
+                          final confirmed =
+                              ref.watch(confirmScheduleProvider).valueOrNull;
                           if (confirmed != null &&
                               confirmed.schedules.isNotEmpty) {
                             final match = confirmed.schedules.firstWhere(
@@ -346,16 +349,16 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                         // 완료된 여행이라면?
                         if (tripState is CompletedTripModel) {
-                          final completed = ref.watch(
-                            completedScheduleProvider,
-                          ).valueOrNull;
+                          final completed =
+                              ref.watch(completedScheduleProvider).valueOrNull;
 
                           tripDayPlaceIds =
                               completed!.data.map((e) => e.id).toList();
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
+                          final confirmed =
+                              ref.watch(confirmScheduleProvider).valueOrNull;
                           tripDayPlaceIds =
                               confirmed!.schedules.map((e) => e.id).toList();
                         }
@@ -440,16 +443,16 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
 
                         // 완료된 여행이라면?
                         if (tripState is CompletedTripModel) {
-                          final completed = ref.watch(
-                            completedScheduleProvider,
-                          ).valueOrNull;
+                          final completed =
+                              ref.watch(completedScheduleProvider).valueOrNull;
 
                           tripDayPlaceIds =
                               completed!.data.map((e) => e.id).toList();
 
                           // 진행중인 여행이라면?
                         } else if (tripState is InProgressTripModel) {
-                          final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
+                          final confirmed =
+                              ref.watch(confirmScheduleProvider).valueOrNull;
                           tripDayPlaceIds =
                               confirmed!.schedules.map((e) => e.id).toList();
                         }
@@ -1051,4 +1054,229 @@ Future<void> shareImageFiles(List<String> urls) async {
   if (files.isNotEmpty) {
     await Share.shareXFiles(files, text: '여행 사진 공유');
   }
+}
+
+void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (context) {
+      final titleTextController = TextEditingController();
+      final contentTextController = TextEditingController();
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              width: 340.w,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(height: 2.h),
+                          Text(
+                            '공지하기',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.sp,
+                              height: 1.4,
+                              letterSpacing: -0.3,
+                              color: Color(0xff313131),
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(Icons.close, size: 24),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '팀원들에게 공지를 보낼 수 있어요',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      height: 1.4,
+                      letterSpacing: -0.3,
+                      color: Color(0xff7d7d7d),
+                    ),
+                  ),
+                  SizedBox(height: 22.h),
+                  //TODO: 제목 작성 필드
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xfff0f0f0),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: TextField(
+                      controller: titleTextController,
+                      maxLength: 20,
+                      onChanged: (value) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: '제목을 작성해주세요',
+                        hintStyle: TextStyle(
+                          fontSize: 16.sp,
+                          height: 1.4,
+                          letterSpacing: -0.3,
+                          color: Color(0xffc6c6c6),
+                        ),
+                        border: InputBorder.none,
+                        counterText: '',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 16.h,
+                        ),
+                      ),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        height: 1.4,
+                        letterSpacing: -0.3,
+                        color: Color(0xff313131),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${titleTextController.text.length}/20',
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.5,
+                        letterSpacing: -0.3,
+                        color: Color(0xffc6c6c6),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  //TODO: 내용 작성 필드
+                  Container(
+                    height: 180.h,
+                    decoration: BoxDecoration(
+                      color: Color(0xfff0f0f0),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: TextField(
+                      controller: contentTextController,
+                      maxLength: 100,
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      onChanged: (value) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: '공지사항을 작성해주세요',
+                        hintStyle: TextStyle(
+                          fontSize: 16.sp,
+                          height: 1.4,
+                          letterSpacing: -0.3,
+                          color: Color(0xffc6c6c6),
+                        ),
+                        border: InputBorder.none,
+                        counterText: '',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 16.h,
+                        ),
+                      ),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        height: 1.4,
+                        letterSpacing: -0.3,
+                        color: Color(0xff313131),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${contentTextController.text.length}/100',
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.5,
+                        letterSpacing: -0.3,
+                        color: Color(0xffc6c6c6),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 120.w,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: titleTextController.text.trim().isEmpty || 
+                                  contentTextController.text.trim().isEmpty
+                            ? null
+                            : () async {
+                                final title = titleTextController.text.trim();
+                                final content = contentTextController.text.trim();
+                                
+                                final tripState = ref.read(tripProvider).valueOrNull;
+                                if (tripState is TripModel) {
+                                  final result = await ref.read(noticeListProvider.notifier).createNotice(
+                                    tripId: tripState.tripId,
+                                    title: title,
+                                    description: content,
+                                  );
+                                  
+                                  if (result['success']) {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('공지사항이 성공적으로 등록되었습니다.'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('공지사항 등록에 실패했습니다.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xff8287ff),
+                          disabledBackgroundColor: Color(0xffc6c6c6),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                        ),
+                        child: Text(
+                          '확인',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16.sp,
+                            height: 1.4,
+                            letterSpacing: -0.3,
+                            color: Color(0xffffffff),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
 }

@@ -662,6 +662,10 @@ class _MyLocationButtonState extends State<MyLocationButton> {
   void initState() {
     super.initState();
     widget.controller.addListener(_updateButtonPosition);
+    // 초기 위치 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateButtonPosition();
+    });
   }
 
   @override
@@ -677,7 +681,7 @@ class _MyLocationButtonState extends State<MyLocationButton> {
         final screenHeight = MediaQuery.of(context).size.height;
         final currentSize = widget.controller.size;
         final sheetHeight = screenHeight * currentSize;
-        
+
         _buttonOffset = sheetHeight + 16.h;
       });
     }

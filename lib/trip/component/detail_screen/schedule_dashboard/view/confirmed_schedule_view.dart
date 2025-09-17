@@ -65,7 +65,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                         ),
                   );
                   return ConfirmedDayExpansionTile(
-                    daySchedule: daySchedule, 
+                    daySchedule: daySchedule,
                     dayLabel: 'Day ${index + 1}',
                   );
                 } else {
@@ -81,7 +81,7 @@ class ConfirmedScheduleView extends StatelessWidget {
                           ),
                     );
                     return ConfirmedDayExpansionTile(
-                      daySchedule: daySchedule, 
+                      daySchedule: daySchedule,
                       dayLabel: dynamicDays[index],
                     );
                   } else {
@@ -95,7 +95,6 @@ class ConfirmedScheduleView extends StatelessWidget {
       },
     );
   }
-
 }
 
 class ConfirmedDayExpansionTile extends ConsumerStatefulWidget {
@@ -109,10 +108,12 @@ class ConfirmedDayExpansionTile extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ConfirmedDayExpansionTile> createState() => _ConfirmedDayExpansionTileState();
+  ConsumerState<ConfirmedDayExpansionTile> createState() =>
+      _ConfirmedDayExpansionTileState();
 }
 
-class _ConfirmedDayExpansionTileState extends ConsumerState<ConfirmedDayExpansionTile> {
+class _ConfirmedDayExpansionTileState
+    extends ConsumerState<ConfirmedDayExpansionTile> {
   @override
   Widget build(BuildContext context) {
     final daySchedule = widget.daySchedule;
@@ -181,17 +182,14 @@ class _ConfirmedDayExpansionTileState extends ConsumerState<ConfirmedDayExpansio
 class ConfirmedDayScheduleList extends ConsumerWidget {
   final ConfirmedDayScheduleModel daySchedule;
 
-  const ConfirmedDayScheduleList({
-    super.key,
-    required this.daySchedule,
-  });
+  const ConfirmedDayScheduleList({super.key, required this.daySchedule});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 전체 provider를 watch하지 않고, 현재 데이터만 사용
     final tripState = ref.watch(tripProvider).valueOrNull;
     final tripId = (tripState is TripModel) ? tripState.tripId : null;
-    
+
     // DnD(드래그&드롭) 및 슬라이드 삭제가 가능한 확정 일정 리스트
     return ReorderableListView.builder(
       shrinkWrap: true, // ExpansionTile 내부에서 스크롤 충돌 방지
@@ -204,10 +202,7 @@ class ConfirmedDayScheduleList extends ConsumerWidget {
         // 현재 리스트 복사 후 순서 변경
         final places = List.of(daySchedule.places);
         final moved = places.removeAt(oldIndex);
-        places.insert(
-          newIndex > oldIndex ? newIndex - 1 : newIndex,
-          moved,
-        );
+        places.insert(newIndex > oldIndex ? newIndex - 1 : newIndex, moved);
         // 변경된 순서의 placeId만 추출
         final orderedPlaceIds = places.map((p) => p.id).toList();
         // 서버에 순서 반영 및 해당 일차만 최신화
@@ -226,10 +221,7 @@ class ConfirmedDayScheduleList extends ConsumerWidget {
           decoration: BoxDecoration(
             color: Colors.transparent,
             border: Border(
-              right: BorderSide(
-                color: Color(0xff8287ff),
-                width: 4.0,
-              ),
+              right: BorderSide(color: Color(0xff8287ff), width: 4.0),
             ),
           ),
           child: child,
@@ -242,26 +234,58 @@ class ConfirmedDayScheduleList extends ConsumerWidget {
           key: ValueKey(place.id), // DnD/슬라이드 모두를 위한 고유 key
           endActionPane: ActionPane(
             motion: const DrawerMotion(),
+            extentRatio: 0.2,
             children: [
-              // 오른쪽으로 슬라이드 시 삭제 버튼
-              SlidableAction(
-                onPressed: (_) async {
-                  if (tripId != null) {
-                    // 서버에서 삭제 및 상태 최신화
-                    await ref
-                        .read(confirmScheduleProvider.notifier)
-                        .deletePlace(
-                          tripId: tripId,
-                          tripDayPlaceId: daySchedule.id,
-                          placeId: place.id,
-                        );
-                  }
-                },
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: '삭제',
-                flex: 1,
+              // 커스텀 삭제 버튼
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: 6.w,
+                    top: 18.h,
+                    bottom: 18.h,
+                    right: 20.w,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Color(0xfff0f0f0),
+                    borderRadius: BorderRadius.circular(18.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(18.r),
+                      onTap: () async {
+                        if (tripId != null) {
+                          // 서버에서 삭제 및 상태 최신화
+                          await ref
+                              .read(confirmScheduleProvider.notifier)
+                              .deletePlace(
+                                tripId: tripId,
+                                tripDayPlaceId: daySchedule.id,
+                                placeId: place.id,
+                              );
+                        }
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          '삭제',
+                          style: TextStyle(
+                            color: const Color(0xffff0000),
+                            fontSize: 14.sp,
+                            height: 1.4,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -298,43 +322,42 @@ class ConfirmedDayScheduleList extends ConsumerWidget {
 class ConfirmedDayAddButton extends ConsumerWidget {
   final ConfirmedDayScheduleModel daySchedule;
 
-  const ConfirmedDayAddButton({
-    super.key,
-    required this.daySchedule,
-  });
+  const ConfirmedDayAddButton({super.key, required this.daySchedule});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tripState = ref.watch(tripProvider).valueOrNull;
     // TripStatus.COMPLETED일 때는 버튼 미노출
-    final isCompleted = tripState is TripModel &&
+    final isCompleted =
+        tripState is TripModel &&
         tripState.status.toString().contains('COMPLETED');
     if (isCompleted) return SizedBox.shrink();
-    
+
     return Padding(
       padding: EdgeInsets.only(bottom: 6.h),
       child: Builder(
-        builder: (buttonContext) => TextButton(
-          onPressed: () {
-            // day와 dayId(id) 모두 전달
-            GoRouter.of(buttonContext).push(
-              '/naverPlaceMapScreen?day=${daySchedule.day}&dayId=${daySchedule.id}',
-            );
-          },
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            splashFactory: NoSplash.splashFactory,
-          ),
-          child: Text(
-            '+ 일정 담으러 가기',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: const Color(0xff8287ff),
-              fontWeight: FontWeight.w600,
+        builder:
+            (buttonContext) => TextButton(
+              onPressed: () {
+                // day와 dayId(id) 모두 전달
+                GoRouter.of(buttonContext).push(
+                  '/naverPlaceMapScreen?day=${daySchedule.day}&dayId=${daySchedule.id}',
+                );
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                splashFactory: NoSplash.splashFactory,
+              ),
+              child: Text(
+                '+ 일정 담으러 가기',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xff8287ff),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
