@@ -3,32 +3,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:yeogiga/notice/model/notice_model.dart';
-import 'package:yeogiga/notice/provider/notice_provider.dart';
-import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/trip/model/trip_model.dart';
 
-class LeaderNoticeCard extends ConsumerWidget {
-  final NoticeModel notice;
+class LeaderPingCard extends ConsumerWidget {
+  final String title;
+  final String time;
+  final bool completed;
 
-  const LeaderNoticeCard({
+  const LeaderPingCard({
     super.key,
-    required this.notice,
+    required this.title,
+    required this.time,
+    required this.completed,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Slidable(
-      key: ValueKey('notice_${notice.title}'),
+      key: ValueKey('notice_ping_$title'),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: notice.completed ? 0.16 : 0.31,
+        extentRatio: completed ? 0.16 : 0.31,
         children: [
           // 삭제 버튼
           Expanded(
             child: Container(
               margin:
-                  notice.completed
+                  completed
                       ? EdgeInsets.only(
                         left: 12.w,
                         right: 4.w,
@@ -50,14 +50,9 @@ class LeaderNoticeCard extends ConsumerWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18.r),
-                  onTap: () async {
-                    final tripState = ref.read(tripProvider).valueOrNull;
-                    if (tripState is TripModel) {
-                      await ref.read(noticeListProvider.notifier).deleteNotice(
-                        tripId: tripState.tripId,
-                        noticeId: notice.id,
-                      );
-                    }
+                  onTap: () {
+                    // TODO: 삭제 처리 로직
+                    print('공지 삭제: $title');
                   },
                   child: Container(
                     alignment: Alignment.center,
@@ -77,7 +72,7 @@ class LeaderNoticeCard extends ConsumerWidget {
           ),
 
           // 완료 버튼
-          if (notice.completed == false)
+          if (completed == false)
             Expanded(
               child: Container(
                 margin: EdgeInsets.only(
@@ -100,15 +95,9 @@ class LeaderNoticeCard extends ConsumerWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18.r),
-                    onTap: () async {
-                      final tripState = ref.read(tripProvider).valueOrNull;
-                      if (tripState is TripModel) {
-                        await ref.read(noticeListProvider.notifier).toggleNoticeComplete(
-                          tripId: tripState.tripId,
-                          noticeId: notice.id,
-                          completed: true,
-                        );
-                      }
+                    onTap: () {
+                      // TODO: 완료 처리 로직
+                      print('공지 완료: $title');
                     },
                     child: Container(
                       alignment: Alignment.center,
@@ -130,11 +119,11 @@ class LeaderNoticeCard extends ConsumerWidget {
       ),
       child: GestureDetector(
         onTap: () {
-          // TODO: 공지사항 자세히보기 모달 펼치기
+          // TODO: 가능하면 지도페이지로 보내기 + 핑찍은 곳으로 카메라 이동시켜주기.
         },
         child: Container(
           decoration: BoxDecoration(
-            color: notice.completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
+            color: completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
             borderRadius: BorderRadius.circular(14.r),
           ),
           height: 60.h,
@@ -143,19 +132,35 @@ class LeaderNoticeCard extends ConsumerWidget {
             child: Row(
               children: [
                 SvgPicture.asset(
-                  'asset/icon/notice.svg',
+                  'asset/icon/ping.svg',
                   width: 24.w,
                   height: 24.h,
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  notice.title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    height: 1.4,
-                    letterSpacing: -0.3,
-                    color: Color(0xff7d7d7d),
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        height: 1.4,
+                        letterSpacing: -0.3,
+                        color: Color(0xff7d7d7d),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      time,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        height: 1.5,
+                        letterSpacing: -0.3,
+                        color: Color(0xff8287ff),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -166,20 +171,27 @@ class LeaderNoticeCard extends ConsumerWidget {
   }
 }
 
-class NoticeCard extends StatelessWidget {
-  final NoticeModel notice;
+class PingCard extends StatelessWidget {
+  final String title;
+  final String time;
+  final bool completed;
 
-  const NoticeCard({super.key, required this.notice});
+  const PingCard({
+    super.key,
+    required this.title,
+    required this.time,
+    required this.completed,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // TODO: 공지사항 자세히보기 모달 펼치기
+        // TODO: 가능하면 지도페이지로 보내기 + 핑찍은 곳으로 카메라 이동시켜주기.
       },
       child: Container(
         decoration: BoxDecoration(
-          color: notice.completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
+          color: completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
           borderRadius: BorderRadius.circular(14.r),
         ),
         height: 60.h,
@@ -188,19 +200,35 @@ class NoticeCard extends StatelessWidget {
           child: Row(
             children: [
               SvgPicture.asset(
-                'asset/icon/notice.svg',
+                'asset/icon/ping.svg',
                 width: 24.w,
                 height: 24.h,
               ),
               SizedBox(width: 8.w),
-              Text(
-                notice.title,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  height: 1.4,
-                  letterSpacing: -0.3,
-                  color: Color(0xff7d7d7d),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      height: 1.4,
+                      letterSpacing: -0.3,
+                      color: Color(0xff7d7d7d),
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      height: 1.5,
+                      letterSpacing: -0.3,
+                      color: Color(0xff8287ff),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

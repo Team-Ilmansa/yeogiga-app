@@ -662,6 +662,10 @@ class _MyLocationButtonState extends State<MyLocationButton> {
   void initState() {
     super.initState();
     widget.controller.addListener(_updateButtonPosition);
+    // 초기 위치 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateButtonPosition();
+    });
   }
 
   @override

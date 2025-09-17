@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
+import 'package:yeogiga/notice/view/notice_list_screen.dart';
 import 'package:yeogiga/schedule/screen/naver_place_map_screen.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
@@ -97,6 +98,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/endTripMap',
       name: EndTripMapScreen.routeName,
       builder: (_, __) => EndTripMapScreen(),
+    ),
+    GoRoute(
+      path: '/noticeListScreen',
+      name: NoticeListScreen.routeName,
+      builder: (_, __) => NoticeListScreen(),
     ),
   ];
 

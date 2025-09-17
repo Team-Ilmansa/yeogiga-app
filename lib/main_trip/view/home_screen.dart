@@ -84,7 +84,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                       if (trip == null) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [_HomeAppBar(trip: trip)],
+                          children: [
+                            _HomeAppBar(trip: trip),
+                            SizedBox(height: 62.h),
+                          ],
                         );
                       }
                       return Column(
@@ -106,8 +109,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 11.h, color: Color(0xfff0f0f0)),
-                    SizedBox(height: 40.h),
                     Consumer(
                       builder: (context, ref, _) {
                         final settingTrips = ref.watch(settingTripListProvider);
