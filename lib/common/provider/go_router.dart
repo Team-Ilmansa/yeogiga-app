@@ -13,6 +13,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/splash',
     refreshListenable: provider,
     redirect: provider.redirectLogic,
-    observers: [myPageRouteObserver, homeRouteObserver],
+    observers: [
+      myPageRouteObserver,
+      homeRouteObserver,
+      tripDetailRouteObserver,
+    ],
   );
 });

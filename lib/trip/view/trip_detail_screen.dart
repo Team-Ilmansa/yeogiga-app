@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:yeogiga/common/provider/selection_mode_provider.dart';
+import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -20,6 +20,7 @@ import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/common/route_observer.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   static String get routeName => 'tripDetailScreen';
@@ -30,7 +31,7 @@ class TripDetailScreen extends ConsumerStatefulWidget {
 }
 
 class TripDetailScreenState extends ConsumerState<TripDetailScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, RouteAware {
   // static 메서드로 분리
   // TODO: 존나 중요
 
@@ -82,11 +83,28 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     if (!_initialized) {
       _initialized = true;
 
+      // RouteObserver 등록
+      tripDetailRouteObserver.subscribe(this, ModalRoute.of(context)!);
+
       //앱을 시작할때도 호출
       WidgetsBinding.instance.addPostFrameCallback((_) {
         refreshAll();
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    tripDetailRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // 다른 화면에서 돌아올 때 pingSelectionMode 초기화
+    ref.read(pingSelectionModeProvider.notifier).state = false;
   }
 
   // 날짜 개수 뽑기
@@ -98,12 +116,6 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       return List.generate(dayCount, (index) => 'Day ${index + 1}');
     }
     return [];
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   bool isRefreshing = false;
@@ -244,6 +256,19 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final tripState = ref.watch(tripProvider).valueOrNull;
     final userMe = ref.watch(userMeProvider);
 
+    // 리더 권한 확인 로직 (통합)
+    bool isLeader = false;
+    if (tripState is TripModel &&
+        userMe is UserResponseModel &&
+        userMe.data != null) {
+      final leaderId = tripState.leaderId;
+      final myMember = tripState.members.firstWhere(
+        (member) => member.nickname == userMe.data!.nickname,
+        orElse: () => TripMember(userId: -1, nickname: '', imageUrl: null),
+      );
+      isLeader = myMember.userId == leaderId;
+    }
+
     if (_tabController.index == 0) {
       bottomAppBarState = 1; // 일정 대시보드
     } else if (_tabController.index == 1) {
@@ -304,24 +329,6 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 IconButton(
                   icon: Icon(Icons.more_vert, color: Colors.black),
                   onPressed: () {
-                    bool isLeader = false;
-                    String? myNickname;
-                    dynamic leader;
-                    if (tripState is TripModel) {
-                      final leaderId = tripState.leaderId;
-                      final leaderList = tripState.members.where(
-                        (m) => m.userId == leaderId,
-                      );
-                      leader = leaderList.isNotEmpty ? leaderList.first : null;
-                    }
-                    if (userMe is UserResponseModel) {
-                      myNickname = userMe.data?.nickname;
-                    }
-                    if (leader != null &&
-                        myNickname != null &&
-                        leader.nickname == myNickname) {
-                      isLeader = true;
-                    }
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: false,
@@ -348,6 +355,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         _selectedDayIndex,
         matchedOrUnmatchedPayload,
         pendingPayload,
+        isLeader,
       ),
       body: DefaultTabController(
         length: 3,
@@ -357,7 +365,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 // 탑 패널
                 SliverToBoxAdapter(child: TopPanel()),
                 SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-                SliverToBoxAdapter(child: NoticePanel()),
+                SliverToBoxAdapter(child: NoticePanel(isLeader: isLeader)),
                 // 탭바
                 SliverPersistentHeader(
                   pinned: true,
@@ -501,23 +509,16 @@ Widget? _getBottomNavigationBar(
   int selectedDayIndex,
   Map<String, List<String>> matchedOrUnmatchedPayload,
   Map<String, List<String>> pendingPayload,
+  bool isLeader,
 ) {
   final tripState = ref.watch(tripProvider).valueOrNull;
-  final userMe = ref.watch(userMeProvider);
   // 여행 상태가 SETTING이고 날짜 미지정이면 '여행 날짜 확정하기' 버튼
   if (tripState is SettingTripModel) {
     final settingTrip = tripState;
     final startedAt = settingTrip.startedAt;
     final endedAt = settingTrip.endedAt;
-    String? myNickname;
-    if (userMe is UserResponseModel) {
-      myNickname = userMe.data?.nickname;
-    }
-    final leaderId = settingTrip.leaderId;
-    final leaderList = settingTrip.members.where((m) => m.userId == leaderId);
-    final leader = leaderList.isNotEmpty ? leaderList.first : null;
     // 리더만 버튼 노출
-    if (leader != null && myNickname != null && leader.nickname == myNickname) {
+    if (isLeader) {
       if (startedAt == null || endedAt == null) {
         // 날짜 미지정: 여행 날짜 확정하기
         return const BottomAppBarLayout(child: ConfirmCalendarState());
@@ -525,15 +526,13 @@ Widget? _getBottomNavigationBar(
         // 날짜 지정: 여행 일정 확정하기
         final tripId = settingTrip.tripId;
         int lastDay = 1;
-        if (startedAt != null && endedAt != null) {
-          try {
-            final start = DateTime.parse(startedAt.toString().substring(0, 10));
-            final end = DateTime.parse(endedAt.toString().substring(0, 10));
-            lastDay = end.difference(start).inDays + 1;
-            if (lastDay < 1) lastDay = 1;
-          } catch (e) {
-            lastDay = 1;
-          }
+        try {
+          final start = DateTime.parse(startedAt.toString().substring(0, 10));
+          final end = DateTime.parse(endedAt.toString().substring(0, 10));
+          lastDay = end.difference(start).inDays + 1;
+          if (lastDay < 1) lastDay = 1;
+        } catch (e) {
+          lastDay = 1;
         }
         return BottomAppBarLayout(
           child: ConfirmScheduleState(tripId: tripId, lastDay: lastDay),
@@ -543,7 +542,15 @@ Widget? _getBottomNavigationBar(
       return null;
     }
   } else if (bottomAppBarState == 1) {
-    return const BottomAppBarLayout(child: AddNoticeState());
+    return isLeader
+        ? BottomAppBarLayout(
+          child:
+              tripState is InProgressTripModel
+                  ? AddNoticeAndPingState()
+                  : AddNoticeState(),
+        )
+        : null;
+    // 방장아니면 공지, 집결지 아무것도 못함.
   } else if (bottomAppBarState == 2 || bottomAppBarState == 3) {
     // 갤러리 탭 하단바는 inprogress/completed 상태에서만 노출
     if (tripState is InProgressTripModel || tripState is CompletedTripModel) {

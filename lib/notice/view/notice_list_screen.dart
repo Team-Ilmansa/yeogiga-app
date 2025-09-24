@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/notice/component/notice_card.dart';
+import 'package:yeogiga/notice/component/ping_card.dart';
 import 'package:yeogiga/notice/provider/notice_provider.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
@@ -23,7 +25,10 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final tripState = ref.read(tripProvider).valueOrNull;
       if (tripState is TripModel) {
-        ref.read(noticeListProvider.notifier).fetchNoticeList(tripId: tripState.tripId);
+        ref
+            .read(noticeListProvider.notifier)
+            .fetchNoticeList(tripId: tripState.tripId);
+        ref.read(pingProvider.notifier).fetchPing(tripId: tripState.tripId);
       }
     });
   }
@@ -52,6 +57,7 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> {
       body: Consumer(
         builder: (context, ref, child) {
           final noticeListData = ref.watch(noticeListProvider);
+          final pingData = ref.watch(pingProvider);
           final tripState = ref.watch(tripProvider).valueOrNull;
           final userMe = ref.watch(userMeProvider);
 
@@ -110,7 +116,15 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> {
                     ),
                   ),
                   SizedBox(height: 8.h),
-
+                  // 핑이 있으면 항상 표시
+                  if (pingData != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child:
+                          isLeader
+                              ? LeaderPingCard(ping: pingData)
+                              : PingCard(ping: pingData),
+                    ),
                   // 현재 공지사항들 표시
                   ...currentNotices.map((notice) {
                     return Padding(

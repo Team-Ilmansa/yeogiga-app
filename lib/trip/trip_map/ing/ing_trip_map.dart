@@ -17,6 +17,8 @@ import 'package:yeogiga/trip/provider/trip_member_location_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/trip/model/trip_member_location.dart';
 import 'package:yeogiga/user/model/user_model.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
+import 'package:yeogiga/notice/model/ping_model.dart';
 
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
@@ -25,7 +27,9 @@ import 'package:yeogiga/user/model/user_model.dart';
 
 class IngTripMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'ingTripMap';
-  const IngTripMapScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? extra;
+
+  const IngTripMapScreen({Key? key, this.extra}) : super(key: key);
 
   @override
   ConsumerState<IngTripMapScreen> createState() => _IngTripMapScreenState();
@@ -47,6 +51,15 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   void initState() {
     super.initState();
     _fetchAllDaysAndUpdateMarkers();
+    _fetchPingData();
+  }
+
+  // Ping 데이터 가져오기
+  Future<void> _fetchPingData() async {
+    final trip = ref.read(tripProvider).valueOrNull;
+    if (trip is TripModel) {
+      await ref.read(pingProvider.notifier).fetchPing(tripId: trip.tripId);
+    }
   }
 
   @override
@@ -101,6 +114,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   NaverMapController? mapController;
   List<NMarker> _placeMarkers = [];
   List<NMarker> _memberMarkers = [];
+  NMarker? _pingMarker;
   NPolylineOverlay? _polyline;
   NLocationOverlay? _locationOverlay;
 
@@ -137,12 +151,14 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     List<ConfirmedPlaceModel> places, {
     List<TripMemberLocation>? memberLocations,
     String? myNickname,
+    PingModel? ping,
   }) async {
     if (mapController == null) return;
     // Remove previous overlays
     await mapController!.clearOverlays();
     _placeMarkers.clear();
     _memberMarkers.clear();
+    _pingMarker = null;
     _polyline = null;
 
     final validPlaces =
@@ -184,6 +200,19 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         _memberMarkers.add(marker);
         await mapController!.addOverlay(marker);
       }
+    }
+
+    // --- Ping 마커 추가 ---
+    if (ping != null) {
+      final pingMarker = NMarker(
+        id: 'ping_marker',
+        position: NLatLng(ping.latitude, ping.longitude),
+        icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
+        size: Size(32.w, 32.h),
+        caption: NOverlayCaption(text: '집결지: ${ping.place}'),
+      );
+      _pingMarker = pingMarker;
+      await mapController!.addOverlay(pingMarker);
     }
 
     // Draw polyline if 2 or more places
@@ -287,6 +316,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
               final memberLocationAsync = ref.watch(tripMemberLocationProvider);
               final userMe = ref.watch(userMeProvider);
+              final ping = ref.watch(pingProvider);
+
               String? myNickname;
               if (userMe is UserResponseModel &&
                   userMe.data?.nickname != null) {
@@ -300,12 +331,13 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                 loading: () {},
                 error: (_, __) {},
               );
-              if (mapController != null && placeList.isNotEmpty) {
+              if (mapController != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _updateMapOverlays(
                     placeList,
                     memberLocations: memberLocations,
                     myNickname: myNickname,
+                    ping: ping,
                   );
                 });
               }
@@ -315,6 +347,23 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                   setState(() {
                     mapController = controller;
                   });
+
+                  // PingCard에서 온 경우 ping 좌표로 카메라 이동
+                  if (widget.extra != null && widget.extra!['focusPing'] == true) {
+                    final pingLat = widget.extra!['pingLatitude'] as double?;
+                    final pingLng = widget.extra!['pingLongitude'] as double?;
+                    if (pingLat != null && pingLng != null) {
+                      await controller.updateCamera(
+                        NCameraUpdate.withParams(
+                          target: NLatLng(pingLat, pingLng),
+                          zoom: 15,
+                        ),
+                      );
+                      _cameraFitted = true;
+                      return;
+                    }
+                  }
+
                   // 최초 진입 시 전체 마커 기준으로 카메라 이동 (중복 호출 방지 플래그 사용)
                   if (!_cameraFitted) {
                     List<ConfirmedPlaceModel> fitPlaces = [];
@@ -479,6 +528,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                 allPlaces,
                                 memberLocations: memberLocations,
                                 myNickname: myNickname,
+                                ping: ref.read(pingProvider),
                               );
                             } else {
                               // Day 선택 시마다 무조건 fetch
@@ -530,6 +580,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                   places,
                                   memberLocations: memberLocations,
                                   myNickname: myNickname,
+                                  ping: ref.read(pingProvider),
                                 );
                                 await _fitMapToPlaces(places);
                               }

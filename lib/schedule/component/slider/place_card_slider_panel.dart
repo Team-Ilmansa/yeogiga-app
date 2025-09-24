@@ -158,6 +158,7 @@ class _PlaceCardSliderPanelState extends State<PlaceCardSliderPanel> {
                   },
                 ),
                 SizedBox(height: 20.h),
+                //목적지 추가 버튼
                 SizedBox(
                   width: double.infinity,
                   height: 52.h,
@@ -171,7 +172,9 @@ class _PlaceCardSliderPanelState extends State<PlaceCardSliderPanel> {
                       padding: EdgeInsets.zero,
                     ),
                     onPressed: () {
-                      print('카테고리 $selectedCategoryIndex로 ${widget.place?.title} 추가');
+                      print(
+                        '카테고리 $selectedCategoryIndex로 ${widget.place?.title} 추가',
+                      );
                       widget.onAddPressed?.call(selectedCategoryIndex);
                     },
                     child: Row(

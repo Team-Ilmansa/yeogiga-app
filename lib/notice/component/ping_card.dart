@@ -3,39 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yeogiga/notice/model/ping_model.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
 
 class LeaderPingCard extends ConsumerWidget {
-  final String title;
-  final String time;
-  final bool completed;
+  final PingModel ping;
 
-  const LeaderPingCard({
-    super.key,
-    required this.title,
-    required this.time,
-    required this.completed,
-  });
+  const LeaderPingCard({super.key, required this.ping});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Slidable(
-      key: ValueKey('notice_ping_$title'),
+      key: ValueKey('notice_ping_${ping.place}'),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: completed ? 0.16 : 0.31,
+        extentRatio: 0.16,
         children: [
           // 삭제 버튼
           Expanded(
             child: Container(
-              margin:
-                  completed
-                      ? EdgeInsets.only(
-                        left: 12.w,
-                        right: 4.w,
-                        top: 16.h,
-                        bottom: 16.h,
-                      )
-                      : EdgeInsets.only(left: 12.w, top: 16.h, bottom: 16.h),
+              margin: EdgeInsets.only(
+                left: 12.w,
+                right: 4.w,
+                top: 16.h,
+                bottom: 16.h,
+              ),
               decoration: BoxDecoration(
                 color: Color(0xfff0f0f0),
                 borderRadius: BorderRadius.circular(18.r),
@@ -50,9 +45,24 @@ class LeaderPingCard extends ConsumerWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18.r),
-                  onTap: () {
-                    // TODO: 삭제 처리 로직
-                    print('공지 삭제: $title');
+                  onTap: () async {
+                    final tripState = ref.read(tripProvider).valueOrNull;
+                    if (tripState is TripModel) {
+                      final result = await ref
+                          .read(pingProvider.notifier)
+                          .deletePing(tripId: tripState.tripId);
+
+                      if (!result['success']) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('핑 삭제에 실패했습니다.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    }
                   },
                   child: Container(
                     alignment: Alignment.center,
@@ -70,60 +80,20 @@ class LeaderPingCard extends ConsumerWidget {
               ),
             ),
           ),
-
-          // 완료 버튼
-          if (completed == false)
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.only(
-                  left: 8.w,
-                  right: 4.w,
-                  top: 16.h,
-                  bottom: 16.h,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFffffFF),
-                  borderRadius: BorderRadius.circular(18.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(18.r),
-                    onTap: () {
-                      // TODO: 완료 처리 로직
-                      print('공지 완료: $title');
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Text(
-                        '완료',
-                        style: TextStyle(
-                          color: const Color(0xff8287ff),
-                          fontSize: 14.sp,
-                          height: 1.4,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
       child: GestureDetector(
         onTap: () {
-          // TODO: 가능하면 지도페이지로 보내기 + 핑찍은 곳으로 카메라 이동시켜주기.
+          // IngMap으로 이동하면서 ping 좌표 정보 전달
+          context.push('/ingTripMap', extra: {
+            'focusPing': true,
+            'pingLatitude': ping.latitude,
+            'pingLongitude': ping.longitude,
+          });
         },
         child: Container(
           decoration: BoxDecoration(
-            color: completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
+            color: Color(0xffe6e7ff),
             borderRadius: BorderRadius.circular(14.r),
           ),
           height: 60.h,
@@ -142,7 +112,7 @@ class LeaderPingCard extends ConsumerWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      title,
+                      ping.place,
                       style: TextStyle(
                         fontSize: 16.sp,
                         height: 1.4,
@@ -152,11 +122,11 @@ class LeaderPingCard extends ConsumerWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      time,
+                      '${ping.time.hour}시 ${ping.time.minute.toString().padLeft(2, '0')}분',
                       style: TextStyle(
                         fontSize: 12.sp,
                         height: 1.5,
-                        letterSpacing: -0.3,
+                        letterSpacing: -0.36,
                         color: Color(0xff8287ff),
                       ),
                     ),
@@ -172,26 +142,24 @@ class LeaderPingCard extends ConsumerWidget {
 }
 
 class PingCard extends StatelessWidget {
-  final String title;
-  final String time;
-  final bool completed;
+  final PingModel ping;
 
-  const PingCard({
-    super.key,
-    required this.title,
-    required this.time,
-    required this.completed,
-  });
+  const PingCard({super.key, required this.ping});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // TODO: 가능하면 지도페이지로 보내기 + 핑찍은 곳으로 카메라 이동시켜주기.
+        // IngMap으로 이동하면서 ping 좌표 정보 전달
+        context.push('/ingTripMap', extra: {
+          'focusPing': true,
+          'pingLatitude': ping.latitude,
+          'pingLongitude': ping.longitude,
+        });
       },
       child: Container(
         decoration: BoxDecoration(
-          color: completed ? Color(0xfff0f0f0) : Color(0xffe6e7ff),
+          color: Color(0xffe6e7ff),
           borderRadius: BorderRadius.circular(14.r),
         ),
         height: 60.h,
@@ -210,7 +178,7 @@ class PingCard extends StatelessWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    title,
+                    ping.place,
                     style: TextStyle(
                       fontSize: 16.sp,
                       height: 1.4,
@@ -220,7 +188,7 @@ class PingCard extends StatelessWidget {
                   ),
                   SizedBox(width: 4.w),
                   Text(
-                    time,
+                    '${ping.time.hour}시 ${ping.time.minute.toString().padLeft(2, '0')}분',
                     style: TextStyle(
                       fontSize: 12.sp,
                       height: 1.5,

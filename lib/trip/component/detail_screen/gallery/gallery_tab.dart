@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
-import 'package:yeogiga/common/provider/selection_mode_provider.dart';
+import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/no_image.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -65,7 +65,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     if (!selectionMode) {
       selectedMatchedOrUnMatchedPictures.clear();
     }
-    final matchedImages = ref.watch(matchedTripImagesProvider).valueOrNull ?? [];
+    final matchedImages =
+        ref.watch(matchedTripImagesProvider).valueOrNull ?? [];
     print('===== matchedImages 전체 내용 =====');
     for (final dayPlace in matchedImages) {
       print(
@@ -87,8 +88,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
       }
     }
     print('==============================');
-    final unmatchedImages = ref.watch(unmatchedTripImagesProvider).valueOrNull ?? [];
-    final pendingImages = ref.watch(pendingDayTripImagesProvider).valueOrNull ?? [];
+    final unmatchedImages =
+        ref.watch(unmatchedTripImagesProvider).valueOrNull ?? [];
+    final pendingImages =
+        ref.watch(pendingDayTripImagesProvider).valueOrNull ?? [];
     final selectedDay = widget.selectedDayIndex;
 
     // TODO: selectedDay에 따라 사진들 분류 작업 계속 실행됨.
@@ -257,9 +260,7 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
           SliverToBoxAdapter(child: SizedBox(height: 6.h)),
           //TODO: 그리드 뷰 부분 (사진 없으면 NoImage();)
           if (allImages.isEmpty && allPendingImages.isEmpty)
-            SliverToBoxAdapter(
-              child: SizedBox(height: 401.h, child: NoImage()),
-            )
+            SliverToBoxAdapter(child: SizedBox(height: 401.h, child: NoImage()))
           else
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {

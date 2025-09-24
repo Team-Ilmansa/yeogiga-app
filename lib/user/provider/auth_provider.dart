@@ -83,6 +83,7 @@ class AuthProvider extends ChangeNotifier {
       path: '/naverPlaceMapScreen',
       name: NaverPlaceMapScreen.routeName,
       builder: (context, state) {
+        // confirmedSchedule을 변경하려면 필요함.
         final dayStr = state.queryParameters['day'];
         final dayId = state.queryParameters['dayId'];
         final day = int.tryParse(dayStr ?? '') ?? 1;
@@ -92,7 +93,9 @@ class AuthProvider extends ChangeNotifier {
     GoRoute(
       path: '/ingTripMap',
       name: IngTripMapScreen.routeName,
-      builder: (context, state) => IngTripMapScreen(),
+      builder:
+          (context, state) =>
+              IngTripMapScreen(extra: state.extra as Map<String, dynamic>?),
     ),
     GoRoute(
       path: '/endTripMap',
