@@ -6,12 +6,15 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import '../component/slider/place_card_slider_panel.dart';
+import '../component/slider/ping_select_panel.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
+import 'package:yeogiga/common/provider/util_state_provider.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
 
 class NaverPlaceMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'naverPlaceMapScreen';
@@ -243,122 +246,184 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
   Widget _buildSliderBarHead() {
     // 선택된 마커가 있을 때만 패널 표시
     if (_selectedPlace == null) return SizedBox.shrink();
-    return PlaceCardSliderPanel(
-      place: _selectedPlace,
-      imageUrl: null, // 썸네일 이미지 URL 또는 null
-      buttonText: '일정에 추가하기',
-      onAddPressed: (selectedCategoryIndex) async {
-        // 카테고리 index를 문자열로 변환
-        String placeCategory;
-        switch (selectedCategoryIndex) {
-          case 1:
-            placeCategory = 'TOURISM';
-            break;
-          case 2:
-            placeCategory = 'LODGING';
-            break;
-          case 3:
-            placeCategory = 'RESTAURANT';
-            break;
-          case 4:
-            placeCategory = 'ETC';
-            break;
-          default:
-            placeCategory = 'TOURISM'; // 기본값
-        }
-        
-        print('선택된 카테고리: $placeCategory (index: $selectedCategoryIndex)');
-        final tripState = ref.read(tripProvider).valueOrNull;
-        if (tripState is TripModel) {
-          bool success = false;
-          String? errorMsg;
-          try {
-            if (tripState.status == TripStatus.SETTING) {
-              // Pending 일정에 추가 (provider만 사용)
-              success = await ref
-                  .read(pendingScheduleProvider.notifier)
-                  .addPlace(
-                    tripId: tripState.tripId.toString(),
-                    day: day,
-                    place: PendingPlaceModel(
-                      id: _selectedPlace!.link,
-                      name: _selectedPlace!.title,
-                      latitude: _selectedPlace!.mapyCoord,
-                      longitude: _selectedPlace!.mapxCoord,
-                      // placeCategory: _selectedPlace!.category,
-                      placeCategory: placeCategory,
+
+    // pingSelectionMode 상태 확인
+    final isPingSelectionMode = ref.watch(pingSelectionModeProvider);
+    final tripState = ref.read(tripProvider).valueOrNull;
+
+    if (isPingSelectionMode) {
+      // 집결지 추가 모드일 때
+      return PingSelectPanel(
+        place: _selectedPlace,
+        imageUrl: null,
+        trip: tripState is TripModel ? tripState : null,
+        onAddPressed: (DateTime selectedDateTime) async {
+          if (tripState is TripModel && _selectedPlace != null) {
+            // 집결지 생성 API 호출
+            final result = await ref
+                .read(pingProvider.notifier)
+                .createPing(
+                  tripId: tripState.tripId,
+                  place: _selectedPlace!.title,
+                  latitude: _selectedPlace!.mapyCoord,
+                  longitude: _selectedPlace!.mapxCoord,
+                  time: selectedDateTime,
+                );
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    result['success']
+                        ? '집결지가 성공적으로 설정되었습니다!'
+                        : result['message'],
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
                     ),
-                  );
-            } else {
-              // Confirmed 일정에 추가 (provider만 사용)
-              if (dayId != null) {
-                success = await ref
-                    .read(confirmScheduleProvider.notifier)
-                    .addPlace(
-                      tripId: tripState.tripId,
-                      tripDayPlaceId: dayId!,
-                      name: _selectedPlace!.title,
-                      latitude: _selectedPlace!.mapyCoord,
-                      longitude: _selectedPlace!.mapxCoord,
-                      // placeType: _selectedPlace!.category,
-                      placeType: placeCategory,
-                    );
-              }
-            }
-          } catch (e) {
-            success = false;
-            if (e is Exception && e.toString().contains('Exception:')) {
-              errorMsg = e.toString().replaceFirst('Exception:', '').trim();
-            } else {
-              errorMsg = e.toString();
-            }
-          }
-          
-          // 성공 시 슬라이더바 내리기
-          if (success) {
-            setState(() {
-              _showSliderBar = false;
-            });
-            // 애니메이션 완료 후 선택된 장소도 초기화
-            Future.delayed(const Duration(milliseconds: 400), () {
-              if (mounted) {
-                setState(() {
-                  _selectedPlace = null;
-                });
-              }
-            });
-          }
-          
-          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  success
-                      ? '일정에 성공적으로 추가되었습니다!'
-                      : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
                   ),
+                  backgroundColor:
+                      result['success']
+                          ? const Color.fromARGB(212, 56, 212, 121)
+                          : const Color.fromARGB(229, 226, 81, 65),
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.all(5.w),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  elevation: 0,
+                  duration: const Duration(seconds: 2),
                 ),
-                backgroundColor:
-                    success
-                        ? const Color.fromARGB(212, 56, 212, 121)
-                        : const Color.fromARGB(229, 226, 81, 65),
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.all(5.w),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                elevation: 0, // 그림자 제거
-                duration: const Duration(seconds: 2),
-              ),
-            );
+              );
+
+              // if (result['success']) {
+              //   // 성공 시 pingSelectionMode 해제하고 뒤로가기
+              //   ref.read(pingSelectionModeProvider.notifier).state = false;
+              context.pop();
+              // }
+            }
           }
-        }
-      },
-    );
+        },
+      );
+    } else {
+      // 일반 일정 추가 모드일 때
+      return PlaceCardSliderPanel(
+        place: _selectedPlace,
+        imageUrl: null, // 썸네일 이미지 URL 또는 null
+        buttonText: '일정에 추가하기',
+        onAddPressed: (selectedCategoryIndex) async {
+          // 카테고리 index를 문자열로 변환
+          String placeCategory;
+          switch (selectedCategoryIndex) {
+            case 1:
+              placeCategory = 'TOURISM';
+              break;
+            case 2:
+              placeCategory = 'LODGING';
+              break;
+            case 3:
+              placeCategory = 'RESTAURANT';
+              break;
+            case 4:
+              placeCategory = 'ETC';
+              break;
+            default:
+              placeCategory = 'TOURISM'; // 기본값
+          }
+
+          print('선택된 카테고리: $placeCategory (index: $selectedCategoryIndex)');
+          final tripState = ref.read(tripProvider).valueOrNull;
+          if (tripState is TripModel) {
+            bool success = false;
+            String? errorMsg;
+            try {
+              if (tripState.status == TripStatus.SETTING) {
+                // Pending 일정에 추가 (provider만 사용)
+                success = await ref
+                    .read(pendingScheduleProvider.notifier)
+                    .addPlace(
+                      tripId: tripState.tripId.toString(),
+                      day: day,
+                      place: PendingPlaceModel(
+                        id: _selectedPlace!.link,
+                        name: _selectedPlace!.title,
+                        latitude: _selectedPlace!.mapyCoord,
+                        longitude: _selectedPlace!.mapxCoord,
+                        // placeCategory: _selectedPlace!.category,
+                        placeCategory: placeCategory,
+                      ),
+                    );
+              } else {
+                // Confirmed 일정에 추가 (provider만 사용)
+                if (dayId != null) {
+                  success = await ref
+                      .read(confirmScheduleProvider.notifier)
+                      .addPlace(
+                        tripId: tripState.tripId,
+                        tripDayPlaceId: dayId!,
+                        name: _selectedPlace!.title,
+                        latitude: _selectedPlace!.mapyCoord,
+                        longitude: _selectedPlace!.mapxCoord,
+                        // placeType: _selectedPlace!.category,
+                        placeType: placeCategory,
+                      );
+                }
+              }
+            } catch (e) {
+              success = false;
+              if (e is Exception && e.toString().contains('Exception:')) {
+                errorMsg = e.toString().replaceFirst('Exception:', '').trim();
+              } else {
+                errorMsg = e.toString();
+              }
+            }
+
+            // 성공 시 슬라이더바 내리기
+            if (success) {
+              setState(() {
+                _showSliderBar = false;
+              });
+              // 애니메이션 완료 후 선택된 장소도 초기화
+              Future.delayed(const Duration(milliseconds: 400), () {
+                if (mounted) {
+                  setState(() {
+                    _selectedPlace = null;
+                  });
+                }
+              });
+            }
+
+            // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    success
+                        ? '일정에 성공적으로 추가되었습니다!'
+                        : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  backgroundColor:
+                      success
+                          ? const Color.fromARGB(212, 56, 212, 121)
+                          : const Color.fromARGB(229, 226, 81, 65),
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.all(5.w),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  elevation: 0, // 그림자 제거
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          }
+        },
+      );
+    }
   }
 
   Future<void> _searchAndShowMarkers() async {

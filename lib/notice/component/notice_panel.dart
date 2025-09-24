@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:yeogiga/notice/component/notice_card.dart';
 import 'package:yeogiga/notice/component/ping_card.dart';
 import 'package:yeogiga/notice/provider/notice_provider.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
-import 'package:yeogiga/user/provider/user_me_provider.dart';
-import 'package:yeogiga/user/model/user_model.dart';
 
 class NoticePanel extends ConsumerStatefulWidget {
-  const NoticePanel({super.key});
+  final bool isLeader;
+  const NoticePanel({super.key, required this.isLeader});
 
   @override
   ConsumerState<NoticePanel> createState() => _NoticePanelState();
@@ -29,6 +29,7 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
         ref
             .read(noticeListProvider.notifier)
             .fetchNoticeList(tripId: tripState.tripId);
+        ref.read(pingProvider.notifier).fetchPing(tripId: tripState.tripId);
       }
     });
   }
@@ -36,22 +37,8 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
   @override
   Widget build(BuildContext context) {
     final noticeListData = ref.watch(noticeListProvider);
-    final tripState = ref.watch(tripProvider).valueOrNull;
-    final userMe = ref.watch(userMeProvider);
-
-    // 방장 여부 확인: 내 userId가 trip의 leaderId와 같은지 체크
-    bool isLeader = false;
-    if (tripState is TripModel &&
-        userMe is UserResponseModel &&
-        userMe.data != null) {
-      final leaderId = tripState.leaderId;
-      // 현재 사용자의 멤버 정보 찾기
-      final myMember = tripState.members.firstWhere(
-        (member) => member.nickname == userMe.data!.nickname,
-        orElse: () => TripMember(userId: -1, nickname: '', imageUrl: null),
-      );
-      isLeader = myMember.userId == leaderId;
-    }
+    final pingData = ref.watch(pingProvider);
+    final isLeader = widget.isLeader;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -83,10 +70,10 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
                     },
                     child: AnimatedRotation(
                       duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      turns: _isExpanded ? 0.25 : 0, // 90도 회전 (0.25 = 90/360)
+                      curve: Curves.fastOutSlowIn,
+                      turns: _isExpanded ? 0.50 : 0, // 90도 회전 (0.25 = 90/360)
                       child: Icon(
-                        Icons.keyboard_arrow_right,
+                        Icons.keyboard_arrow_up,
                         size: 20.sp,
                         color: const Color(0xff313131),
                       ),
@@ -133,6 +120,14 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
 
               return Column(
                 children: [
+                  // 핑이 있으면 항상 표시
+                  if (pingData != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: isLeader
+                          ? LeaderPingCard(ping: pingData)
+                          : PingCard(ping: pingData),
+                    ),
                   // 첫 번째 공지는 항상 표시
                   if (currentNotices.isNotEmpty)
                     Padding(

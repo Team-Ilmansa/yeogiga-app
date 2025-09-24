@@ -18,6 +18,7 @@ import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/view/trip_detail_screen.dart';
@@ -43,85 +44,222 @@ class AddNoticeState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        // Expanded(
-        //   child: ElevatedButton(
-        //     style: ElevatedButton.styleFrom(
-        //       backgroundColor: Color(0xff8287ff),
-        //       shape: RoundedRectangleBorder(
-        //         borderRadius: BorderRadius.circular(12.r),
-        //       ),
-        //       minimumSize: Size.fromHeight(46.h),
-        //       elevation: 0,
-        //       padding: EdgeInsets.zero,
-        //     ),
-        //     onPressed: () {
-        //       // TODO: 일정 추가 액션
-        //     },
-        //     child: Row(
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       crossAxisAlignment: CrossAxisAlignment.center,
-        //       children: [
-        //         SvgPicture.asset(
-        //           'asset/icon/add_schedule.svg',
-        //           width: 21.w,
-        //           height: 21.h,
-        //         ),
-        //         SizedBox(width: 9.w),
-        //         Text(
-        //           '일정 추가하기',
-        //           style: TextStyle(
-        //             color: Colors.white,
-        //             fontSize: 14.sp,
-        //             fontWeight: FontWeight.w600,
-        //             letterSpacing: -0.1,
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-        // SizedBox(width: 11.w),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xff8287ff),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+    return SizedBox(
+      height: 48.h,
+      child: Row(
+        children: [
+          // Expanded(
+          //   child: ElevatedButton(
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Color(0xff8287ff),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12.r),
+          //       ),
+          //       minimumSize: Size.fromHeight(46.h),
+          //       elevation: 0,
+          //       padding: EdgeInsets.zero,
+          //     ),
+          //     onPressed: () {
+          //       // TODO: 일정 추가 액션
+          //     },
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: [
+          //         SvgPicture.asset(
+          //           'asset/icon/add_schedule.svg',
+          //           width: 21.w,
+          //           height: 21.h,
+          //         ),
+          //         SizedBox(width: 9.w),
+          //         Text(
+          //           '일정 추가하기',
+          //           style: TextStyle(
+          //             color: Colors.white,
+          //             fontSize: 14.sp,
+          //             fontWeight: FontWeight.w600,
+          //             letterSpacing: -0.1,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          // SizedBox(width: 11.w),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff8287ff),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                minimumSize: Size.fromHeight(46.h),
+                elevation: 0,
+                padding: EdgeInsets.zero,
               ),
-              minimumSize: Size.fromHeight(46.h),
-              elevation: 0,
-              padding: EdgeInsets.zero,
-            ),
-            onPressed: () {
-              _showAddNoticeModal(context, ref);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  'asset/icon/gong_ji.svg',
-                  width: 21.w,
-                  height: 21.h,
-                ),
-                SizedBox(width: 9.w),
-                Text(
-                  '공지 추가하기',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
+              onPressed: () {
+                _showAddNoticeModal(context, ref);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'asset/icon/gong_ji.svg',
+                    width: 21.w,
+                    height: 21.h,
                   ),
-                ),
-              ],
+                  SizedBox(width: 9.w),
+                  Text(
+                    '공지 추가하기',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        SizedBox(width: 12.w),
-      ],
+          SizedBox(width: 12.w),
+        ],
+      ),
+    );
+  }
+}
+
+class AddNoticeAndPingState extends ConsumerWidget {
+  const AddNoticeAndPingState({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      height: 48.h,
+      child: Row(
+        children: [
+          // Expanded(
+          //   child: ElevatedButton(
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Color(0xff8287ff),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(12.r),
+          //       ),
+          //       minimumSize: Size.fromHeight(46.h),
+          //       elevation: 0,
+          //       padding: EdgeInsets.zero,
+          //     ),
+          //     onPressed: () {
+          //       // TODO: 일정 추가 액션
+          //     },
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: [
+          //         SvgPicture.asset(
+          //           'asset/icon/add_schedule.svg',
+          //           width: 21.w,
+          //           height: 21.h,
+          //         ),
+          //         SizedBox(width: 9.w),
+          //         Text(
+          //           '일정 추가하기',
+          //           style: TextStyle(
+          //             color: Colors.white,
+          //             fontSize: 14.sp,
+          //             fontWeight: FontWeight.w600,
+          //             letterSpacing: -0.1,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff8287ff),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                minimumSize: Size.fromHeight(46.h),
+                elevation: 0,
+                padding: EdgeInsets.zero,
+              ),
+              onPressed: () {
+                // pingSelectionModeProvider를 true로 설정
+                ref.read(pingSelectionModeProvider.notifier).state = true;
+
+                // naver_place_map_screen으로 이동
+                context.push('/naverPlaceMapScreen');
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'asset/icon/ping_white.svg',
+                    width: 21.w,
+                    height: 21.h,
+                  ),
+                  SizedBox(width: 9.w),
+                  Text(
+                    '집결지 추가하기',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(width: 11.w),
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff8287ff),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                minimumSize: Size.fromHeight(46.h),
+                elevation: 0,
+                padding: EdgeInsets.zero,
+              ),
+              onPressed: () {
+                _showAddNoticeModal(context, ref);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'asset/icon/gong_ji.svg',
+                    width: 21.w,
+                    height: 21.h,
+                  ),
+                  SizedBox(width: 9.w),
+                  Text(
+                    '공지 추가하기',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                  SizedBox(width: 3.w),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+        ],
+      ),
     );
   }
 }
@@ -1073,35 +1211,29 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
             ),
             child: Container(
               width: 340.w,
+              height: 467.h,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        children: [
-                          SizedBox(height: 2.h),
-                          Text(
-                            '공지하기',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20.sp,
-                              height: 1.4,
-                              letterSpacing: -0.3,
-                              color: Color(0xff313131),
-                            ),
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.close, size: 24),
-                      ),
-                    ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(Icons.close, size: 24),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    '공지하기',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20.sp,
+                      height: 1.4,
+                      letterSpacing: -0.3,
+                      color: Color(0xff313131),
+                    ),
                   ),
                   Text(
                     '팀원들에게 공지를 보낼 수 있어요',
@@ -1146,20 +1278,7 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                       ),
                     ),
                   ),
-                  SizedBox(height: 2.h),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '${titleTextController.text.length}/20',
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.5,
-                        letterSpacing: -0.3,
-                        color: Color(0xffc6c6c6),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 12.h),
                   //TODO: 내용 작성 필드
                   Container(
                     height: 180.h,
@@ -1217,39 +1336,47 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                       width: 120.w,
                       height: 52.h,
                       child: ElevatedButton(
-                        onPressed: titleTextController.text.trim().isEmpty || 
-                                  contentTextController.text.trim().isEmpty
-                            ? null
-                            : () async {
-                                final title = titleTextController.text.trim();
-                                final content = contentTextController.text.trim();
-                                
-                                final tripState = ref.read(tripProvider).valueOrNull;
-                                if (tripState is TripModel) {
-                                  final result = await ref.read(noticeListProvider.notifier).createNotice(
-                                    tripId: tripState.tripId,
-                                    title: title,
-                                    description: content,
-                                  );
-                                  
-                                  if (result['success']) {
-                                    Navigator.pop(context);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('공지사항이 성공적으로 등록되었습니다.'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('공지사항 등록에 실패했습니다.'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
+                        onPressed:
+                            titleTextController.text.trim().isEmpty ||
+                                    contentTextController.text.trim().isEmpty
+                                ? null
+                                : () async {
+                                  final title = titleTextController.text.trim();
+                                  final content =
+                                      contentTextController.text.trim();
+
+                                  final tripState =
+                                      ref.read(tripProvider).valueOrNull;
+                                  if (tripState is TripModel) {
+                                    final result = await ref
+                                        .read(noticeListProvider.notifier)
+                                        .createNotice(
+                                          tripId: tripState.tripId,
+                                          title: title,
+                                          description: content,
+                                        );
+
+                                    if (result['success']) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('공지사항이 성공적으로 등록되었습니다.'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('공지사항 등록에 실패했습니다.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   }
-                                }
-                              },
+                                },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xff8287ff),
                           disabledBackgroundColor: Color(0xffc6c6c6),
