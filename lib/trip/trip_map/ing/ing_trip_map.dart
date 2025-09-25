@@ -167,6 +167,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final marker = NMarker(
         id: place.id,
         position: NLatLng(place.latitude!, place.longitude!),
+        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+        size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: place.name),
       );
       _placeMarkers.add(marker);
@@ -190,6 +192,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         print(
           '[DEBUG] adding marker: ${member.nickname}, ${member.latitude}, ${member.longitude}',
         );
+
+        // TODO: 팀원 위치 마커는, 각각 프로필 사진으로 변경 필요
         final marker = NMarker(
           id: 'member_${member.userId}',
           position: NLatLng(member.latitude, member.longitude),
@@ -207,7 +211,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final pingMarker = NMarker(
         id: 'ping_marker',
         position: NLatLng(ping.latitude, ping.longitude),
-        icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
+        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
         size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: '집결지: ${ping.place}'),
       );
@@ -349,7 +353,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                   });
 
                   // PingCard에서 온 경우 ping 좌표로 카메라 이동
-                  if (widget.extra != null && widget.extra!['focusPing'] == true) {
+                  if (widget.extra != null &&
+                      widget.extra!['focusPing'] == true) {
                     final pingLat = widget.extra!['pingLatitude'] as double?;
                     final pingLng = widget.extra!['pingLongitude'] as double?;
                     if (pingLat != null && pingLng != null) {
