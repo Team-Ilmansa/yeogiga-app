@@ -327,7 +327,10 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
       builder:
           (context) => Container(
             height: 300.h,
-            color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14.r),
+            ),
             child: Column(
               children: [
                 Container(
@@ -340,8 +343,8 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
                       Text(
                         '날짜 선택',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black,
                           decoration: TextDecoration.none,
                         ),
@@ -404,7 +407,10 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
       builder:
           (context) => Container(
             height: 300.h,
-            color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14.r),
+            ),
             child: Column(
               children: [
                 Container(
@@ -417,8 +423,8 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
                       Text(
                         '시간 선택',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black,
                           decoration: TextDecoration.none,
                         ),
@@ -473,7 +479,10 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
       builder:
           (context) => Container(
             height: 300.h,
-            color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14.r),
+            ),
             child: Column(
               children: [
                 Container(
@@ -486,8 +495,8 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
                       Text(
                         '분 선택',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
                           color: Colors.black,
                           decoration: TextDecoration.none,
                         ),

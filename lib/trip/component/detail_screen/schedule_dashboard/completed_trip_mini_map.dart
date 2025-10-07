@@ -55,7 +55,12 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
       if (places.isEmpty) return;
       for (final latLng in places) {
         await _controller!.addOverlay(
-          NMarker(id: latLng.toString(), position: latLng),
+          NMarker(
+            id: latLng.toString(),
+            position: latLng,
+            icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+            size: Size(32.w, 32.h),
+          ),
         );
       }
       // 카메라 자동 fit

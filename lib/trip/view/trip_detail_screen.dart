@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
@@ -21,6 +22,7 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
+import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   static String get routeName => 'tripDetailScreen';
@@ -88,6 +90,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
       //앱을 시작할때도 호출
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         refreshAll();
       });
     }
@@ -122,6 +125,8 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
   // 갤러리탭 리프레쉬
   Future<void> refreshAll() async {
+    if (!mounted) return;
+
     setState(() {
       isRefreshing = true;
     });
@@ -218,10 +223,12 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
             .fetchAll(tripId, pendingDayPlaceInfos);
       }
     }
-    setState(() {
-      isRefreshing = false;
-      ref.read(selectionModeProvider.notifier).state = false;
-    });
+    if (mounted) {
+      setState(() {
+        isRefreshing = false;
+        ref.read(selectionModeProvider.notifier).state = false;
+      });
+    }
   }
 
   //대쉬보드탭 리프레쉬
@@ -281,7 +288,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       backgroundColor: Color(0xfffafafa),
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        toolbarHeight: 36.h,
+        toolbarHeight: 48.h,
         backgroundColor: Color(0xfffafafa),
         shadowColor: Colors.transparent, // 그림자도 제거
         foregroundColor: Colors.black,
@@ -302,33 +309,52 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                if (tripState is InProgressTripModel ||
+                    tripState is CompletedTripModel)
+                  Row(
+                    children: [
+                      GestureDetector(
+                        child: SvgPicture.asset('asset/icon/settlement.svg'),
+                        onTap: () async {
+                          // TODO: 이떄 settlement 초기화 한번 해야할 듯?
+                          if (!mounted) return;
+                          GoRouter.of(context).push('/settlementListScreen');
+                        },
+                      ),
+                      SizedBox(width: 16.w),
+                    ],
+                  ),
                 //TODO: IN_PROGRESS 일때만 보여주기
                 if (tripState is InProgressTripModel)
-                  IconButton(
-                    icon: Icon(Icons.map_outlined, color: Colors.black),
-                    onPressed: () async {
-                      ref.invalidate(
-                        pendingScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      ref.invalidate(
-                        confirmScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      ref.invalidate(
-                        completedScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      await ref
-                          .read(confirmScheduleProvider.notifier)
-                          .fetchAll(tripState.tripId);
-                      //TODO: 지도로 이동
-                      // 수정: async gap 이후 context 사용 시 mounted 체크 추가
-                      if (!mounted) return;
-                      GoRouter.of(context).push('/ingTripMap');
-                    },
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          ref.invalidate(
+                            pendingScheduleProvider,
+                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                          ref.invalidate(
+                            confirmScheduleProvider,
+                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                          ref.invalidate(
+                            completedScheduleProvider,
+                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                          await ref
+                              .read(confirmScheduleProvider.notifier)
+                              .fetchAll(tripState.tripId);
+                          //TODO: 지도로 이동
+                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                          if (!mounted) return;
+                          GoRouter.of(context).push('/ingTripMap');
+                        },
+                        child: Icon(Icons.map_outlined, color: Colors.black),
+                      ),
+                      SizedBox(width: 14.w),
+                    ],
                   ),
                 // TODO: 메뉴 보여주기
-                IconButton(
-                  icon: Icon(Icons.more_vert, color: Colors.black),
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: false,
@@ -341,6 +367,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       },
                     );
                   },
+                  child: Icon(Icons.more_vert, color: Colors.black),
                 ),
               ],
             ),
@@ -373,6 +400,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     child: SizedBox(
                       height: 32.h,
                       child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
                         color: Color(0xfffafafa),
                         child: TabBar(
                           controller: _tabController,
@@ -576,29 +604,4 @@ Widget? _getBottomNavigationBar(
     return null;
   }
   return null;
-}
-
-// ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-// ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-
-// SliverPersistentHeaderDelegate for the pinned TabBar
-class TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  TabBarHeaderDelegate({required this.child});
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Material(color: Colors.white, child: child);
-  }
-
-  @override
-  double get maxExtent => 32.h; // TabBar의 실제 높이와 동일하게!
-  @override
-  double get minExtent => 32.h;
-  @override
-  bool shouldRebuild(covariant TabBarHeaderDelegate oldDelegate) => false;
 }

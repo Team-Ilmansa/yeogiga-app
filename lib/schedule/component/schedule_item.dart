@@ -112,6 +112,8 @@ class ScheduleItem extends StatelessWidget {
         return 'asset/icon/category hotel.svg';
       case '식당':
         return 'asset/icon/category restaurant.svg';
+      case '교통수단':
+        return 'asset/icon/category transport.svg';
       case '기타':
         return 'asset/icon/category etc.svg';
       default:

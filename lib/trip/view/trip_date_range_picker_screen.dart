@@ -28,6 +28,8 @@ class _TripDateRangePickerScreenState
   Widget build(BuildContext context) {
     // 에러 메시지 노출
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       if (_error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_error!), backgroundColor: Colors.red),

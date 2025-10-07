@@ -31,6 +31,8 @@ class EndTripMapScreen extends ConsumerStatefulWidget {
 class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   // 갤러리탭 리프레쉬
   Future<void> refreshAll() async {
+    if (!mounted) return;
+
     final trip = ref.read(tripProvider).valueOrNull;
     final isCompleted = trip is CompletedTripModel;
     int tripId = (trip is TripModel) ? trip.tripId : 0;
@@ -40,6 +42,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     ref.invalidate(matchedTripImagesProvider);
     // 일정 fetchAll
     if (isCompleted) {
+      if (!mounted) return;
       await ref.read(completedScheduleProvider.notifier).fetch(tripId);
       final completed = ref.read(completedScheduleProvider).valueOrNull;
       if (completed != null && completed.data.isNotEmpty) {
@@ -124,9 +127,11 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             .fetchAll(tripId, pendingDayPlaceInfos);
       }
     }
-    setState(() {
-      ref.read(selectionModeProvider.notifier).state = false;
-    });
+    if (mounted) {
+      setState(() {
+        ref.read(selectionModeProvider.notifier).state = false;
+      });
+    }
   }
 
   bool _allDaysFetched = false;
@@ -146,6 +151,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     super.initState();
     // CompletedSchedule 초기 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _fetchAllDaysAndUpdateMarkers();
       final trip = ref.read(tripProvider).valueOrNull;
       if (trip is CompletedTripModel) {
@@ -155,14 +161,21 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
+    if (!mounted) return;
+
     final trip = ref.read(tripProvider).valueOrNull;
     if (trip is! CompletedTripModel) return;
+
     await ref.read(completedScheduleProvider.notifier).fetch(trip.tripId);
+    if (!mounted) return; // await 후 체크
+
     // 모든 day의 데이터가 provider에 들어올 때까지 대기
     var completedAsync = ref.read(completedScheduleProvider).valueOrNull;
     var schedules = completedAsync?.data ?? [];
     if (schedules.isEmpty) {
       await Future.delayed(const Duration(milliseconds: 10));
+      if (!mounted) return; // delay 후 체크
+
       completedAsync = ref.read(completedScheduleProvider).valueOrNull;
       schedules = completedAsync?.data ?? [];
       if (schedules.isEmpty) {
@@ -230,6 +243,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
       final marker = NMarker(
         id: place.id,
         position: NLatLng(place.latitude!, place.longitude!),
+        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+        size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: place.name),
       );
       _placeMarkers.add(marker);
@@ -243,6 +258,8 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
             validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
         color: const Color(0xFF8287FF),
         width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
       );
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
@@ -391,6 +408,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                 }
                 if (mapController != null && placeList.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
                     _updateMapOverlays(
                       placeList,
                       hostRouteCoords: hostRouteCoords,
@@ -399,10 +417,13 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                 }
                 return NaverMap(
                   onMapReady: (controller) {
-                    setState(() {
-                      mapController = controller;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        mapController = controller;
+                      });
+                    }
                     WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
                       _updateMapOverlays(
                         placeList,
                         hostRouteCoords: hostRouteCoords,
@@ -453,9 +474,11 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                   days: days,
                   selectedDayIndex: selectedDayIndex,
                   onDayChanged: (index) async {
-                    setState(() {
-                      selectedDayIndex = index;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        selectedDayIndex = index;
+                      });
+                    }
 
                     // 기존 DaySelector onChanged의 지도 마커/폴리라인 갱신 로직
                     final tripState = ref.read(tripProvider).valueOrNull;
@@ -620,10 +643,12 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                     );
                   },
                   onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
-                    setState(() {
-                      matchedOrUnmatchedPayload = matchedOrUnmatched;
-                      pendingPayload = pending;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        matchedOrUnmatchedPayload = matchedOrUnmatched;
+                        pendingPayload = pending;
+                      });
+                    }
                   },
                 );
               },
@@ -658,6 +683,7 @@ class _MyLocationButtonState extends State<MyLocationButton> {
     widget.controller.addListener(_updateButtonPosition);
     // 초기 위치 설정
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _updateButtonPosition();
     });
   }
@@ -802,9 +828,11 @@ class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
                 itemCount: widget.days.length + 1,
                 selectedIndex: _selectedDayIndex,
                 onChanged: (index) {
-                  setState(() {
-                    _selectedDayIndex = index;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _selectedDayIndex = index;
+                    });
+                  }
                   widget.onDayChanged(index);
                 },
               ),
@@ -814,9 +842,11 @@ class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
                 showDaySelector: false,
                 selectedDayIndex: _selectedDayIndex,
                 onDayIndexChanged: (index) {
-                  setState(() {
-                    _selectedDayIndex = index;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _selectedDayIndex = index;
+                    });
+                  }
                   widget.onDayChanged(index);
                 },
                 onSelectionPayloadChanged: ({

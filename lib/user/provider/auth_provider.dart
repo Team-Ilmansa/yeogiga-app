@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/notice/view/notice_list_screen.dart';
 import 'package:yeogiga/schedule/screen/naver_place_map_screen.dart';
+import 'package:yeogiga/settlement/view/settlement_list_screen.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
 import 'package:yeogiga/trip/view/trip_date_range_picker_screen.dart';
@@ -106,6 +107,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/noticeListScreen',
       name: NoticeListScreen.routeName,
       builder: (_, __) => NoticeListScreen(),
+    ),
+    GoRoute(
+      path: '/settlementListScreen',
+      name: SettlementListScreen.routeName,
+      builder: (_, __) => SettlementListScreen(),
     ),
   ];
 

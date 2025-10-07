@@ -24,6 +24,8 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final tripState = ref.read(tripProvider).valueOrNull;
       if (tripState is TripModel) {
         ref
@@ -107,16 +109,16 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
               final currentNotices =
                   noticeListData.where((notice) => !notice.completed).toList();
 
-              if (currentNotices.isEmpty) {
-                return Container(
-                  height: 60.h,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '현재 공지가 없습니다.',
-                    style: TextStyle(fontSize: 14.sp, color: Color(0xffc6c6c6)),
-                  ),
-                );
-              }
+              // if (currentNotices.isEmpty && pingData == null) {
+              //   return Container(
+              //     height: 60.h,
+              //     alignment: Alignment.center,
+              //     child: Text(
+              //       '현재 공지가 없습니다.',
+              //       style: TextStyle(fontSize: 14.sp, color: Color(0xffc6c6c6)),
+              //     ),
+              //   );
+              // }
 
               return Column(
                 children: [
@@ -124,9 +126,10 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
                   if (pingData != null)
                     Padding(
                       padding: EdgeInsets.only(bottom: 8.h),
-                      child: isLeader
-                          ? LeaderPingCard(ping: pingData)
-                          : PingCard(ping: pingData),
+                      child:
+                          isLeader
+                              ? LeaderPingCard(ping: pingData)
+                              : PingCard(ping: pingData),
                     ),
                   // 첫 번째 공지는 항상 표시
                   if (currentNotices.isNotEmpty)
@@ -148,18 +151,33 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
                       child: AnimatedOpacity(
                         duration: Duration(milliseconds: 200),
                         opacity: _isExpanded ? 1.0 : 0.0,
-                        child: Column(
-                          children:
-                              currentNotices.skip(1).map((notice) {
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 8.h),
-                                  child:
-                                      isLeader
-                                          ? LeaderNoticeCard(notice: notice)
-                                          : NoticeCard(notice: notice),
-                                );
-                              }).toList(),
-                        ),
+                        child:
+                            currentNotices.isEmpty && pingData == null
+                                ? Container(
+                                  height: 60.h,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '현재 공지가 없습니다.',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Color(0xffc6c6c6),
+                                    ),
+                                  ),
+                                )
+                                : Column(
+                                  children:
+                                      currentNotices.skip(1).map((notice) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(bottom: 8.h),
+                                          child:
+                                              isLeader
+                                                  ? LeaderNoticeCard(
+                                                    notice: notice,
+                                                  )
+                                                  : NoticeCard(notice: notice),
+                                        );
+                                      }).toList(),
+                                ),
                       ),
                     ),
                   ),

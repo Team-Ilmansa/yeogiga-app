@@ -56,6 +56,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
   // Ping 데이터 가져오기
   Future<void> _fetchPingData() async {
+    if (!mounted) return;
+
     final trip = ref.read(tripProvider).valueOrNull;
     if (trip is TripModel) {
       await ref.read(pingProvider.notifier).fetchPing(tripId: trip.tripId);
@@ -72,6 +74,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
+    if (!mounted) return; // 추가: 초기 체크
+
     final trip = ref.read(tripProvider).valueOrNull as TripModel;
     // 지도에서는 fetchAll(tripId) 호출하지 않음! 이미 state에 들어온 schedules만 사용
     var scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
@@ -80,6 +84,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     // schedules가 비어있으면 그냥 리턴 (혹시나 state 반영이 늦을 때는 잠깐 기다렸다가 한 번 더 시도)
     if (schedules.isEmpty) {
       await Future.delayed(const Duration(milliseconds: 10));
+      if (!mounted) return; // 추가: delay 후 체크
+
       scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
       schedules = scheduleAsync?.schedules ?? [];
       if (schedules.isEmpty) {
@@ -90,6 +96,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
     // day별 places만 fetch
     for (final schedule in schedules) {
+      if (!mounted) return; // 추가: 루프 중 체크
+
       await ref
           .read(confirmScheduleProvider.notifier)
           .fetchDaySchedule(
@@ -98,6 +106,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             day: schedule.day,
           );
     }
+
     if (mounted) {
       setState(() {
         _allDaysFetched = true;
@@ -227,6 +236,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
         color: const Color(0xFF8287FF),
         width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
       );
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
@@ -337,6 +348,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               );
               if (mapController != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
                   _updateMapOverlays(
                     placeList,
                     memberLocations: memberLocations,
@@ -348,9 +360,11 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
               return NaverMap(
                 onMapReady: (controller) async {
-                  setState(() {
-                    mapController = controller;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      mapController = controller;
+                    });
+                  }
 
                   // PingCard에서 온 경우 ping 좌표로 카메라 이동
                   if (widget.extra != null &&
@@ -478,12 +492,16 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                           itemCount: days.length + 1,
                           selectedIndex: selectedDayIndex,
                           onChanged: (index) async {
-                            setState(() {
-                              selectedDayIndex = index;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                selectedDayIndex = index;
+                              });
+                            }
                             await Future.delayed(
                               const Duration(milliseconds: 100),
                             ); // 상태 반영 대기
+                            if (!mounted) return; // delay 후 체크
+
                             final tripState =
                                 ref.read(tripProvider).valueOrNull;
                             final scheduleAsync =
@@ -605,6 +623,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                 WidgetsBinding.instance.addPostFrameCallback((
                                   _,
                                 ) {
+                                  if (!mounted) return;
                                   ref
                                       .read(confirmScheduleProvider.notifier)
                                       .fetchAll(trip.tripId);

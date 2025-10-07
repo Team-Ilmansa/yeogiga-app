@@ -114,6 +114,7 @@ class PendingScheduleView extends StatelessWidget {
         children: [
           ExpansionTile(
             backgroundColor: Colors.white,
+            collapsedBackgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.r),
               side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),

@@ -319,7 +319,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           }
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/kakao.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/kakao.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                       SizedBox(width: 13.w),
@@ -330,7 +334,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // TODO: 네이버 로그인 로직
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/naver.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/naver.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                       SizedBox(width: 13.w),
@@ -341,7 +349,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // TODO: 애플 로그인 로직
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/apple.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/apple.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                     ],

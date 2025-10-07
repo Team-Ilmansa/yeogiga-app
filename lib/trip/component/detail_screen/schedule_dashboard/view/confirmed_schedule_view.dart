@@ -140,6 +140,7 @@ class _ConfirmedDayExpansionTileState
         //   borderRadius: BorderRadius.circular(16.r),
         // ),
         backgroundColor: Colors.white,
+        collapsedBackgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),

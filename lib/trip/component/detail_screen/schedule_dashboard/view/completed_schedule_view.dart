@@ -32,10 +32,7 @@ class CompletedScheduleView extends StatelessWidget {
               return const Center(
                 child: Text(
                   '완료된 일정이 없습니다.',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
               );
             }
@@ -64,7 +61,9 @@ class CompletedScheduleView extends StatelessWidget {
                                   .where((s) => s.day == selectedDayIndex)
                                   .toList(),
                       onTap: () async {
-                        GoRouter.of(context).pushNamed(EndTripMapScreen.routeName);
+                        GoRouter.of(
+                          context,
+                        ).pushNamed(EndTripMapScreen.routeName);
                       },
                     ),
                   ),
@@ -85,7 +84,10 @@ class CompletedScheduleView extends StatelessWidget {
                               unmatchedImage: null,
                             ),
                       );
-                      return _buildExpansionTile(daySchedule, 'Day ${index + 1}');
+                      return _buildExpansionTile(
+                        daySchedule,
+                        'Day ${index + 1}',
+                      );
                     } else {
                       // 선택된 Day만 보기
                       if (index == selectedDayIndex - 1) {
@@ -113,12 +115,13 @@ class CompletedScheduleView extends StatelessWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text(
-              '데이터를 불러오는데 실패했습니다: $error',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
+          error:
+              (error, stackTrace) => Center(
+                child: Text(
+                  '데이터를 불러오는데 실패했습니다: $error',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
         );
       },
     );
@@ -150,6 +153,7 @@ class CompletedScheduleView extends StatelessWidget {
         //   borderRadius: BorderRadius.circular(16.r),
         // ),
         backgroundColor: Colors.white,
+        collapsedBackgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
           side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),

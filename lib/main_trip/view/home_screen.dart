@@ -46,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   @override
   void didPopNext() {
     // 홈 화면 복귀 시 데이터 새로고침
+    if (!mounted) return;
     ref.read(mainTripFutureProvider);
     ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
     ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
@@ -56,6 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   void initState() {
     super.initState();
     Future.microtask(() {
+      if (!mounted) return;
       ref.read(mainTripFutureProvider);
       ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
       ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
