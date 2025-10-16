@@ -100,8 +100,8 @@ class TopPanel extends StatelessWidget {
                 children: [
                   SvgPicture.asset(
                     'asset/icon/user-02.svg',
-                    width: 18.w,
-                    height: 18.h,
+                    width: 20.w,
+                    height: 20.h,
                     color: const Color(0xff7d7d7d),
                   ),
                   SizedBox(width: 4.w),

@@ -296,9 +296,9 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                 ),
               );
 
-              // if (result['success']) {
-              //   // 성공 시 pingSelectionMode 해제하고 뒤로가기
-              //   ref.read(pingSelectionModeProvider.notifier).state = false;
+              if (result['success']) {
+                ref.read(pingSelectionModeProvider.notifier).state = false;
+              }
               context.pop();
               // }
             }

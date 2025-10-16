@@ -82,28 +82,8 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   ),
                   data: (trips) => PastTripCardList(
                     trips: trips,
-                    onTap: (tripId) async {
-                      ref.invalidate(tripProvider); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      ref.invalidate(
-                        confirmScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      ref.invalidate(
-                        pendingScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      ref.invalidate(
-                        completedScheduleProvider,
-                      ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                      await ref.read(tripProvider.notifier).getTrip(tripId: tripId);
-                      final tripState = ref.read(tripProvider).valueOrNull;
-                      final userW2mState = ref.read(userW2mProvider);
-                      if (context.mounted) {
-                        if (tripState is SettingTripModel &&
-                            userW2mState is NoUserW2mModel) {
-                          GoRouter.of(context).push('/dateRangePicker');
-                        } else {
-                          GoRouter.of(context).push('/tripDetailScreen');
-                        }
-                      }
+                    onTap: (tripId) {
+                      GoRouter.of(context).push('/tripDetailScreen/$tripId');
                     },
                   ),
                 );

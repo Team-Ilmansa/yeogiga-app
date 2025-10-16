@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart' hide ExpansionPanel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
+import 'package:yeogiga/notice/provider/notice_provider.dart';
+import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -23,10 +26,12 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
+import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
+  final int tripId;
   static String get routeName => 'tripDetailScreen';
-  const TripDetailScreen({super.key});
+  const TripDetailScreen({super.key, required this.tripId});
 
   @override
   ConsumerState<TripDetailScreen> createState() => TripDetailScreenState();
@@ -44,6 +49,11 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
   Map<String, List<String>> matchedOrUnmatchedPayload = {};
   Map<String, List<String>> pendingPayload = {};
+
+  Timer? _noticeFetchDebounce;
+  // Trip 정보가 완전히 로드된 뒤에만 일정 데이터를 다시 불러오기 위해 TripProvider를 구독한다.
+  ProviderSubscription<AsyncValue<TripBaseModel?>>? _tripSubscription;
+  int? _lastRefreshedTripId;
 
   void onSelectionPayloadChanged({
     required Map<String, List<String>> matchedOrUnmatched,
@@ -91,7 +101,44 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
       //앱을 시작할때도 호출
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        refreshAll();
+
+        // Deeplink 진입 대비: TripProvider 체크 후 필요시에만 fetch
+        final current = ref.read(tripProvider).valueOrNull;
+        if (current == null ||
+            (current is TripModel && current.tripId != widget.tripId)) {
+          _lastRefreshedTripId = null;
+          ref.read(tripProvider.notifier).getTrip(tripId: widget.tripId);
+        }
+
+        // 공지 및 핑 fetch
+        ref
+            .read(noticeListProvider.notifier)
+            .fetchNoticeList(tripId: widget.tripId);
+        ref.read(pingProvider.notifier).fetchPing(tripId: widget.tripId);
+
+        _tripSubscription ??= ref.listenManual<AsyncValue<TripBaseModel?>>(
+          tripProvider,
+          (previous, next) {
+            if (next.isLoading) {
+              // Trip이 갱신되는 동안에는 이후 완료 시점에 다시 새로고침할 수 있도록 초기화한다.
+              _lastRefreshedTripId = null;
+              return;
+            }
+
+            final tripValue = next.valueOrNull;
+            if (tripValue is TripModel && tripValue.tripId == widget.tripId) {
+              if (_lastRefreshedTripId != tripValue.tripId) {
+                _lastRefreshedTripId = tripValue.tripId;
+                // Trip 데이터가 준비된 뒤 다음 프레임에서 일정들을 불러온다.
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  refreshAll();
+                });
+              }
+            }
+          },
+          fireImmediately: true,
+        );
       });
     }
   }
@@ -99,7 +146,10 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _noticeFetchDebounce?.cancel();
     tripDetailRouteObserver.unsubscribe(this);
+    // TripProvider 구독 해제
+    _tripSubscription?.close();
     super.dispose();
   }
 
@@ -108,6 +158,16 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     super.didPopNext();
     // 다른 화면에서 돌아올 때 pingSelectionMode 초기화
     ref.read(pingSelectionModeProvider.notifier).state = false;
+
+    // Debounce를 사용한 공지 및 핑 fetch
+    _noticeFetchDebounce?.cancel();
+    _noticeFetchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      ref
+          .read(noticeListProvider.notifier)
+          .fetchNoticeList(tripId: widget.tripId);
+      ref.read(pingProvider.notifier).fetchPing(tripId: widget.tripId);
+    });
   }
 
   // 날짜 개수 뽑기
@@ -294,85 +354,82 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         foregroundColor: Colors.black,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                SizedBox(width: 4.w),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (tripState is InProgressTripModel ||
-                    tripState is CompletedTripModel)
-                  Row(
-                    children: [
-                      GestureDetector(
-                        child: SvgPicture.asset('asset/icon/settlement.svg'),
-                        onTap: () async {
-                          // TODO: 이떄 settlement 초기화 한번 해야할 듯?
-                          if (!mounted) return;
-                          GoRouter.of(context).push('/settlementListScreen');
-                        },
-                      ),
-                      SizedBox(width: 16.w),
-                    ],
-                  ),
-                //TODO: IN_PROGRESS 일때만 보여주기
-                if (tripState is InProgressTripModel)
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          ref.invalidate(
-                            pendingScheduleProvider,
-                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                          ref.invalidate(
-                            confirmScheduleProvider,
-                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                          ref.invalidate(
-                            completedScheduleProvider,
-                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                          await ref
-                              .read(confirmScheduleProvider.notifier)
-                              .fetchAll(tripState.tripId);
-                          //TODO: 지도로 이동
-                          // 수정: async gap 이후 context 사용 시 mounted 체크 추가
-                          if (!mounted) return;
-                          GoRouter.of(context).push('/ingTripMap');
-                        },
-                        child: Icon(Icons.map_outlined, color: Colors.black),
-                      ),
-                      SizedBox(width: 14.w),
-                    ],
-                  ),
-                // TODO: 메뉴 보여주기
-                GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: false,
-                      backgroundColor: Colors.transparent,
-                      barrierColor: Colors.black.withOpacity(0.7),
-                      builder: (context) {
-                        return isLeader
-                            ? const TripMoreMenuSheetLeader()
-                            : const TripMoreMenuSheetMember();
-                      },
-                    );
-                  },
-                  child: Icon(Icons.more_vert, color: Colors.black),
-                ),
-              ],
-            ),
-          ],
+        leading: Padding(
+          padding: EdgeInsets.only(left: 4.w),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
+          ),
         ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (tripState is TripModel &&
+                  tripState.startedAt != null &&
+                  tripState.endedAt != null)
+                Row(
+                  children: [
+                    GestureDetector(
+                      child: SvgPicture.asset('asset/icon/settlement.svg'),
+                      onTap: () async {
+                        // TODO: 이떄 settlement 초기화 한번 해야할 듯?
+                        if (!mounted) return;
+                        GoRouter.of(context).push('/settlementListScreen');
+                      },
+                    ),
+                    SizedBox(width: 16.w),
+                  ],
+                ),
+              //TODO: IN_PROGRESS 일때만 보여주기
+              if (tripState is InProgressTripModel)
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        ref.invalidate(
+                          pendingScheduleProvider,
+                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                        ref.invalidate(
+                          confirmScheduleProvider,
+                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                        ref.invalidate(
+                          completedScheduleProvider,
+                        ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                        await ref
+                            .read(confirmScheduleProvider.notifier)
+                            .fetchAll(tripState.tripId);
+                        //TODO: 지도로 이동
+                        // 수정: async gap 이후 context 사용 시 mounted 체크 추가
+                        if (!mounted) return;
+                        GoRouter.of(context).push('/ingTripMap');
+                      },
+                      child: Icon(Icons.map_outlined, color: Colors.black),
+                    ),
+                    SizedBox(width: 14.w),
+                  ],
+                ),
+              // TODO: 메뉴 보여주기
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: false,
+                    backgroundColor: Colors.transparent,
+                    barrierColor: Colors.black.withOpacity(0.5),
+                    builder: (context) {
+                      return isLeader
+                          ? const TripMoreMenuSheetLeader()
+                          : const TripMoreMenuSheetMember();
+                    },
+                  );
+                },
+                child: Icon(Icons.more_vert, color: Colors.black),
+              ),
+              SizedBox(width: 14.w),
+            ],
+          ),
+        ],
       ),
       bottomNavigationBar: _getBottomNavigationBar(
         /// TODO: 하단바 버튼으로
@@ -384,148 +441,120 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         pendingPayload,
         isLeader,
       ),
-      body: DefaultTabController(
-        length: 3,
-        child: NestedScrollView(
-          headerSliverBuilder:
-              (context, innerBoxIsScrolled) => [
-                // 탑 패널
-                SliverToBoxAdapter(child: TopPanel()),
-                SliverToBoxAdapter(child: SizedBox(height: 20.h)),
-                SliverToBoxAdapter(child: NoticePanel(isLeader: isLeader)),
-                // 탭바
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: TabBarHeaderDelegate(
-                    child: SizedBox(
-                      height: 32.h,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w),
-                        color: Color(0xfffafafa),
-                        child: TabBar(
-                          controller: _tabController,
-                          indicator: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Color(0xFF8287FF),
-                                width: 2.w,
+      body: NestedScrollView(
+        headerSliverBuilder:
+            (context, innerBoxIsScrolled) => [
+              // 탑 패널
+              SliverToBoxAdapter(child: TopPanel()),
+              SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+              SliverToBoxAdapter(child: NoticePanel(isLeader: isLeader)),
+              // 탭바
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: TabBarHeaderDelegate(
+                  child: SizedBox(
+                    height: 36.h,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      color: Color(0xfffafafa),
+                      child: TabBar(
+                        controller: _tabController,
+                        indicator: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Color(0xFF8287FF),
+                              width: 2.w,
+                            ),
+                          ),
+                        ),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        labelColor: Color(0xFF8287FF),
+                        unselectedLabelColor: Colors.grey,
+                        tabs: [
+                          Tab(
+                            child: Text(
+                              '일정 대시보드',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                height: 1.40,
+                                letterSpacing: -0.48,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          labelColor: Color(0xFF8287FF),
-                          unselectedLabelColor: Colors.grey,
-                          tabs: [
-                            Tab(
-                              child: Text(
-                                '일정 대시보드',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  letterSpacing: -0.1,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          Tab(
+                            child: Text(
+                              '갤러리',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                height: 1.40,
+                                letterSpacing: -0.48,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Tab(
-                              child: Text(
-                                '갤러리',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  letterSpacing: -0.1,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          ),
+                          Tab(
+                            child: Text(
+                              '즐겨찾는 사진',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                height: 1.40,
+                                letterSpacing: -0.48,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Tab(
-                              child: Text(
-                                '즐겨찾는 사진',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  letterSpacing: -0.1,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ],
-          // 탭바 뷰
-          body: TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
-            children: [
-              LiquidPullToRefresh(
-                onRefresh: refreshSchedule,
-                animSpeedFactor: 7.0,
-                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
-                backgroundColor: Color(0xfff0f0f0), // 배경색
-                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
-                child: ScheduleDashboardTab(),
-              ),
-              LiquidPullToRefresh(
-                onRefresh: refreshAll,
-                animSpeedFactor: 7.0,
-                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
-                backgroundColor: Color(0xfff0f0f0), // 배경색
-                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
-                child: GalleryTab(
-                  sliverMode: true,
-                  selectedDayIndex: _selectedDayIndex,
-                  onDayIndexChanged: (index) {
-                    setState(() {
-                      _selectedDayIndex = index;
-                    });
-                  },
-                  onSelectionPayloadChanged: onSelectionPayloadChanged,
-                ),
-              ),
-              // 즐겨찾는 사진 탭
-              Center(
-                child: Text(
-                  '즐겨찾는 사진 탭\n구현 예정',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
               ),
             ],
-          ),
+        // 탭바 뷰
+        body: TabBarView(
+          controller: _tabController,
+          physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
+          children: [
+            LiquidPullToRefresh(
+              onRefresh: refreshSchedule,
+              animSpeedFactor: 7.0,
+              color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
+              backgroundColor: Color(0xfff0f0f0), // 배경색
+              showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+              child: ScheduleDashboardTab(),
+            ),
+            LiquidPullToRefresh(
+              onRefresh: refreshAll,
+              animSpeedFactor: 7.0,
+              color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
+              backgroundColor: Color(0xfff0f0f0), // 배경색
+              showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+              child: GalleryTab(
+                sliverMode: true,
+                selectedDayIndex: _selectedDayIndex,
+                onDayIndexChanged: (index) {
+                  setState(() {
+                    _selectedDayIndex = index;
+                  });
+                },
+                onSelectionPayloadChanged: onSelectionPayloadChanged,
+              ),
+            ),
+            // 즐겨찾는 사진 탭
+            Center(
+              child: Text(
+                '즐겨찾는 사진 탭\n구현 예정',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-/// 하단 바 생성 함수
-/// 공통 하단 바 레이아웃 컴포넌트
-class BottomAppBarLayout extends ConsumerWidget {
-  final Widget child;
-  const BottomAppBarLayout({required this.child, super.key});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(21.r),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            offset: const Offset(0, -2),
-            blurRadius: 4,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
-        child: child,
       ),
     );
   }

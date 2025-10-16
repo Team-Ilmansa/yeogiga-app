@@ -10,7 +10,7 @@ class NoScheduleView extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(height: 30.h),
+        SizedBox(height: 50.h),
         SvgPicture.asset(
           'asset/icon/add_schedule.svg',
           height: 50.h,

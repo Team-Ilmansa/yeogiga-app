@@ -6,8 +6,6 @@ import 'package:yeogiga/notice/component/notice_card.dart';
 import 'package:yeogiga/notice/component/ping_card.dart';
 import 'package:yeogiga/notice/provider/notice_provider.dart';
 import 'package:yeogiga/notice/provider/ping_provider.dart';
-import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/trip/model/trip_model.dart';
 
 class NoticePanel extends ConsumerStatefulWidget {
   final bool isLeader;
@@ -19,22 +17,6 @@ class NoticePanel extends ConsumerStatefulWidget {
 
 class _NoticePanelState extends ConsumerState<NoticePanel> {
   bool _isExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      final tripState = ref.read(tripProvider).valueOrNull;
-      if (tripState is TripModel) {
-        ref
-            .read(noticeListProvider.notifier)
-            .fetchNoticeList(tripId: tripState.tripId);
-        ref.read(pingProvider.notifier).fetchPing(tripId: tripState.tripId);
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

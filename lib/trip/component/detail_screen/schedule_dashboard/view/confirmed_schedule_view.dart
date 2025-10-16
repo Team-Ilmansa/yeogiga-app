@@ -10,17 +10,17 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 
-class ConfirmedScheduleView extends StatelessWidget {
+class ConfirmedScheduleView extends StatefulWidget {
   final List<String> dynamicDays;
-  final int selectedDayIndex;
-  final void Function(int) onDaySelected;
 
-  const ConfirmedScheduleView({
-    super.key,
-    required this.dynamicDays,
-    required this.selectedDayIndex,
-    required this.onDaySelected,
-  });
+  const ConfirmedScheduleView({super.key, required this.dynamicDays});
+
+  @override
+  State<ConfirmedScheduleView> createState() => _ConfirmedScheduleViewState();
+}
+
+class _ConfirmedScheduleViewState extends State<ConfirmedScheduleView> {
+  int selectedDayIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +43,13 @@ class ConfirmedScheduleView extends StatelessWidget {
             SliverToBoxAdapter(child: SizedBox(height: 12.h)),
             SliverToBoxAdapter(
               child: DaySelector(
-                itemCount: dynamicDays.length + 1, // +1 for 전체
+                itemCount: widget.dynamicDays.length + 1, // +1 for 전체
                 selectedIndex: selectedDayIndex,
-                onChanged: onDaySelected,
+                onChanged: (index) {
+                  setState(() {
+                    selectedDayIndex = index;
+                  });
+                },
               ),
             ),
             SliverToBoxAdapter(child: SizedBox(height: 6.h)),
@@ -82,13 +86,13 @@ class ConfirmedScheduleView extends StatelessWidget {
                     );
                     return ConfirmedDayExpansionTile(
                       daySchedule: daySchedule,
-                      dayLabel: dynamicDays[index],
+                      dayLabel: widget.dynamicDays[index],
                     );
                   } else {
                     return const SizedBox.shrink();
                   }
                 }
-              }, childCount: dynamicDays.length),
+              }, childCount: widget.dynamicDays.length),
             ),
           ],
         );
@@ -119,62 +123,63 @@ class _ConfirmedDayExpansionTileState
     final daySchedule = widget.daySchedule;
     final dayLabel = widget.dayLabel;
     final hasPlaces = daySchedule.places.isNotEmpty;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
-      // decoration: BoxDecoration(
-      //   color: Colors.white,
-      //   borderRadius: BorderRadius.circular(16.r),
-      //   boxShadow: [
-      //     BoxShadow(
-      //       color: Colors.black.withOpacity(0.04),
-      //       blurRadius: 2.r,
-      //       offset: Offset(0, 4.h),
-      //     ),
-      //   ],
-      // ),
-      child: ExpansionTile(
-        // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(16.r),
-        // ),
-        // collapsedShape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(16.r),
-        // ),
-        backgroundColor: Colors.white,
-        collapsedBackgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20.r),
-          side: const BorderSide(color: Color.fromARGB(255, 221, 221, 221)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x26000000),
+              blurRadius: 2,
+              offset: Offset(0, 0),
+              spreadRadius: 0,
+            ),
+          ],
         ),
-        collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-          side: const BorderSide(color: Color(0xffd9d9d9)),
-        ),
-        minTileHeight: 55.h,
-        title: Text(
-          dayLabel,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: Color(0xff7d7d7d),
-            letterSpacing: -0.1,
-            fontWeight: FontWeight.w600,
+        child: ExpansionTile(
+          // shape: RoundedRectangleBorder(
+          //   borderRadius: BorderRadius.circular(16.r),
+          // ),
+          // collapsedShape: RoundedRectangleBorder(
+          //   borderRadius: BorderRadius.circular(16.r),
+          // ),
+          backgroundColor: Colors.white,
+          collapsedBackgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
           ),
-        ),
-        children: [
-          if (hasPlaces)
-            ConfirmedDayScheduleList(daySchedule: daySchedule)
-          else
-            Center(
-              child: Text(
-                '등록된 일정이 없습니다.',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: const Color(0xffc6c6c6),
-                  fontWeight: FontWeight.w500,
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          minTileHeight: 62.h,
+          title: Text(
+            dayLabel,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Color(0xff7d7d7d),
+              letterSpacing: -0.1,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          children: [
+            if (hasPlaces)
+              ConfirmedDayScheduleList(daySchedule: daySchedule)
+            else
+              Center(
+                child: Text(
+                  '등록된 일정이 없습니다.',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: const Color(0xffc6c6c6),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-          ConfirmedDayAddButton(daySchedule: daySchedule),
-        ],
+            ConfirmedDayAddButton(daySchedule: daySchedule),
+          ],
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
@@ -115,7 +116,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 7.h),
-            CustomVerifyTextFormField(
+            CustomSettlementTextFormField(
               controller: _emailVerifyController,
               enabled: _emailController.text.isNotEmpty && !isEmailVerified,
               hintText: '인증번호 6자리를 입력해주세요',
@@ -641,16 +642,20 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
         elevation: 0,
         leading:
             currentStep > 0
-                ? IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new,
-                    color: Colors.black,
+                ? Padding(
+                  padding: EdgeInsets.only(left: 4.w),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        currentStep--;
+                      });
+                    },
+                    child: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 16.sp,
+                      color: Colors.black,
+                    ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      currentStep--;
-                    });
-                  },
                 )
                 : null,
       ),
@@ -704,93 +709,94 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
 
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          14.w,
-          11.h,
-          14.w,
-          MediaQuery.of(context).viewInsets.bottom + 18.h,
-        ),
-        child:
-            currentStep < stepCount - 1
-                ? ElevatedButton(
-                  onPressed:
-                      canProceed && !_isRegistering
-                          ? () async {
-                            FocusScope.of(context).unfocus();
-                            if (currentStep == 3) {
-                              setState(() {
-                                _isRegistering = true;
-                              });
-                              final repo = ref.read(registerRepositoryProvider);
-                              final result = await repo.register(
-                                username: _usernameController.text,
-                                password: _pwController.text,
-                                email: _emailController.text,
-                                nickname: _nicknameController.text,
-                              );
-                              setState(() {
-                                _registerResult = result;
-                                _isRegistering = false;
-                                currentStep = 4;
-                              });
-                            } else {
-                              nextStep();
-                            }
-                          }
-                          : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
+      bottomNavigationBar: BottomAppBarLayout(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child:
+              currentStep < stepCount - 1
+                  ? ElevatedButton(
+                    onPressed:
                         canProceed && !_isRegistering
-                            ? const Color(0xff8287ff)
-                            : Colors.grey[400],
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11.r),
+                            ? () async {
+                              FocusScope.of(context).unfocus();
+                              if (currentStep == 3) {
+                                setState(() {
+                                  _isRegistering = true;
+                                });
+                                final repo = ref.read(
+                                  registerRepositoryProvider,
+                                );
+                                final result = await repo.register(
+                                  username: _usernameController.text,
+                                  password: _pwController.text,
+                                  email: _emailController.text,
+                                  nickname: _nicknameController.text,
+                                );
+                                setState(() {
+                                  _registerResult = result;
+                                  _isRegistering = false;
+                                  currentStep = 4;
+                                });
+                              } else {
+                                nextStep();
+                              }
+                            }
+                            : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          canProceed && !_isRegistering
+                              ? const Color(0xff8287ff)
+                              : Colors.grey[400],
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(11.r),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child:
-                      _isRegistering
-                          ? SizedBox(
-                            width: 20.w,
-                            height: 20.h,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.w,
+                    child:
+                        _isRegistering
+                            ? SizedBox(
+                              width: 20.w,
+                              height: 20.h,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.w,
+                              ),
+                            )
+                            : Text(
+                              currentStep == 3 ? '가입 완료' : '다음 단계로',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          )
-                          : Text(
-                            currentStep == 3 ? '가입 완료' : '다음 단계로',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                )
-                : ElevatedButton(
-                  onPressed: () {
-                    FocusScope.of(context).unfocus();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff8287ff),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11.r),
+                  )
+                  : ElevatedButton(
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff8287ff),
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(11.r),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    '확인',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
+        ),
       ),
     );
   }

@@ -18,6 +18,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       myPageRouteObserver,
       homeRouteObserver,
       tripDetailRouteObserver,
+      settlementRouteObserver,
     ],
   );
 });

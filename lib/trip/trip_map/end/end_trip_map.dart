@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
@@ -233,8 +234,13 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     List<CompletedTripPlaceModel> places, {
     List<NLatLng>? hostRouteCoords,
   }) async {
-    if (mapController == null) return;
-    await mapController!.clearOverlays();
+    if (mapController == null || !mounted) return;
+    try {
+      await mapController!.clearOverlays();
+    } catch (e) {
+      // 이미 dispose된 경우 무시
+      return;
+    }
     _placeMarkers.clear();
     _polyline = null;
     final validPlaces =

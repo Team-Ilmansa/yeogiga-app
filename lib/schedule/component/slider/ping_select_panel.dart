@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:yeogiga/common/utils/date_picker_util.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 
@@ -233,7 +233,14 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildDateSelector() {
     return GestureDetector(
-      onTap: () => _showDatePicker(),
+      onTap: () => DatePickerUtil.showDateListPicker(
+        context: context,
+        selectedDateTime: selectedDateTime,
+        availableDates: availableDates,
+        onDateChanged: (date) {
+          setState(() => selectedDateTime = date);
+        },
+      ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -263,7 +270,13 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildTimeSelector() {
     return GestureDetector(
-      onTap: () => _showTimePicker(),
+      onTap: () => DatePickerUtil.showTimePicker(
+        context: context,
+        selectedDateTime: selectedDateTime,
+        onDateChanged: (date) {
+          setState(() => selectedDateTime = date);
+        },
+      ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -293,7 +306,13 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildMinuteSelector() {
     return GestureDetector(
-      onTap: () => _showMinutePicker(),
+      onTap: () => DatePickerUtil.showMinutePicker(
+        context: context,
+        selectedDateTime: selectedDateTime,
+        onDateChanged: (date) {
+          setState(() => selectedDateTime = date);
+        },
+      ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -318,231 +337,6 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showDatePicker() {
-    showCupertinoModalPopup(
-      context: context,
-      builder:
-          (context) => Container(
-            height: 300.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  height: 50.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 40.w),
-                      Text(
-                        '날짜 선택',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          '확인',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    itemExtent: 40.h,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: availableDates
-                          .indexWhere(
-                            (date) =>
-                                date.day == selectedDateTime.day &&
-                                date.month == selectedDateTime.month,
-                          )
-                          .clamp(0, availableDates.length - 1),
-                    ),
-                    onSelectedItemChanged: (index) {
-                      final selectedDate = availableDates[index];
-                      setState(() {
-                        selectedDateTime = DateTime(
-                          selectedDate.year,
-                          selectedDate.month,
-                          selectedDate.day,
-                          selectedDateTime.hour,
-                          selectedDateTime.minute,
-                        );
-                      });
-                    },
-                    children:
-                        availableDates.map((date) {
-                          return Center(
-                            child: Text(
-                              '${date.month}월 ${date.day}일',
-                              style: TextStyle(fontSize: 16.sp),
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  void _showTimePicker() {
-    showCupertinoModalPopup(
-      context: context,
-      builder:
-          (context) => Container(
-            height: 300.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  height: 50.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 40.w),
-                      Text(
-                        '시간 선택',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          '확인',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    itemExtent: 40.h,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: selectedDateTime.hour,
-                    ),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        selectedDateTime = DateTime(
-                          selectedDateTime.year,
-                          selectedDateTime.month,
-                          selectedDateTime.day,
-                          index,
-                          selectedDateTime.minute,
-                        );
-                      });
-                    },
-                    children: List.generate(24, (index) {
-                      return Center(
-                        child: Text(
-                          '${index.toString().padLeft(2, '0')}시',
-                          style: TextStyle(fontSize: 16.sp),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
-          ),
-    );
-  }
-
-  void _showMinutePicker() {
-    showCupertinoModalPopup(
-      context: context,
-      builder:
-          (context) => Container(
-            height: 300.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  height: 50.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 40.w),
-                      Text(
-                        '분 선택',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          '확인',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    itemExtent: 40.h,
-                    scrollController: FixedExtentScrollController(
-                      initialItem: selectedDateTime.minute ~/ 1,
-                    ),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        selectedDateTime = DateTime(
-                          selectedDateTime.year,
-                          selectedDateTime.month,
-                          selectedDateTime.day,
-                          selectedDateTime.hour,
-                          index * 1,
-                        );
-                      });
-                    },
-                    children: List.generate(60, (index) {
-                      final minute = index * 1;
-                      return Center(
-                        child: Text(
-                          '${minute.toString().padLeft(2, '0')}분',
-                          style: TextStyle(fontSize: 16.sp),
-                        ),
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
-          ),
     );
   }
 }

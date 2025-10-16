@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/notice/view/notice_list_screen.dart';
 import 'package:yeogiga/schedule/screen/naver_place_map_screen.dart';
+import 'package:yeogiga/settlement/model/settlement_model.dart';
+import 'package:yeogiga/settlement/view/settlement_create_screen.dart';
+import 'package:yeogiga/settlement/view/settlement_detail_screen.dart';
 import 'package:yeogiga/settlement/view/settlement_list_screen.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
-import 'package:yeogiga/trip/view/trip_date_range_picker_screen.dart';
+import 'package:yeogiga/w2m/view/trip_date_range_picker_screen.dart';
 import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/user/view/login_screen.dart';
 import 'package:yeogiga/user/model/user_model.dart';
@@ -71,9 +74,12 @@ class AuthProvider extends ChangeNotifier {
       builder: (_, __) => TripDateRangePickerScreen(),
     ),
     GoRoute(
-      path: '/tripDetailScreen',
+      path: '/tripDetailScreen/:tripId',
       name: TripDetailScreen.routeName,
-      builder: (_, __) => TripDetailScreen(),
+      builder: (context, state) {
+        final tripId = int.parse(state.pathParameters['tripId']!);
+        return TripDetailScreen(tripId: tripId);
+      },
     ),
     GoRoute(
       path: '/W2mConfirmScreen',
@@ -112,6 +118,23 @@ class AuthProvider extends ChangeNotifier {
       path: '/settlementListScreen',
       name: SettlementListScreen.routeName,
       builder: (_, __) => SettlementListScreen(),
+    ),
+    GoRoute(
+      path: '/settlementCreateScreen',
+      name: SettlementCreateScreen.routeName,
+      builder: (_, state) {
+        final extra = state.extra;
+        final settlement = extra is SettlementModel ? extra : null;
+        return SettlementCreateScreen(initialSettlement: settlement);
+      },
+    ),
+    GoRoute(
+      path: '/settlementDetailScreen/:settlementId',
+      name: SettlementDetailScreen.routeName,
+      builder: (context, state) {
+        final settlementId = int.parse(state.pathParameters['settlementId']!);
+        return SettlementDetailScreen(settlementId: settlementId);
+      },
     ),
   ];
 

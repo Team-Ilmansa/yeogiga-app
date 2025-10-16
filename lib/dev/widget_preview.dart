@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
-import 'package:yeogiga/trip/view/trip_date_range_picker_screen.dart';
+import 'package:yeogiga/w2m/view/trip_date_range_picker_screen.dart';
 import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/user/view/login_screen.dart';
 import 'package:yeogiga/user/view/register_flow_screen.dart';
@@ -27,10 +27,7 @@ class ComponentPlayground extends ConsumerWidget {
       builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: Scaffold(
-            backgroundColor: Colors.grey[200],
-            body: TripDetailScreen(),
-          ),
+          home: Scaffold(backgroundColor: Colors.grey[200], body: Container()),
         );
       },
     );

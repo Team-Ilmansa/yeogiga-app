@@ -161,6 +161,27 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: asset/fonts/Pretendard-Thin.ttf
+          weight: 100
+        - asset: asset/fonts/Pretendard-ExtraLight.ttf
+          weight: 200
+        - asset: asset/fonts/Pretendard-Light.ttf
+          weight: 300
+        - asset: asset/fonts/Pretendard-Regular.ttf
+          weight: 400
+        - asset: asset/fonts/Pretendard-Medium.ttf
+          weight: 500
+        - asset: asset/fonts/Pretendard-SemiBold.ttf
+          weight: 600
+        - asset: asset/fonts/Pretendard-Bold.ttf
+          weight: 700
+        - asset: asset/fonts/Pretendard-ExtraBold.ttf
+          weight: 800
+        - asset: asset/fonts/Pretendard-Black.ttf
+          weight: 900
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

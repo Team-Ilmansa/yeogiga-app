@@ -86,7 +86,7 @@ class AddNoticeState extends ConsumerWidget {
           //   ),
           // ),
           // SizedBox(width: 11.w),
-          SizedBox(width: 12.w),
+          SizedBox(width: 6.w),
           Expanded(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -123,7 +123,7 @@ class AddNoticeState extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 6.w),
         ],
       ),
     );
@@ -176,7 +176,7 @@ class AddNoticeAndPingState extends ConsumerWidget {
           //     ),
           //   ),
           // ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 6.w),
           Expanded(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -257,7 +257,7 @@ class AddNoticeAndPingState extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 6.w),
         ],
       ),
     );
@@ -297,7 +297,7 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
               // 사진 업로드 버튼
               Row(
                 children: [
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 6.w),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -645,7 +645,7 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 6.w),
                 ],
               ),
             ],
@@ -863,7 +863,7 @@ class ConfirmScheduleState extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
-        SizedBox(width: 12.w),
+        SizedBox(width: 6.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1073,7 +1073,7 @@ class ConfirmScheduleState extends ConsumerWidget {
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 6.w),
       ],
     );
   }
@@ -1086,7 +1086,7 @@ class ConfirmCalendarState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 12.w),
+        SizedBox(width: 6.w),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1112,7 +1112,7 @@ class ConfirmCalendarState extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 6.w),
       ],
     );
   }
@@ -1375,6 +1375,7 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                                         ),
                                       );
                                     }
+                                    GoRouter.of(context).pop();
                                   }
                                 },
                         style: ElevatedButton.styleFrom(

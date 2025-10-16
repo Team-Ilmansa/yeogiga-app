@@ -50,6 +50,21 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Deeplink 진입 대비: TripProvider 체크 후 필요시에만 fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final currentTrip = ref.read(tripProvider).valueOrNull;
+      final tripId = (currentTrip is TripModel) ? currentTrip.tripId : null;
+
+      // TripProvider에 데이터가 없으면 fetch (Deeplink로 직접 진입한 경우)
+      if (currentTrip == null || tripId == null) {
+        // TODO: Deeplink로 tripId 파라미터 받아서 fetch
+        // ref.read(tripProvider.notifier).getTrip(tripId: widget.tripId);
+      }
+    });
+
     _fetchAllDaysAndUpdateMarkers();
     _fetchPingData();
   }
@@ -162,9 +177,14 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     String? myNickname,
     PingModel? ping,
   }) async {
-    if (mapController == null) return;
+    if (mapController == null || !mounted) return;
     // Remove previous overlays
-    await mapController!.clearOverlays();
+    try {
+      await mapController!.clearOverlays();
+    } catch (e) {
+      // 이미 dispose된 경우 무시
+      return;
+    }
     _placeMarkers.clear();
     _memberMarkers.clear();
     _pingMarker = null;
@@ -366,7 +386,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                     });
                   }
 
-                  // PingCard에서 온 경우 ping 좌표로 카메라 이동
+                  // TODO: PingCard에서 온 경우 ping 좌표로 카메라 이동
                   if (widget.extra != null &&
                       widget.extra!['focusPing'] == true) {
                     final pingLat = widget.extra!['pingLatitude'] as double?;

@@ -47,13 +47,17 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
   }
 
   Future<void> _updateMarkersAndFitCamera() async {
-    if (_controller == null || _isFittingCamera) return;
+    if (_controller == null || _isFittingCamera || !mounted) return;
     _isFittingCamera = true;
     try {
       await _controller!.clearOverlays();
+      if (!mounted) return;
+
       final places = _allPlaces;
       if (places.isEmpty) return;
+
       for (final latLng in places) {
+        if (!mounted) return;
         await _controller!.addOverlay(
           NMarker(
             id: latLng.toString(),
@@ -63,6 +67,9 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
           ),
         );
       }
+
+      if (!mounted) return;
+
       // 카메라 자동 fit
       if (places.length == 1) {
         await _controller!.updateCamera(
@@ -96,7 +103,9 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
     } catch (e, st) {
       debugPrint('NaverMap clearOverlays/addOverlay error: $e\n$st');
     } finally {
-      _isFittingCamera = false;
+      if (mounted) {
+        _isFittingCamera = false;
+      }
     }
   }
 
