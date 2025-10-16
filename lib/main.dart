@@ -85,6 +85,7 @@ class MyApp extends ConsumerWidget {
       splitScreenMode: true,
       builder: (context, child) {
         return MaterialApp.router(
+          theme: ThemeData(fontFamily: 'Pretendard'),
           debugShowCheckedModeBanner: false,
           routerConfig: router,
         );

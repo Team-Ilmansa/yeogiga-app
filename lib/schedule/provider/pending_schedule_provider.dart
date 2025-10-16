@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/repository/pending_schedule_repository.dart';
 
-final pendingScheduleProvider = StateNotifierProvider.autoDispose<
+final pendingScheduleProvider = StateNotifierProvider<
   PendingScheduleNotifier,
   AsyncValue<PendingScheduleModel?>
 >((ref) {

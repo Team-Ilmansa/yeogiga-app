@@ -145,12 +145,6 @@ class LeaderNoticeCard extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               children: [
-                SvgPicture.asset(
-                  'asset/icon/notice.svg',
-                  width: 24.w,
-                  height: 24.h,
-                ),
-                SizedBox(width: 8.w),
                 Text(
                   notice.title,
                   style: TextStyle(
@@ -191,12 +185,6 @@ class NoticeCard extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Row(
             children: [
-              SvgPicture.asset(
-                'asset/icon/notice.svg',
-                width: 24.w,
-                height: 24.h,
-              ),
-              SizedBox(width: 8.w),
               Text(
                 notice.title,
                 style: TextStyle(

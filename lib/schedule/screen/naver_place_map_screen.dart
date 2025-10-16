@@ -296,9 +296,9 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                 ),
               );
 
-              // if (result['success']) {
-              //   // 성공 시 pingSelectionMode 해제하고 뒤로가기
-              //   ref.read(pingSelectionModeProvider.notifier).state = false;
+              if (result['success']) {
+                ref.read(pingSelectionModeProvider.notifier).state = false;
+              }
               context.pop();
               // }
             }
@@ -325,6 +325,9 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
               placeCategory = 'RESTAURANT';
               break;
             case 4:
+              placeCategory = 'TRANSPORT';
+              break;
+            case 5:
               placeCategory = 'ETC';
               break;
             default:
@@ -445,6 +448,8 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
             final marker = NMarker(
               id: item.title,
               position: NLatLng(item.mapyCoord, item.mapxCoord),
+              icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+              size: Size(32.w, 32.h),
               caption: NOverlayCaption(
                 text: item.title.replaceAll(RegExp(r'<.*?>'), ''),
               ),

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
@@ -45,26 +46,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
       // 로그인하기 버튼 섹션
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(21.r),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              offset: const Offset(0, -2),
-              blurRadius: 4,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomAppBarLayout(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            11.w,
-            11.h,
-            11.w,
+          padding: EdgeInsets.only(
             // 키보드 높이만큼 여백 추가
-            MediaQuery.of(context).viewInsets.bottom + 22.h,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
 
           child: ElevatedButton(
@@ -319,7 +305,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           }
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/kakao.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/kakao.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                       SizedBox(width: 13.w),
@@ -330,7 +320,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // TODO: 네이버 로그인 로직
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/naver.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/naver.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                       SizedBox(width: 13.w),
@@ -341,7 +335,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // TODO: 애플 로그인 로직
                         },
                         child: Center(
-                          child: Image.asset('asset/img/oauth/apple.png'),
+                          child: Image.asset(
+                            'asset/img/oauth/apple.png',
+                            width: 46.sp,
+                            height: 46.sp,
+                          ),
                         ),
                       ),
                     ],

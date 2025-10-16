@@ -23,6 +23,8 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final tripState = ref.read(tripProvider).valueOrNull;
       if (tripState is TripModel) {
         ref

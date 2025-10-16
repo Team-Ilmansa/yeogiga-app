@@ -69,8 +69,6 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
     return [];
   }
 
-  int selectedDayIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     final tripState = ref.watch(tripProvider).valueOrNull;
@@ -81,38 +79,14 @@ class _ScheduleDashboardTabState extends ConsumerState<ScheduleDashboardTab> {
         tripState.startedAt != null &&
         tripState.endedAt != null) {
       final dynamicDays = getDaysForTrip(tripState);
-      return PendingScheduleView(
-        dynamicDays: dynamicDays,
-        selectedDayIndex: selectedDayIndex,
-        onDaySelected: (index) {
-          setState(() {
-            selectedDayIndex = index;
-          });
-        },
-      );
+      return PendingScheduleView(dynamicDays: dynamicDays);
     } else if (tripState is PlannedTripModel ||
         tripState is InProgressTripModel) {
       final dynamicDays = getDaysForTrip(tripState);
-      return ConfirmedScheduleView(
-        dynamicDays: dynamicDays,
-        selectedDayIndex: selectedDayIndex,
-        onDaySelected: (index) {
-          setState(() {
-            selectedDayIndex = index;
-          });
-        },
-      );
+      return ConfirmedScheduleView(dynamicDays: dynamicDays);
     } else if (tripState is CompletedTripModel) {
       final dynamicDays = getDaysForTrip(tripState);
-      return CompletedScheduleView(
-        dynamicDays: dynamicDays,
-        selectedDayIndex: selectedDayIndex,
-        onDaySelected: (index) {
-          setState(() {
-            selectedDayIndex = index;
-          });
-        },
-      );
+      return CompletedScheduleView(dynamicDays: dynamicDays);
     }
     // fallback: 아무 조건에도 해당하지 않으면 빈 위젯 반환
     return const SizedBox.shrink();

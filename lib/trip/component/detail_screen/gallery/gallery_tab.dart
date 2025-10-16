@@ -33,6 +33,7 @@ class GalleryImage {
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
 class GalleryTab extends ConsumerStatefulWidget {
+  //sliver - detailscreen, nonsliver - endmap
   final bool sliverMode;
   final bool showDaySelector;
   final int selectedDayIndex;
@@ -242,18 +243,21 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                     if (tripDayCount < 0) tripDayCount = 0;
                   }
                 }
-                return DaySelector(
-                  itemCount: tripDayCount + 1, // +1 for '여행 전체'
-                  selectedIndex: widget.selectedDayIndex,
-                  onChanged: (index) {
-                    widget.onDayIndexChanged(index);
-                    setState(() {
-                      selectedMatchedOrUnMatchedPictures.clear();
-                      ref.read(selectionModeProvider.notifier).state =
-                          false; // ✅ 이렇게 변경
-                    });
-                  },
-                );
+                return trip is SettingTripModel &&
+                        (trip.startedAt == null || trip.endedAt == null)
+                    ? Container()
+                    : DaySelector(
+                      itemCount: tripDayCount + 1, // +1 for '여행 전체'
+                      selectedIndex: widget.selectedDayIndex,
+                      onChanged: (index) {
+                        widget.onDayIndexChanged(index);
+                        setState(() {
+                          selectedMatchedOrUnMatchedPictures.clear();
+                          ref.read(selectionModeProvider.notifier).state =
+                              false; // ✅ 이렇게 변경
+                        });
+                      },
+                    );
               },
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -28,6 +29,8 @@ class _TripDateRangePickerScreenState
   Widget build(BuildContext context) {
     // 에러 메시지 노출
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       if (_error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_error!), backgroundColor: Colors.red),
@@ -48,20 +51,23 @@ class _TripDateRangePickerScreenState
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 22,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 4.w),
+          child: GestureDetector(
+            onTap: () {
+              // GoRouter 6.x 이상이면 context.canPop/context.pop 사용, 아니면 Navigator fallback
+              if (GoRouter.of(context).canPop()) {
+                GoRouter.of(context).pop();
+              } else {
+                Navigator.of(context).maybePop();
+              }
+            },
+            child: Icon(
+              Icons.arrow_back_ios_new,
+              size: 16.sp,
+              color: Colors.black,
+            ),
           ),
-          onPressed: () {
-            // GoRouter 6.x 이상이면 context.canPop/context.pop 사용, 아니면 Navigator fallback
-            if (GoRouter.of(context).canPop()) {
-              GoRouter.of(context).pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
         ),
       ),
       //달력 선택 공간
@@ -118,21 +124,9 @@ class _TripDateRangePickerScreenState
       //하단 바 (날짜 선택 시 노출)
       bottomNavigationBar:
           (_startDate != null && _endDate != null)
-              ? Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(21.r),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      offset: const Offset(0, -2),
-                      blurRadius: 4,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
+              ? BottomAppBarLayout(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff8287ff),
@@ -155,7 +149,8 @@ class _TripDateRangePickerScreenState
                               });
                               try {
                                 // tripProvider에서 tripId 가져오기
-                                final tripState = ref.read(tripProvider).valueOrNull;
+                                final tripState =
+                                    ref.read(tripProvider).valueOrNull;
                                 int? tripId;
                                 if (tripState is TripModel) {
                                   tripId = tripState.tripId;
@@ -181,9 +176,9 @@ class _TripDateRangePickerScreenState
                                       availableDates: availableDates,
                                     );
                                 if (userW2m is UserW2mModel) {
-                                  GoRouter.of(
-                                    context,
-                                  ).pushReplacement('/tripDetailScreen');
+                                  if (context.mounted) {
+                                    GoRouter.of(context).pushReplacement('/tripDetailScreen/$tripId');
+                                  }
                                 } else {
                                   setState(() {
                                     _error = '날짜 저장에 실패했습니다.';

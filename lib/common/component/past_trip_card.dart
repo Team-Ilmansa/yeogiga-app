@@ -38,6 +38,7 @@ class PastTripCardList extends StatelessWidget {
             startedAt: trip.startedAt,
             endedAt: trip.endedAt,
             memberCount: trip.members.length,
+            tripId: trip.tripId,
             onTap: () {
               if (onTap != null && trip.tripId != null) {
                 onTap!(trip.tripId!);
@@ -57,6 +58,7 @@ class PastTripCard extends StatelessWidget {
   final String? endedAt;
   final int memberCount;
   final VoidCallback? onTap;
+  final int? tripId; // Hero tag용
 
   const PastTripCard({
     super.key,
@@ -66,6 +68,7 @@ class PastTripCard extends StatelessWidget {
     required this.endedAt,
     required this.memberCount,
     this.onTap,
+    this.tripId,
   });
 
   String _formatDate(String date) {

@@ -50,12 +50,29 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Deeplink 진입 대비: TripProvider 체크 후 필요시에만 fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final currentTrip = ref.read(tripProvider).valueOrNull;
+      final tripId = (currentTrip is TripModel) ? currentTrip.tripId : null;
+
+      // TripProvider에 데이터가 없으면 fetch (Deeplink로 직접 진입한 경우)
+      if (currentTrip == null || tripId == null) {
+        // TODO: Deeplink로 tripId 파라미터 받아서 fetch
+        // ref.read(tripProvider.notifier).getTrip(tripId: widget.tripId);
+      }
+    });
+
     _fetchAllDaysAndUpdateMarkers();
     _fetchPingData();
   }
 
   // Ping 데이터 가져오기
   Future<void> _fetchPingData() async {
+    if (!mounted) return;
+
     final trip = ref.read(tripProvider).valueOrNull;
     if (trip is TripModel) {
       await ref.read(pingProvider.notifier).fetchPing(tripId: trip.tripId);
@@ -72,6 +89,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   }
 
   Future<void> _fetchAllDaysAndUpdateMarkers() async {
+    if (!mounted) return; // 추가: 초기 체크
+
     final trip = ref.read(tripProvider).valueOrNull as TripModel;
     // 지도에서는 fetchAll(tripId) 호출하지 않음! 이미 state에 들어온 schedules만 사용
     var scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
@@ -80,6 +99,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     // schedules가 비어있으면 그냥 리턴 (혹시나 state 반영이 늦을 때는 잠깐 기다렸다가 한 번 더 시도)
     if (schedules.isEmpty) {
       await Future.delayed(const Duration(milliseconds: 10));
+      if (!mounted) return; // 추가: delay 후 체크
+
       scheduleAsync = ref.read(confirmScheduleProvider).valueOrNull;
       schedules = scheduleAsync?.schedules ?? [];
       if (schedules.isEmpty) {
@@ -90,6 +111,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
     // day별 places만 fetch
     for (final schedule in schedules) {
+      if (!mounted) return; // 추가: 루프 중 체크
+
       await ref
           .read(confirmScheduleProvider.notifier)
           .fetchDaySchedule(
@@ -98,6 +121,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             day: schedule.day,
           );
     }
+
     if (mounted) {
       setState(() {
         _allDaysFetched = true;
@@ -153,9 +177,14 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     String? myNickname,
     PingModel? ping,
   }) async {
-    if (mapController == null) return;
+    if (mapController == null || !mounted) return;
     // Remove previous overlays
-    await mapController!.clearOverlays();
+    try {
+      await mapController!.clearOverlays();
+    } catch (e) {
+      // 이미 dispose된 경우 무시
+      return;
+    }
     _placeMarkers.clear();
     _memberMarkers.clear();
     _pingMarker = null;
@@ -167,6 +196,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final marker = NMarker(
         id: place.id,
         position: NLatLng(place.latitude!, place.longitude!),
+        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+        size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: place.name),
       );
       _placeMarkers.add(marker);
@@ -190,6 +221,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         print(
           '[DEBUG] adding marker: ${member.nickname}, ${member.latitude}, ${member.longitude}',
         );
+
+        // TODO: 팀원 위치 마커는, 각각 프로필 사진으로 변경 필요
         final marker = NMarker(
           id: 'member_${member.userId}',
           position: NLatLng(member.latitude, member.longitude),
@@ -207,7 +240,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final pingMarker = NMarker(
         id: 'ping_marker',
         position: NLatLng(ping.latitude, ping.longitude),
-        icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
+        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
         size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: '집결지: ${ping.place}'),
       );
@@ -223,6 +256,8 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
             validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
         color: const Color(0xFF8287FF),
         width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
       );
       _polyline = polyline;
       await mapController!.addOverlay(polyline);
@@ -333,6 +368,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               );
               if (mapController != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
                   _updateMapOverlays(
                     placeList,
                     memberLocations: memberLocations,
@@ -344,12 +380,15 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
 
               return NaverMap(
                 onMapReady: (controller) async {
-                  setState(() {
-                    mapController = controller;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      mapController = controller;
+                    });
+                  }
 
-                  // PingCard에서 온 경우 ping 좌표로 카메라 이동
-                  if (widget.extra != null && widget.extra!['focusPing'] == true) {
+                  // TODO: PingCard에서 온 경우 ping 좌표로 카메라 이동
+                  if (widget.extra != null &&
+                      widget.extra!['focusPing'] == true) {
                     final pingLat = widget.extra!['pingLatitude'] as double?;
                     final pingLng = widget.extra!['pingLongitude'] as double?;
                     if (pingLat != null && pingLng != null) {
@@ -473,12 +512,16 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                           itemCount: days.length + 1,
                           selectedIndex: selectedDayIndex,
                           onChanged: (index) async {
-                            setState(() {
-                              selectedDayIndex = index;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                selectedDayIndex = index;
+                              });
+                            }
                             await Future.delayed(
                               const Duration(milliseconds: 100),
                             ); // 상태 반영 대기
+                            if (!mounted) return; // delay 후 체크
+
                             final tripState =
                                 ref.read(tripProvider).valueOrNull;
                             final scheduleAsync =
@@ -600,6 +643,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                 WidgetsBinding.instance.addPostFrameCallback((
                                   _,
                                 ) {
+                                  if (!mounted) return;
                                   ref
                                       .read(confirmScheduleProvider.notifier)
                                       .fetchAll(trip.tripId);

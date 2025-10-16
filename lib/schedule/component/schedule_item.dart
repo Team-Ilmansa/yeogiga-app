@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:yeogiga/common/utils/category_icon_util.dart';
 
 class ScheduleItem extends StatelessWidget {
   final String title;
@@ -25,7 +26,7 @@ class ScheduleItem extends StatelessWidget {
     final textColor = const Color(0xFF7D7D7D);
 
     // 카테고리에 따라 아이콘 경로 결정
-    final categoryIcon = _getCategoryIcon(category);
+    final categoryIcon = CategoryIconUtil.getCategoryIconByKorean(category);
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 9.w),
@@ -101,34 +102,17 @@ class ScheduleItem extends StatelessWidget {
       ),
     );
   }
-
-  // 카테고리에 따라 아이콘 경로 반환
-  String _getCategoryIcon(String category) {
-    print('ScheduleItem category: "$category"'); // 디버그 로그
-    switch (category.toUpperCase()) {
-      case '관광지':
-        return 'asset/icon/category spot.svg';
-      case '숙소':
-        return 'asset/icon/category hotel.svg';
-      case '식당':
-        return 'asset/icon/category restaurant.svg';
-      case '기타':
-        return 'asset/icon/category etc.svg';
-      default:
-        print('Unknown category: "$category" - using default icon'); // 디버그 로그
-        return 'asset/icon/category icon.svg'; // 기본값
-    }
-  }
 }
 
-class ScheduleItemList extends ConsumerStatefulWidget {
-  const ScheduleItemList({super.key});
+class ScheduleItemListMain extends ConsumerStatefulWidget {
+  const ScheduleItemListMain({super.key});
 
   @override
-  ConsumerState<ScheduleItemList> createState() => _ScheduleItemListState();
+  ConsumerState<ScheduleItemListMain> createState() =>
+      _ScheduleItemListMainState();
 }
 
-class _ScheduleItemListState extends ConsumerState<ScheduleItemList>
+class _ScheduleItemListMainState extends ConsumerState<ScheduleItemListMain>
     with TickerProviderStateMixin {
   bool isExpanded = false;
 

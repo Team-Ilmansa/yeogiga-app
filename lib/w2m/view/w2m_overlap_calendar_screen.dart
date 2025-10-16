@@ -53,13 +53,16 @@ class _W2MOverlapCalendarScreenState
             scrolledUnderElevation: 0,
             backgroundColor: Colors.white,
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.black,
-                size: 22,
+            leading: Padding(
+              padding: EdgeInsets.only(left: 4.w),
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 16.sp,
+                  color: Colors.black,
+                ),
               ),
-              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
           body: SafeArea(

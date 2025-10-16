@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/setting_trip_card.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
@@ -10,6 +11,7 @@ import 'package:yeogiga/schedule/component/recommend_card.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
+import 'package:yeogiga/settlement/provider/settlement_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
@@ -46,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   @override
   void didPopNext() {
     // 홈 화면 복귀 시 데이터 새로고침
+    if (!mounted) return;
     ref.read(mainTripFutureProvider);
     ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
     ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
@@ -56,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   void initState() {
     super.initState();
     Future.microtask(() {
+      if (!mounted) return;
       ref.read(mainTripFutureProvider);
       ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
       ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
@@ -96,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                           _HomeAppBar(trip: trip),
                           Transform.translate(
                             offset: Offset(0, -40.h),
-                            child: ScheduleItemList(),
+                            child: ScheduleItemListMain(),
                           ),
                         ],
                       );
@@ -132,28 +136,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                             ),
                             SettingTripCardList(
                               trips: settingTrips,
-                              onTap: (tripId) async {
-                                ref.invalidate(
-                                  tripProvider,
-                                ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                                await ref
-                                    .read(tripProvider.notifier)
-                                    .getTrip(tripId: tripId);
-                                final tripState =
-                                    ref.read(tripProvider).valueOrNull;
-                                final userW2mState = ref.read(userW2mProvider);
-                                if (context.mounted) {
-                                  if (tripState is SettingTripModel &&
-                                      userW2mState is NoUserW2mModel) {
-                                    GoRouter.of(
-                                      context,
-                                    ).push('/dateRangePicker');
-                                  } else {
-                                    GoRouter.of(
-                                      context,
-                                    ).push('/tripDetailScreen');
-                                  }
-                                }
+                              onTap: (tripId) {
+                                GoRouter.of(context).push('/tripDetailScreen/$tripId');
                               },
                             ),
                           ],
@@ -364,6 +348,50 @@ class AppBarTop extends StatelessWidget {
           ),
           Row(
             children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  if (trip != null) {
+                    return Row(
+                      children: [
+                        InkWell(
+                          borderRadius: BorderRadius.circular(7.r),
+                          onTap: () async {
+                            final mainTripAsync = ref.read(mainTripFutureProvider);
+                            final mainTrip =
+                                mainTripAsync is AsyncData
+                                    ? mainTripAsync.value
+                                    : null;
+                            final tripId = mainTrip?.tripId;
+                            if (tripId != null) {
+                              ref.invalidate(tripProvider);
+                              ref.invalidate(settlementListProvider);
+
+                              await ref
+                                  .read(tripProvider.notifier)
+                                  .getTrip(tripId: tripId);
+                              await ref
+                                  .read(settlementListProvider.notifier)
+                                  .getSettlements(tripId: tripId);
+
+                              if (context.mounted) {
+                                GoRouter.of(context).push('/settlementListScreen');
+                              }
+                            }
+                          },
+                          child: SvgPicture.asset(
+                            'asset/icon/settlement.svg',
+                            height: 24.sp,
+                            width: 24.sp,
+                          ),
+                        ),
+                        SizedBox(width: 14.w),
+                      ],
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
               Consumer(
                 builder: (context, ref, _) {
                   if (trip != null) {

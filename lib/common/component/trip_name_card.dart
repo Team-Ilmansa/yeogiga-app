@@ -27,7 +27,7 @@ class TripNameCardByAsset extends StatelessWidget {
             color: color,
             fontSize: 14.sp,
             height: 1.4,
-            letterSpacing: -0.3,
+            letterSpacing: -0.42,
           ),
         ),
       ],

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class CategorySelector extends StatefulWidget {
   final Function(int)? onCategoryChanged; // 콜백 함수 추가
   final int? initialSelectedIndex; // 초기값 설정 가능
-  
+
   const CategorySelector({
     super.key,
     this.onCategoryChanged,
@@ -88,6 +88,19 @@ class _CategorySelectorState extends State<CategorySelector> {
           },
           child: CategoryItem(
             index: 4,
+            selectedIndexNotifier: selectedIndexNotifier,
+            categoryName: '교통수단',
+            categoryIconAsset: 'asset/icon/category transport.svg',
+            categoryGreyIconAsset: 'asset/icon/category grey transport.svg',
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            selectedIndexNotifier.value = 5;
+            widget.onCategoryChanged?.call(5); // 상위로 알림
+          },
+          child: CategoryItem(
+            index: 5,
             selectedIndexNotifier: selectedIndexNotifier,
             categoryName: '기타',
             categoryIconAsset: 'asset/icon/category etc.svg',
