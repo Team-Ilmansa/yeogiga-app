@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
-import 'package:yeogiga/common/utils/date_picker_util.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
+import 'package:yeogiga/common/utils/date_picker_util.dart';
 import 'package:yeogiga/schedule/component/slider/category_selector.dart';
 import 'package:yeogiga/settlement/component/settlement_payer_item.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
@@ -165,49 +165,21 @@ class _SettlementCreateScreenState
     }
   }
 
-  //TODO: 날짜 선택 범위 (논의필요)
+  /// 날짜 선택 범위 (제한 없음)
   List<DateTime> getAvailableDates() {
-    final tripState = ref.watch(tripProvider).valueOrNull;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-
-    if (tripState is! TripModel ||
-        tripState.startedAt == null ||
-        tripState.endedAt == null) {
-      return [today];
-    }
-
-    final start = DateTime.parse(tripState.startedAt!.substring(0, 10));
-    final end = DateTime.parse(tripState.endedAt!.substring(0, 10));
     final dates = <DateTime>[];
 
-    // 여행 중: 여행 시작일 ~ 오늘
-    if (today.isAfter(start.subtract(Duration(days: 1))) &&
-        today.isBefore(end.add(Duration(days: 1)))) {
-      for (var i = 0; i <= today.difference(start).inDays; i++) {
-        dates.add(start.add(Duration(days: i)));
-      }
-    }
-    // 여행 종료 후: 오늘 ~ 여행 시작일
-    else if (today.isAfter(end)) {
-      if (today.isAfter(start)) {
-        for (var i = 0; i <= today.difference(start).inDays; i++) {
-          dates.add(
-            today.subtract(
-              Duration(days: today.difference(start).inDays - i),
-            ),
-          );
-        }
-      } else {
-        dates.add(today);
-      }
-    }
-    // 여행 전: 오늘만
-    else {
-      dates.add(today);
+    // 과거 1년 ~ 미래 1년까지 선택 가능
+    final startDate = today.subtract(Duration(days: 365));
+    final endDate = today.add(Duration(days: 365));
+
+    for (var i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      dates.add(startDate.add(Duration(days: i)));
     }
 
-    return dates.isNotEmpty ? dates : [today];
+    return dates;
   }
 
   @override
@@ -354,7 +326,6 @@ class _SettlementCreateScreenState
   Widget build(BuildContext context) {
     final isUpdateMode =
         ref.watch(isSettlementUpdateModeProvider) || _editingSettlement != null;
-    final availableDates = getAvailableDates();
     final tripState = ref.watch(tripProvider).valueOrNull;
     final userState = ref.watch(userMeProvider);
     final members = tripState is TripModel ? tripState.members : <TripMember>[];
@@ -469,10 +440,29 @@ class _SettlementCreateScreenState
                                 final settlementNotifier = ref.read(
                                   settlementListProvider.notifier,
                                 );
+
+                                // Optimistic UI: 화면을 닫기 전에 상위 context 저장
+                                final scaffoldMessenger = ScaffoldMessenger.of(
+                                  context,
+                                );
+
+                                // 화면 닫기
+                                _editingSettlement = null;
+                                if (isUpdateMode) {
+                                  ref
+                                      .read(
+                                        isSettlementUpdateModeProvider.notifier,
+                                      )
+                                      .state = false;
+                                }
+                                GoRouter.of(context).pop();
+
                                 Map<String, dynamic> result;
 
                                 if (isUpdateMode) {
-                                  if (_editingSettlement == null) {
+                                  final settlement =
+                                      ref.read(settlementProvider).valueOrNull;
+                                  if (settlement == null) {
                                     if (mounted) {
                                       ScaffoldMessenger.of(
                                         context,
@@ -509,22 +499,15 @@ class _SettlementCreateScreenState
                                   result = await settlementNotifier
                                       .updateSettlement(
                                         tripId: tripState.tripId,
-                                        settlementId: _editingSettlement!.id,
+                                        settlementId: settlement.id,
                                         name: payload['name'],
                                         totalPrice: payload['totalPrice'],
                                         date: payload['date'],
                                         type: payload['type'],
                                         payers: payload['payers'],
                                       );
-
-                                  if (result['success'] == true) {
-                                    await ref
-                                        .read(settlementProvider.notifier)
-                                        .getOneSettlement(
-                                          tripId: tripState.tripId,
-                                          settlementId: _editingSettlement!.id,
-                                        );
-                                  }
+                                  // updateSettlement 내부에서 이미 getSettlements() 호출하므로
+                                  // 중복 fetch 제거 (optimistic UI 사용)
                                 } else {
                                   result = await settlementNotifier
                                       .createSettlement(
@@ -535,71 +518,43 @@ class _SettlementCreateScreenState
                                         type: payload['type'],
                                         payers: payload['payers'],
                                       );
+                                  // createSettlement 내부에서 이미 getSettlements() 호출하므로
+                                  // 추가 fetch 불필요 (optimistic UI 사용)
                                 }
 
-                                if (!mounted) return;
-
-                                if (result['success']) {
-                                  if (!mounted) return;
-                                  _editingSettlement = null;
-
-                                  if (isUpdateMode) {
-                                    ref
-                                        .read(
-                                          isSettlementUpdateModeProvider
-                                              .notifier,
-                                        )
-                                        .state = false;
-
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                          if (!mounted) return;
-                                          GoRouter.of(context).pop();
-                                        });
-                                  } else {
-                                    GoRouter.of(context).pop();
-                                  }
-                                }
-
-                                Future.microtask(() {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          result['message'] ??
-                                              '알 수 없는 오류가 발생했습니다.',
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        backgroundColor:
-                                            result['success']
-                                                ? const Color.fromARGB(
-                                                  212,
-                                                  56,
-                                                  212,
-                                                  121,
-                                                )
-                                                : const Color.fromARGB(
-                                                  229,
-                                                  226,
-                                                  81,
-                                                  65,
-                                                ),
-                                        behavior: SnackBarBehavior.floating,
-                                        margin: EdgeInsets.all(5.w),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            14.r,
-                                          ),
-                                        ),
-                                        elevation: 6,
-                                        duration: const Duration(seconds: 2),
+                                // 결과 스낵바 표시 (저장된 scaffoldMessenger 사용)
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      result['message'] ?? '알 수 없는 오류가 발생했습니다.',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    );
-                                  }
-                                });
+                                    ),
+                                    backgroundColor:
+                                        result['success']
+                                            ? const Color.fromARGB(
+                                              212,
+                                              56,
+                                              212,
+                                              121,
+                                            )
+                                            : const Color.fromARGB(
+                                              229,
+                                              226,
+                                              81,
+                                              65,
+                                            ),
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.all(5.w),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14.r),
+                                    ),
+                                    elevation: 6,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
                               }
                             }
                             : null,
@@ -683,15 +638,16 @@ class _SettlementCreateScreenState
                 ),
                 SizedBox(height: 8.h),
                 GestureDetector(
-                  onTap:
-                      () => DatePickerUtil.showDateListPicker(
-                        context: context,
-                        selectedDateTime: selectedDate,
-                        availableDates: availableDates,
-                        onDateChanged: (date) {
-                          setState(() => selectedDate = date);
-                        },
-                      ),
+                  onTap: () {
+                    DatePickerUtil.showDateListPicker(
+                      context: context,
+                      selectedDateTime: selectedDate,
+                      availableDates: getAvailableDates(),
+                      onDateChanged: (picked) {
+                        setState(() => selectedDate = picked);
+                      },
+                    );
+                  },
                   child: Row(
                     children: [
                       Container(

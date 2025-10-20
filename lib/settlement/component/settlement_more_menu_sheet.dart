@@ -90,7 +90,16 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                   if (confirmed == true) {
                     final tripState = ref.read(tripProvider).valueOrNull;
                     if (tripState is TripModel) {
-                      // 정산 삭제 API 호출
+                      if (!context.mounted) return;
+
+                      // Optimistic UI: 화면을 닫기 전에 ScaffoldMessenger 저장
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                      // 화면 닫기
+                      GoRouter.of(context).pop(); // 바텀시트 닫기
+                      Navigator.of(context).pop(); // 상세 화면 닫기
+
+                      // 정산 삭제 API 호출 (백그라운드에서 실행)
                       final result = await ref
                           .read(settlementListProvider.notifier)
                           .deleteSettlement(
@@ -98,18 +107,8 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                             settlementId: settlement.id,
                           );
 
-                      if (!context.mounted) return;
-
-                      // 바텀시트 닫기
-                      GoRouter.of(context).pop();
-
-                      // 성공 시 상세 화면도 닫기
-                      if (result['success']) {
-                        Navigator.of(context).pop();
-                      }
-
-                      // 결과를 스낵바로 표시
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      // 결과를 스낵바로 표시 (저장된 scaffoldMessenger 사용)
+                      scaffoldMessenger.showSnackBar(
                         SnackBar(
                           content: Text(
                             result['message'] ?? '알 수 없는 오류가 발생했습니다.',

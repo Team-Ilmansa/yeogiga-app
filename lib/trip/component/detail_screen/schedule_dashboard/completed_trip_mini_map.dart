@@ -62,7 +62,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
           NMarker(
             id: latLng.toString(),
             position: latLng,
-            icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+            icon: NOverlayImage.fromAssetImage('asset/icon/place.png'),
             size: Size(32.w, 32.h),
           ),
         );

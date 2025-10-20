@@ -239,7 +239,7 @@ class DatePickerUtil {
                 children: availableDates.map((date) {
                   return Center(
                     child: Text(
-                      '${date.month}월 ${date.day}일',
+                      '${date.year}년 ${date.month}월 ${date.day}일',
                       style: TextStyle(
                         fontSize: 16.sp,
                         decoration: TextDecoration.none,

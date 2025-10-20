@@ -196,7 +196,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final marker = NMarker(
         id: place.id,
         position: NLatLng(place.latitude!, place.longitude!),
-        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+        icon: NOverlayImage.fromAssetImage('asset/icon/place.png'),
         size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: place.name),
       );

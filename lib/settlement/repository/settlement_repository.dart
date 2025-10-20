@@ -148,6 +148,30 @@ class SettlementRepository {
     }
   }
 
+  /// 정산 완료 여부 갱신
+  Future<Map<String, dynamic>> updateSettlementCompletion({
+    required int tripId,
+    required int settlementId,
+    required List<Map<String, dynamic>> payInfos,
+  }) async {
+    try {
+      final response = await dio.patch(
+        '$baseUrl/api/v1/trip/$tripId/settlements/$settlementId',
+        data: {
+          'payInfos': payInfos,
+        },
+        options: Options(headers: {"accessToken": 'true'}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': '정산 완료 여부가 갱신되었습니다.'};
+      }
+      return {'success': false, 'message': '정산 완료 여부 갱신에 실패했습니다.'};
+    } catch (e) {
+      return _handleError(e, defaultMessage: '정산 완료 여부 갱신에 실패했습니다.');
+    }
+  }
+
   /// 에러 처리
   Map<String, dynamic> _handleError(
     dynamic e, {
@@ -165,6 +189,7 @@ class SettlementRepository {
       'S000': '정산 내역 금액 총합이 일치하지 않습니다.',
       'S001': '존재하지 않는 정산 내역 입니다.',
       'S002': '정산자가 아닙니다.',
+      'S003': '존재하지 않는 분담 내역입니다.',
       'T102': '해당 여행의 멤버가 아닙니다.',
       'T105': '여행 멤버가 아닌 사용자가 존재합니다.',
       'T006': '해당 여행이 존재하지 않습니다.',

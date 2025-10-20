@@ -1211,7 +1211,7 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
             ),
             child: Container(
               width: 340.w,
-              height: 467.h,
+              height: 437.h,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1266,8 +1266,8 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                         border: InputBorder.none,
                         counterText: '',
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 16.h,
+                          horizontal: 20.w,
+                          vertical: 19.h,
                         ),
                       ),
                       style: TextStyle(
@@ -1281,7 +1281,7 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                   SizedBox(height: 12.h),
                   //TODO: 내용 작성 필드
                   Container(
-                    height: 180.h,
+                    height: 146.h,
                     decoration: BoxDecoration(
                       color: Color(0xfff0f0f0),
                       borderRadius: BorderRadius.circular(12.r),
@@ -1304,8 +1304,8 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                         border: InputBorder.none,
                         counterText: '',
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 16.h,
+                          horizontal: 20.w,
+                          vertical: 19.h,
                         ),
                       ),
                       style: TextStyle(

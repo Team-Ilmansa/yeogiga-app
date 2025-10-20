@@ -23,7 +23,7 @@ class SettlementListScreen extends ConsumerStatefulWidget {
 }
 
 class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
-  int _selectedIndex = 0; // 0: 미정산내역, 1: 여행전체, 2~: Day 1, Day 2, ...
+  int _selectedIndex = 0; // 0: 미정산내역, 1: 여행전체, 2: 기타, 3~: Day 1, Day 2, ...
 
   @override
   void initState() {
@@ -42,8 +42,8 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
   Widget build(BuildContext context) {
     final tripState = ref.watch(tripProvider).valueOrNull;
     final dynamicDays = TripUtils.getDaysForTrip(tripState);
-    // itemCount: 미정산내역(1) + 여행전체(1) + Day 개수
-    final itemCount = 2 + dynamicDays.length;
+    // itemCount: 미정산내역(1) + 여행전체(1) + 기타(1) + Day 개수
+    final itemCount = 3 + dynamicDays.length;
 
     // 현재 사용자 정보 가져오기
     final userState = ref.watch(userMeProvider);
@@ -172,8 +172,9 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
             labelBuilder: (index) {
               if (index == 0) return '미정산 내역';
               if (index == 1) return '여행 전체';
-              // index 2부터는 Day 1, Day 2, ...
-              return 'DAY ${index - 1}';
+              if (index == 2) return '기타';
+              // index 3부터는 Day 1, Day 2, ...
+              return 'DAY ${index - 2}';
             },
           ),
 
@@ -240,11 +241,31 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
     } else if (_selectedIndex == 1) {
       // 여행 전체: 모든 정산 내역
       filteredData = Map.from(settlements);
+    } else if (_selectedIndex == 2) {
+      // 기타: 여행 기간 외의 정산 내역
+      final tripState = ref.watch(tripProvider).valueOrNull;
+      if (tripState is TripModel &&
+          tripState.startedAt != null &&
+          tripState.endedAt != null) {
+        final start = DateTime.parse(tripState.startedAt!.substring(0, 10));
+        final end = DateTime.parse(tripState.endedAt!.substring(0, 10));
+
+        for (var entry in sortedEntries) {
+          final date = DateTime.parse(entry.key);
+          // 여행 기간 외의 날짜만 필터링
+          if (date.isBefore(start) || date.isAfter(end)) {
+            filteredData[entry.key] = entry.value;
+          }
+        }
+      } else {
+        // 여행 정보가 없으면 모든 정산을 기타로 표시
+        filteredData = Map.from(settlements);
+      }
     } else {
       // Day별: 특정 일차의 정산 내역만
       final tripState = ref.watch(tripProvider).valueOrNull;
       if (tripState is TripModel && tripState.startedAt != null) {
-        final dayIndex = _selectedIndex - 2; // 0부터 시작하는 Day 인덱스
+        final dayIndex = _selectedIndex - 3; // 0부터 시작하는 Day 인덱스
 
         // 여행 시작일 + dayIndex로 해당 Day의 날짜 계산
         final start = DateTime.parse(tripState.startedAt!.substring(0, 10));
@@ -324,7 +345,7 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
         if (!date.isBefore(start) && !date.isAfter(end)) {
           // 여행 시작일로부터 며칠째인지 계산
           final dayNumber = date.difference(start).inDays + 1;
-          return 'DAY $dayNumber';
+          return 'DAY $dayNumber (${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')})';
         }
       }
 

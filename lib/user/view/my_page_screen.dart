@@ -81,46 +81,46 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                   ),
                   SizedBox(height: 20.h),
                   ProfileCard(), //프로필 카드 부분
-                  SizedBox(height: 60.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '즐겨찾기한 사진',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20.sp,
-                          height: 1.4,
-                          letterSpacing: -0.3,
-                          color: Color(0xff313131),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          //TODO: 어디로?
-                        },
-                        child: Text(
-                          '더보기',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            height: 1.5,
-                            letterSpacing: -0.3,
-                            color: Color(0xffc6c6c6),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ///TODO: 아래 즐겨찾기한 사진 리스트 주석은 지우지 말 것
+                  // SizedBox(height: 60.h),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   crossAxisAlignment: CrossAxisAlignment.baseline,
+                  //   textBaseline: TextBaseline.alphabetic,
+                  //   children: [
+                  //     Text(
+                  //       '즐겨찾기한 사진',
+                  //       style: TextStyle(
+                  //         fontWeight: FontWeight.w700,
+                  //         fontSize: 20.sp,
+                  //         height: 1.4,
+                  //         letterSpacing: -0.3,
+                  //         color: Color(0xff313131),
+                  //       ),
+                  //     ),
+                  //     GestureDetector(
+                  //       onTap: () {
+                  //         //TODO: 어디로?
+                  //       },
+                  //       child: Text(
+                  //         '더보기',
+                  //         style: TextStyle(
+                  //           fontSize: 12.sp,
+                  //           height: 1.5,
+                  //           letterSpacing: -0.3,
+                  //           color: Color(0xffc6c6c6),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
 
-            SizedBox(height: 12.h),
-            //TODO: 즐겨찾기한 사진 그리드 뷰
-            HotScheduleCardGridList(),
-
+            // SizedBox(height: 12.h),
+            // //TODO: 즐겨찾기한 사진 그리드 뷰
+            // HotScheduleCardGridList(),
             Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 16.w),
               child: Column(
@@ -132,7 +132,7 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '지난 여행 전체보기',
+                        '전체 여행 보기',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 20.sp,
@@ -167,25 +167,33 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               builder: (context, ref, _) {
                 final tripsAsync = ref.watch(allTripListProvider);
                 return tripsAsync.when(
-                  loading: () => SizedBox(
-                    height: 321.h,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => SizedBox(
-                    height: 321.h,
-                    child: Center(
-                      child: Text(
-                        '여행 목록을 불러올 수 없습니다.',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                  loading:
+                      () => SizedBox(
+                        height: 321.h,
+                        child: Center(child: CircularProgressIndicator()),
                       ),
-                    ),
-                  ),
-                  data: (trips) => PastTripCardList(
-                    trips: trips,
-                    onTap: (tripId) {
-                      GoRouter.of(context).push('/tripDetailScreen/$tripId');
-                    },
-                  ),
+                  error:
+                      (e, _) => SizedBox(
+                        height: 321.h,
+                        child: Center(
+                          child: Text(
+                            '여행 목록을 불러올 수 없습니다.',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                  data:
+                      (trips) => PastTripCardList(
+                        trips: trips,
+                        onTap: (tripId) {
+                          GoRouter.of(
+                            context,
+                          ).push('/tripDetailScreen/$tripId');
+                        },
+                      ),
                 );
               },
             ),

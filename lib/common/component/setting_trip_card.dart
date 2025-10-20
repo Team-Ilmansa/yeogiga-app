@@ -20,12 +20,12 @@ class SettingTripCardList extends StatelessWidget {
       );
     }
     return SizedBox(
-      height: 112.h,
+      height: 113.h,
       child: ListView.separated(
         primary: false,
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
         itemCount: trips.length,
         separatorBuilder: (_, __) => SizedBox(width: 11.w),
         itemBuilder: (context, index) {
