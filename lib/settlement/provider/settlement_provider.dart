@@ -16,6 +16,13 @@ class SettlementListNotifier
 
   SettlementListNotifier(this.repo) : super(const AsyncValue.data({}));
 
+  /// Optimistic update를 위한 메서드
+  void setOptimisticSettlementList(
+    Map<String, List<SettlementModel>> settlements,
+  ) {
+    state = AsyncValue.data(settlements);
+  }
+
   /// 정산 생성
   Future<Map<String, dynamic>> createSettlement({
     required int tripId,
@@ -127,5 +134,34 @@ class SettlementNotifier extends StateNotifier<AsyncValue<SettlementModel?>> {
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
     }
+  }
+
+  /// Optimistic update를 위한 메서드
+  void setOptimisticSettlement(SettlementModel settlement) {
+    state = AsyncValue.data(settlement);
+  }
+
+  /// 정산 완료 여부 갱신
+  Future<Map<String, dynamic>> updateSettlementCompletion({
+    required int tripId,
+    required int settlementId,
+    required List<Map<String, dynamic>> payInfos,
+  }) async {
+    final result = await repo.updateSettlementCompletion(
+      tripId: tripId,
+      settlementId: settlementId,
+      payInfos: payInfos,
+    );
+
+    // Optimistic UI 사용으로 성공 시 추가 fetch 불필요
+    // 실패 시에는 화면에서 롤백 처리
+    // if (result['success'] == true) {
+    //   await getOneSettlement(
+    //     tripId: tripId,
+    //     settlementId: settlementId,
+    //   );
+    // }
+
+    return result;
   }
 }

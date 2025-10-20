@@ -137,7 +137,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                             SettingTripCardList(
                               trips: settingTrips,
                               onTap: (tripId) {
-                                GoRouter.of(context).push('/tripDetailScreen/$tripId');
+                                GoRouter.of(
+                                  context,
+                                ).push('/tripDetailScreen/$tripId');
                               },
                             ),
                           ],
@@ -335,7 +337,7 @@ class AppBarTop extends StatelessWidget {
           Row(
             children: [
               Icon(getWeatherIcon(weatherMain), size: 24.sp, color: iconColor),
-              SizedBox(width: 3.w),
+              SizedBox(width: 4.w),
               Text(
                 '$temp°',
                 style: TextStyle(
@@ -353,35 +355,42 @@ class AppBarTop extends StatelessWidget {
                   if (trip != null) {
                     return Row(
                       children: [
-                        InkWell(
-                          borderRadius: BorderRadius.circular(7.r),
-                          onTap: () async {
-                            final mainTripAsync = ref.read(mainTripFutureProvider);
-                            final mainTrip =
-                                mainTripAsync is AsyncData
-                                    ? mainTripAsync.value
-                                    : null;
-                            final tripId = mainTrip?.tripId;
-                            if (tripId != null) {
-                              ref.invalidate(tripProvider);
-                              ref.invalidate(settlementListProvider);
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(7.r),
+                            onTap: () async {
+                              final mainTripAsync = ref.read(
+                                mainTripFutureProvider,
+                              );
+                              final mainTrip =
+                                  mainTripAsync is AsyncData
+                                      ? mainTripAsync.value
+                                      : null;
+                              final tripId = mainTrip?.tripId;
+                              if (tripId != null) {
+                                ref.invalidate(tripProvider);
+                                ref.invalidate(settlementListProvider);
 
-                              await ref
-                                  .read(tripProvider.notifier)
-                                  .getTrip(tripId: tripId);
-                              await ref
-                                  .read(settlementListProvider.notifier)
-                                  .getSettlements(tripId: tripId);
+                                await ref
+                                    .read(tripProvider.notifier)
+                                    .getTrip(tripId: tripId);
+                                await ref
+                                    .read(settlementListProvider.notifier)
+                                    .getSettlements(tripId: tripId);
 
-                              if (context.mounted) {
-                                GoRouter.of(context).push('/settlementListScreen');
+                                if (context.mounted) {
+                                  GoRouter.of(
+                                    context,
+                                  ).push('/settlementListScreen');
+                                }
                               }
-                            }
-                          },
-                          child: SvgPicture.asset(
-                            'asset/icon/settlement.svg',
-                            height: 24.sp,
-                            width: 24.sp,
+                            },
+                            child: SvgPicture.asset(
+                              'asset/icon/settlement.svg',
+                              height: 24.sp,
+                              width: 24.sp,
+                            ),
                           ),
                         ),
                         SizedBox(width: 14.w),
@@ -395,37 +404,42 @@ class AppBarTop extends StatelessWidget {
               Consumer(
                 builder: (context, ref, _) {
                   if (trip != null) {
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(7.r),
-                      onTap: () async {
-                        final mainTripAsync = ref.read(mainTripFutureProvider);
-                        final mainTrip =
-                            mainTripAsync is AsyncData
-                                ? mainTripAsync.value
-                                : null;
-                        final tripId = mainTrip?.tripId;
-                        if (tripId != null) {
-                          ref.invalidate(
-                            tripProvider,
-                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                          ref.invalidate(
-                            confirmScheduleProvider,
-                          ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                          await ref
-                              .read(tripProvider.notifier)
-                              .getTrip(tripId: tripId);
-                          await ref
-                              .read(confirmScheduleProvider.notifier)
-                              .fetchAll(tripId);
-                          if (context.mounted) {
-                            GoRouter.of(context).push('/ingTripMap');
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(7.r),
+                        onTap: () async {
+                          final mainTripAsync = ref.read(
+                            mainTripFutureProvider,
+                          );
+                          final mainTrip =
+                              mainTripAsync is AsyncData
+                                  ? mainTripAsync.value
+                                  : null;
+                          final tripId = mainTrip?.tripId;
+                          if (tripId != null) {
+                            ref.invalidate(
+                              tripProvider,
+                            ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                            ref.invalidate(
+                              confirmScheduleProvider,
+                            ); // ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                            await ref
+                                .read(tripProvider.notifier)
+                                .getTrip(tripId: tripId);
+                            await ref
+                                .read(confirmScheduleProvider.notifier)
+                                .fetchAll(tripId);
+                            if (context.mounted) {
+                              GoRouter.of(context).push('/ingTripMap');
+                            }
                           }
-                        }
-                      },
-                      child: Icon(
-                        Icons.map_outlined,
-                        color: iconColor,
-                        size: 24.sp,
+                        },
+                        child: Icon(
+                          Icons.map_outlined,
+                          color: iconColor,
+                          size: 24.sp,
+                        ),
                       ),
                     );
                   } else {
@@ -434,7 +448,7 @@ class AppBarTop extends StatelessWidget {
                 },
               ),
               SizedBox(width: 11.w),
-              Icon(Icons.notifications_none, color: iconColor, size: 24.sp),
+              // Icon(Icons.notifications_none, color: iconColor, size: 24.sp),
             ],
           ),
         ],

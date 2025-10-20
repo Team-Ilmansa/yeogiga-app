@@ -188,6 +188,7 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                     pinned: true,
                     delegate: TabBarHeaderDelegate(
                       child: Container(
+                        key: ValueKey('tab-$totalPayers-$completedPayers'), // 강제 리빌드
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         color: Color(0xfffafafa),
                         child: SizedBox(
@@ -288,8 +289,8 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
   }
 
   Widget getPayerCard({
-    required dynamic payer,
-    required dynamic settlement,
+    required SettlementPayerModel payer,
+    required SettlementModel settlement,
     required bool isCompleted,
   }) {
     // 현재 사용자 정보 가져오기
@@ -378,9 +379,109 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                 color: Colors.white,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18.r),
-                  onTap: () {
-                    // TODO: 정산 완료/취소 API 호출
-                    // isCompleted가 true면 '취소' 동작, false면 '완료' 동작
+                  onTap: () async {
+                    final tripState = ref.read(tripProvider).valueOrNull;
+                    if (tripState is! TripModel) return;
+
+                    // Optimistic UI: 먼저 UI 상태를 업데이트
+                    // 모든 payer를 새로운 객체로 생성하여 불변성 보장
+                    final List<SettlementPayerModel> updatedPayers = settlement.payers
+                        .cast<SettlementPayerModel>()
+                        .map((p) {
+                      return SettlementPayerModel(
+                        id: p.id,
+                        userId: p.userId,
+                        nickname: p.nickname,
+                        imageUrl: p.imageUrl,
+                        price: p.price,
+                        isCompleted: p.id == payer.id ? !isCompleted : p.isCompleted,
+                      );
+                    }).toList();
+
+                    final updatedSettlement = SettlementModel(
+                      id: settlement.id,
+                      name: settlement.name,
+                      totalPrice: settlement.totalPrice,
+                      type: settlement.type,
+                      date: settlement.date,
+                      payerId: settlement.payerId,
+                      isCompleted: settlement.isCompleted,
+                      payers: updatedPayers,
+                    );
+
+                    // Optimistic update
+                    ref.read(settlementProvider.notifier)
+                        .setOptimisticSettlement(updatedSettlement);
+
+                    // settlement의 모든 payer 정보를 payInfos에 담기
+                    final payInfos = updatedPayers.map((p) {
+                      return {
+                        'payInfoId': p.id,
+                        'isCompleted': p.isCompleted,
+                      };
+                    }).toList();
+
+                    // API 호출 (백그라운드에서 실행)
+                    final result = await ref
+                        .read(settlementProvider.notifier)
+                        .updateSettlementCompletion(
+                          tripId: tripState.tripId,
+                          settlementId: settlement.id,
+                          payInfos: payInfos,
+                        );
+
+                    // 실패 시에만 롤백 및 에러 표시
+                    if (!result['success']) {
+                      // 원래 상태로 롤백
+                      ref.read(settlementProvider.notifier)
+                          .setOptimisticSettlement(settlement);
+
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result['message'] ?? '알 수 없는 오류가 발생했습니다.',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          backgroundColor: const Color.fromARGB(229, 226, 81, 65),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.all(5.w),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          elevation: 6,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+
+                    // // 결과 스낵바 표시 (기존 코드 - 주석처리)
+                    // if (!mounted) return;
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(
+                    //       result['message'] ?? '알 수 없는 오류가 발생했습니다.',
+                    //       style: TextStyle(
+                    //         fontSize: 14.sp,
+                    //         fontWeight: FontWeight.w600,
+                    //       ),
+                    //     ),
+                    //     backgroundColor:
+                    //         result['success']
+                    //             ? const Color.fromARGB(212, 56, 212, 121)
+                    //             : const Color.fromARGB(229, 226, 81, 65),
+                    //     behavior: SnackBarBehavior.floating,
+                    //     margin: EdgeInsets.all(5.w),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(14.r),
+                    //     ),
+                    //     elevation: 6,
+                    //     duration: const Duration(seconds: 2),
+                    //   ),
+                    // );
                   },
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -496,8 +597,8 @@ class _TopPanel extends StatelessWidget {
                   ),
                   SizedBox(width: 4.w),
                   ...settlement.payers.map((payer) {
-                    // payerId와 일치하는 사람만 테두리 표시
-                    final isActualPayer = payer.userId == settlement.payerId;
+                    // // payerId와 일치하는 사람만 테두리 표시
+                    // final isActualPayer = payer.userId == settlement.payerId;
 
                     return Padding(
                       padding: EdgeInsets.only(right: 4.w),
@@ -506,13 +607,13 @@ class _TopPanel extends StatelessWidget {
                         height: 18.h,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(40.r),
-                          border:
-                              isActualPayer
-                                  ? Border.all(
-                                    width: 0.889.sp,
-                                    color: Color(0xff8287ff),
-                                  )
-                                  : null,
+                          // border:
+                          //     isActualPayer
+                          //         ? Border.all(
+                          //           width: 0.889.sp,
+                          //           color: Color(0xff8287ff),
+                          //         )
+                          //         : null,
                           image:
                               payer.imageUrl != null &&
                                       payer.imageUrl!.isNotEmpty

@@ -46,6 +46,7 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
                     ),
                   ),
                   SizedBox(width: 4.w),
+                  // 여긴 일부러 GestureDetector씀
                   GestureDetector(
                     onTap: () {
                       setState(() {
@@ -65,17 +66,23 @@ class _NoticePanelState extends ConsumerState<NoticePanel> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  GoRouter.of(context).push('/noticeListScreen');
-                },
-                child: Text(
-                  '지난 공지 전체보기',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    height: 1.5,
-                    letterSpacing: -0.3,
-                    color: const Color(0xffc6c6c6),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    GoRouter.of(context).push('/noticeListScreen');
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4.h),
+                    child: Text(
+                      '지난 공지 전체보기',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        height: 1.5,
+                        letterSpacing: -0.3,
+                        color: const Color(0xffc6c6c6),
+                      ),
+                    ),
                   ),
                 ),
               ),

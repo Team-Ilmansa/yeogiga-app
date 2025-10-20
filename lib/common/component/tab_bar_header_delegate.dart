@@ -22,5 +22,8 @@ class TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 32.h;
 
   @override
-  bool shouldRebuild(covariant TabBarHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant TabBarHeaderDelegate oldDelegate) {
+    // child가 변경되었는지 확인 (Key를 통해 판단)
+    return child.key != oldDelegate.child.key;
+  }
 }

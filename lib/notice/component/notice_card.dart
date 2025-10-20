@@ -145,6 +145,13 @@ class LeaderNoticeCard extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               children: [
+                SvgPicture.asset(
+                  'asset/icon/menu/re_notice.svg',
+                  color: Color(0xff8287ff),
+                  width: 24.w,
+                  height: 24.h,
+                ),
+                SizedBox(width: 8.w),
                 Text(
                   notice.title,
                   style: TextStyle(
@@ -185,6 +192,13 @@ class NoticeCard extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Row(
             children: [
+              SvgPicture.asset(
+                'asset/icon/menu/re_notice.svg',
+                color: Color(0xff8287ff),
+                width: 24.w,
+                height: 24.h,
+              ),
+              SizedBox(width: 8.w),
               Text(
                 notice.title,
                 style: TextStyle(
@@ -225,15 +239,26 @@ void _showNoticeModal(BuildContext context, NoticeModel notice) {
                 ),
               ),
               SizedBox(height: 10.h),
-              Text(
-                '${notice.title}',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20.sp,
-                  height: 1.4,
-                  letterSpacing: -0.3,
-                  color: Color(0xff313131),
-                ),
+              Row(
+                children: [
+                  SvgPicture.asset(
+                    'asset/icon/menu/re_notice.svg',
+                    color: Color(0xff8287ff),
+                    width: 24.w,
+                    height: 24.h,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    '${notice.title}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20.sp,
+                      height: 1.4,
+                      letterSpacing: -0.3,
+                      color: Color(0xff313131),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 12.h),
               Text(
