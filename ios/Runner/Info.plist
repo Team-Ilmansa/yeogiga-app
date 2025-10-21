@@ -62,6 +62,13 @@
 				<string>kakao0e2b4c6886ca5a40118dd41935b17592</string>
 				</array>
 			</dict>
+			<!-- TODO: 딥링크 설정 관련 코드 -->
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+				<string>yeogiga</string>
+				</array>
+			</dict>
 		</array>
 		<key>LSApplicationQueriesSchemes</key>
 			<array>

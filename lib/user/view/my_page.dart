@@ -67,25 +67,33 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
               builder: (context, ref, _) {
                 final tripsAsync = ref.watch(allTripListProvider);
                 return tripsAsync.when(
-                  loading: () => SizedBox(
-                    height: 321.h,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => SizedBox(
-                    height: 321.h,
-                    child: Center(
-                      child: Text(
-                        '여행 목록을 불러올 수 없습니다.',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                  loading:
+                      () => SizedBox(
+                        height: 321.h,
+                        child: Center(child: CircularProgressIndicator()),
                       ),
-                    ),
-                  ),
-                  data: (trips) => PastTripCardList(
-                    trips: trips,
-                    onTap: (tripId) {
-                      GoRouter.of(context).push('/tripDetailScreen/$tripId');
-                    },
-                  ),
+                  error:
+                      (e, _) => SizedBox(
+                        height: 321.h,
+                        child: Center(
+                          child: Text(
+                            '여행 목록을 불러올 수 없습니다.',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                  data:
+                      (trips) => TripCardList(
+                        trips: trips,
+                        onTap: (tripId) {
+                          GoRouter.of(
+                            context,
+                          ).push('/tripDetailScreen/$tripId');
+                        },
+                      ),
                 );
               },
             ),

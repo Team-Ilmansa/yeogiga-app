@@ -46,9 +46,6 @@ dependencies:
 
   flutter_svg: ^2.0.7
 
-  # 안씀
-  flutter_sliding_up_panel: ^2.1.1
-
   flutter_screenutil: ^5.9.3
   geolocator: ^10.1.0
   flutter_dotenv: ^5.0.2

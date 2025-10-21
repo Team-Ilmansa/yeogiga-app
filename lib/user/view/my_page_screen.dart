@@ -186,7 +186,7 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                         ),
                       ),
                   data:
-                      (trips) => PastTripCardList(
+                      (trips) => TripCardList(
                         trips: trips,
                         onTap: (tripId) {
                           GoRouter.of(

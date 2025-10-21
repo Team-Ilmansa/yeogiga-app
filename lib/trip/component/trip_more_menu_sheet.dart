@@ -7,6 +7,8 @@ import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/component/grey_bar.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 // 방장 전용 메뉴
 class TripMoreMenuSheetLeader extends ConsumerWidget {
@@ -37,59 +39,60 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
             children: [
               GreyBar(),
 
-              // TODO: 여행 ID 확인하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/share_edit.svg',
-                text: '여행 ID 확인하기',
-                onTap: () async {
-                  final tripState = ref.read(tripProvider).valueOrNull;
-                  int? tripId;
-                  if (tripState is TripModel) {
-                    tripId = tripState.tripId;
-                  }
-                  await showDialog(
-                    context: context,
-                    builder:
-                        (context) => Dialog(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          insetPadding: EdgeInsets.all(14.w),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 18.w,
-                              vertical: 18.h,
-                            ),
-                            child: Container(
-                              width: 1.w,
-                              height: 59.h,
-                              child: Center(
-                                child: Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 4.w,
-                                    ),
-                                    child: Text(
-                                      tripId != null
-                                          ? tripId.toString()
-                                          : '알 수 없음',
-                                      style: TextStyle(
-                                        fontSize: 18.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xff8287ff),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                  );
-                },
-              ),
-              // TODO: 여행 이름 수정하기
+              // 여행 ID 확인하기
+              // _TripMenuItem(
+              //   svgUrl: 'asset/icon/menu/share_edit.svg',
+              //   text: '여행 ID 확인하기',
+              //   onTap: () async {
+              //     final tripState = ref.read(tripProvider).valueOrNull;
+              //     int? tripId;
+              //     if (tripState is TripModel) {
+              //       tripId = tripState.tripId;
+              //     }
+              //     await showDialog(
+              //       context: context,
+              //       builder:
+              //           (context) => Dialog(
+              //             backgroundColor: Colors.white,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(14.r),
+              //             ),
+              //             insetPadding: EdgeInsets.all(14.w),
+              //             child: Padding(
+              //               padding: EdgeInsets.symmetric(
+              //                 horizontal: 18.w,
+              //                 vertical: 18.h,
+              //               ),
+              //               child: Container(
+              //                 width: 1.w,
+              //                 height: 59.h,
+              //                 child: Center(
+              //                   child: Center(
+              //                     child: Padding(
+              //                       padding: EdgeInsets.symmetric(
+              //                         horizontal: 4.w,
+              //                       ),
+              //                       child: Text(
+              //                         tripId != null
+              //                             ? tripId.toString()
+              //                             : '알 수 없음',
+              //                         style: TextStyle(
+              //                           fontSize: 18.sp,
+              //                           fontWeight: FontWeight.w600,
+              //                           color: const Color(0xff8287ff),
+              //                         ),
+              //                       ),
+              //                     ),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //     );
+              //   },
+              // ),
+
+              // 여행 이름 수정하기
               _TripMenuItem(
                 svgUrl: 'asset/icon/menu/title_edit.svg',
                 text: '여행 개요 수정하기',
@@ -235,7 +238,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   }
                 },
               ),
-              // TODO: 날짜 수정하기
+              // 날짜 수정하기
               _TripMenuItem(
                 svgUrl: 'asset/icon/menu/calendar_edit.svg',
                 text: '일정 수정하기',
@@ -245,7 +248,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   // TODO: 일정 수정
                 },
               ),
-              // TODO: 여행 삭제하기
+              // 여행 삭제하기
               _TripMenuItem(
                 svgUrl: 'asset/icon/menu/delete_edit.svg',
                 text: '여행 삭제하기',
@@ -356,37 +359,47 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                         ),
                   );
                   if (confirm != true) return;
+
+                  // context를 미리 저장
+                  if (!context.mounted) return;
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                  // 바텀시트 닫기
                   GoRouter.of(context).pop();
+
                   try {
                     final success =
                         await ref.read(tripProvider.notifier).deleteTrip();
-                    GoRouter.of(context).pop(); // 화면 닫기(성공/실패 모두)
-                    Future.microtask(() {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success ? '여행이 삭제되었습니다.' : '여행 삭제에 실패했습니다.',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            backgroundColor:
-                                success
-                                    ? const Color.fromARGB(212, 56, 212, 121)
-                                    : const Color.fromARGB(229, 226, 81, 65),
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.all(5.w),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            elevation: 0,
-                            duration: const Duration(seconds: 2),
+
+                    // 성공 시 이전 화면으로 이동
+                    if (success) {
+                      navigator.pop();
+                    }
+
+                    // 스낵바 표시
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          success ? '여행이 삭제되었습니다.' : '여행 삭제에 실패했습니다.',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
                           ),
-                        );
-                      }
-                    });
+                        ),
+                        backgroundColor:
+                            success
+                                ? const Color.fromARGB(212, 56, 212, 121)
+                                : const Color.fromARGB(229, 226, 81, 65),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
                   } catch (e) {
                     String errorMsg = '';
                     if (e is Exception && e.toString().contains('Exception:')) {
@@ -395,43 +408,124 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     } else {
                       errorMsg = e.toString();
                     }
-                    if (context.mounted) {
-                      GoRouter.of(context).pop();
-                    }
-                    Future.microtask(() {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '여행 삭제에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.all(5.w),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            elevation: 0,
-                            duration: const Duration(seconds: 2),
+
+                    // 스낵바 표시
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '여행 삭제에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
                           ),
-                        );
-                      }
-                    });
+                        ),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
                   }
                 },
               ),
-              // _TripMenuItem(
-              //   svgUrl: 'asset/icon/menu/share_edit.svg',
-              //   text: '링크공유로 초대하기',
-              //   onTap: () {
-              //     GoRouter.of(context).pop();
-              //     // TODO: 링크공유
-              //   },
-              // ),
+              // 링크공유로 초대하기
+              _TripMenuItem(
+                svgUrl: 'asset/icon/menu/share_edit.svg',
+                text: '링크공유로 초대하기',
+                onTap: () async {
+                  GoRouter.of(context).pop();
+
+                  // 여행 정보 가져오기
+                  final tripState = ref.read(tripProvider).valueOrNull;
+                  if (tripState is! TripModel) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('여행 정보를 불러올 수 없습니다.'),
+                        backgroundColor: Color(0xFFE25141),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final tripId = tripState.tripId;
+                  final tripTitle = tripState.title;
+
+                  // 날짜 포맷팅
+                  String dateText = '날짜 미정';
+                  if (tripState.startedAt != null &&
+                      tripState.endedAt != null) {
+                    try {
+                      final start = DateTime.parse(tripState.startedAt!);
+                      final end = DateTime.parse(tripState.endedAt!);
+                      final formatter = DateFormat('yyyy.MM.dd');
+                      dateText =
+                          '${formatter.format(start)} - ${formatter.format(end)}';
+                    } catch (e) {
+                      // 날짜 파싱 실패 시 기본값 유지
+                    }
+                  }
+
+                  final inviteLink =
+                      'yeogiga://trip/invite/$tripId';
+                  final message =
+                      '$tripTitle\n$dateText\n아래 링크를 눌러 여행에 참여하세요.\n$inviteLink';
+
+                  try {
+                    final box = context.findRenderObject() as RenderBox?;
+                    final origin = box != null
+                        ? box.localToGlobal(Offset.zero) & box.size
+                        : Rect.zero;
+                    await Share.share(
+                      message,
+                      subject: '$tripTitle 초대 링크',
+                      sharePositionOrigin: origin,
+                    );
+
+                    // 성공 메시지
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('초대 링크를 공유했습니다!'),
+                        backgroundColor: Color(0xFF38D479),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    );
+                  } catch (error) {
+                    print('카카오톡 공유 실패: $error');
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('공유에 실패했습니다.'),
+                        backgroundColor: Color(0xFFE25141),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),
@@ -468,55 +562,56 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
             children: [
               GreyBar(),
               // 여행 ID 확인하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/share_edit.svg',
-                text: '여행 ID 확인하기',
-                onTap: () async {
-                  final tripState = ref.read(tripProvider).valueOrNull;
-                  int? tripId;
-                  if (tripState is TripModel) {
-                    tripId = tripState.tripId;
-                  }
-                  await showDialog(
-                    context: context,
-                    builder:
-                        (context) => Dialog(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          insetPadding: EdgeInsets.all(14.w),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 18.w,
-                              vertical: 18.h,
-                            ),
-                            child: Container(
-                              width: 1.w,
-                              height: 59.h,
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 4.w,
-                                  ),
-                                  child: Text(
-                                    tripId != null
-                                        ? tripId.toString()
-                                        : '알 수 없음',
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xff8287ff),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                  );
-                },
-              ),
+              // _TripMenuItem(
+              //   svgUrl: 'asset/icon/menu/share_edit.svg',
+              //   text: '여행 ID 확인하기',
+              //   onTap: () async {
+              //     final tripState = ref.read(tripProvider).valueOrNull;
+              //     int? tripId;
+              //     if (tripState is TripModel) {
+              //       tripId = tripState.tripId;
+              //     }
+              //     await showDialog(
+              //       context: context,
+              //       builder:
+              //           (context) => Dialog(
+              //             backgroundColor: Colors.white,
+              //             shape: RoundedRectangleBorder(
+              //               borderRadius: BorderRadius.circular(14.r),
+              //             ),
+              //             insetPadding: EdgeInsets.all(14.w),
+              //             child: Padding(
+              //               padding: EdgeInsets.symmetric(
+              //                 horizontal: 18.w,
+              //                 vertical: 18.h,
+              //               ),
+              //               child: Container(
+              //                 width: 1.w,
+              //                 height: 59.h,
+              //                 child: Center(
+              //                   child: Padding(
+              //                     padding: EdgeInsets.symmetric(
+              //                       horizontal: 4.w,
+              //                     ),
+              //                     child: Text(
+              //                       tripId != null
+              //                           ? tripId.toString()
+              //                           : '알 수 없음',
+              //                       style: TextStyle(
+              //                         fontSize: 18.sp,
+              //                         fontWeight: FontWeight.w600,
+              //                         color: const Color(0xff8287ff),
+              //                       ),
+              //                     ),
+              //                   ),
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //     );
+              //   },
+              // ),
+
               // 여행 탈퇴하기
               _TripMenuItem(
                 svgUrl: 'asset/icon/menu/delete_edit.svg',
@@ -623,37 +718,51 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                         ),
                   );
                   if (confirm == true) {
+                    // context를 미리 저장
+                    if (!context.mounted) return;
+                    final navigator = Navigator.of(context);
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                    // 바텀시트 닫기
+                    navigator.pop();
+
                     try {
                       final success =
                           await ref.read(tripProvider.notifier).leaveTrip();
-                      GoRouter.of(context).pop();
-                      if (success) GoRouter.of(context).pop();
-                      Future.microtask(() {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                success ? '여행에서 탈퇴했습니다.' : '탈퇴에 실패했습니다.',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              backgroundColor:
-                                  success
-                                      ? const Color.fromARGB(212, 56, 212, 121)
-                                      : const Color.fromARGB(229, 226, 81, 65),
-                              behavior: SnackBarBehavior.floating,
-                              margin: EdgeInsets.all(5.w),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14.r),
-                              ),
-                              elevation: 0,
-                              duration: const Duration(seconds: 2),
+
+                      // 성공 시 이전 화면으로 이동
+                      if (success) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!navigator.mounted) return;
+                          if (navigator.canPop()) {
+                            navigator.pop();
+                          }
+                        });
+                      }
+
+                      // 스낵바 표시
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            success ? '여행에서 탈퇴했습니다.' : '탈퇴에 실패했습니다.',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                          );
-                        }
-                      });
+                          ),
+                          backgroundColor:
+                              success
+                                  ? const Color.fromARGB(212, 56, 212, 121)
+                                  : const Color.fromARGB(229, 226, 81, 65),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.all(5.w),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          elevation: 0,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
                     } catch (e) {
                       String errorMsg = '';
                       if (e is Exception &&
@@ -663,35 +772,32 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                       } else {
                         errorMsg = e.toString();
                       }
-                      GoRouter.of(context).pop();
-                      Future.microtask(() {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                errorMsg,
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              backgroundColor: const Color.fromARGB(
-                                229,
-                                226,
-                                81,
-                                65,
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              margin: EdgeInsets.all(5.w),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14.r),
-                              ),
-                              elevation: 0,
-                              duration: const Duration(seconds: 2),
+
+                      // 스낵바 표시
+                      scaffoldMessenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            errorMsg,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                          );
-                        }
-                      });
+                          ),
+                          backgroundColor: const Color.fromARGB(
+                            229,
+                            226,
+                            81,
+                            65,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.all(5.w),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          elevation: 0,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
                     }
                   }
                 },

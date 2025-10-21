@@ -5,18 +5,21 @@ import 'package:yeogiga/common/component/trip_name_card.dart';
 
 import 'package:yeogiga/trip/model/trip_model.dart';
 
-class PastTripCardList extends StatelessWidget {
+class TripCardList extends StatelessWidget {
   final List<TripModel?> trips;
   final void Function(int tripId)? onTap;
-  const PastTripCardList({super.key, required this.trips, this.onTap});
+  const TripCardList({super.key, required this.trips, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     if (trips.isEmpty) {
-      return Center(
-        child: Text(
-          '여행 내역이 없습니다.',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+      return SizedBox(
+        height: 100.h,
+        child: Center(
+          child: Text(
+            '여행 내역이 없습니다.',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+          ),
         ),
       );
     }
@@ -32,7 +35,7 @@ class PastTripCardList extends StatelessWidget {
         itemBuilder: (context, index) {
           final trip = trips[index];
           if (trip == null) return const SizedBox.shrink();
-          return PastTripCard(
+          return TripCard(
             title: trip.title,
             city: trip.city,
             startedAt: trip.startedAt,
@@ -51,7 +54,7 @@ class PastTripCardList extends StatelessWidget {
   }
 }
 
-class PastTripCard extends StatelessWidget {
+class TripCard extends StatelessWidget {
   final String title;
   final String? city;
   final String? startedAt;
@@ -60,7 +63,7 @@ class PastTripCard extends StatelessWidget {
   final VoidCallback? onTap;
   final int? tripId; // Hero tag용
 
-  const PastTripCard({
+  const TripCard({
     super.key,
     required this.title,
     required this.city,

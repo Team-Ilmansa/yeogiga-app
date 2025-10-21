@@ -357,7 +357,14 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         leading: Padding(
           padding: EdgeInsets.only(left: 4.w),
           child: GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              final navigator = Navigator.of(context);
+              if (navigator.canPop()) {
+                navigator.pop();
+              } else {
+                GoRouter.of(context).go('/');
+              }
+            },
             child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
           ),
         ),

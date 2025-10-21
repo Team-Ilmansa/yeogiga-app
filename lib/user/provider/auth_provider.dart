@@ -20,6 +20,7 @@ import 'package:yeogiga/user/view/user_recovery_screen.dart';
 import 'package:yeogiga/user/view/nickname_setup_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
+import 'package:yeogiga/trip/view/trip_invite_handler.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider(ref: ref);
@@ -79,6 +80,23 @@ class AuthProvider extends ChangeNotifier {
       builder: (context, state) {
         final tripId = int.parse(state.pathParameters['tripId']!);
         return TripDetailScreen(tripId: tripId);
+      },
+    ),
+    // 딥링크용 화면
+    GoRoute(
+      path: '/trip/invite/:tripId',
+      name: 'tripInvite',
+      builder: (context, state) {
+        final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
+        return TripInviteHandler(tripId: tripId);
+      },
+    ),
+    GoRoute(
+      path: '/invite/:tripId',
+      name: 'tripInviteShortcut',
+      builder: (context, state) {
+        final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
+        return TripInviteHandler(tripId: tripId);
       },
     ),
     GoRoute(
@@ -164,6 +182,11 @@ class AuthProvider extends ChangeNotifier {
     }
 
     if (user is! UserResponseModel) {
+      // TODO: 딥링크로 여행 초대 진입한 경우 tripId를 보존하여 로그인 페이지로 리다이렉트
+      if (state.matchedLocation.startsWith('/trip/invite/')) {
+        final encodedRedirect = Uri.encodeComponent(state.matchedLocation);
+        return '/login?redirect=$encodedRedirect';
+      }
       return loggingInOrRegister ? null : '/login';
     }
 
