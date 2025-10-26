@@ -176,7 +176,7 @@ class AuthProvider extends ChangeNotifier {
     // 유저 정보가 없는데
     // 로그인/회원가입 중이면 그대로 두고
     // 그 외에는 로그인 페이지로 이동
-    // 게스트일 경우 닉네임 페이지로 이동
+    // 게스트(닉네임 없는 소셜로그인)일 경우 닉네임 페이지로 이동
     if (user is UserModelGuest) {
       return '/nickname';
     }
@@ -192,6 +192,14 @@ class AuthProvider extends ChangeNotifier {
 
     // UserResponseModel이지만 정상 유저 정보(code==200, data!=null)만 홈으로 이동
     if (user.code == 200 && user.data != null) {
+      // 로그인 성공 후 딥링크 redirect 파라미터 확인
+      final uri = Uri.parse(state.location);
+      final redirect = uri.queryParameters['redirect'];
+
+      if (redirect != null && redirect.isNotEmpty) {
+        return Uri.decodeComponent(redirect);
+      }
+
       return loggingInOrRegister || state.location == '/splash' ? '/' : null;
     }
 

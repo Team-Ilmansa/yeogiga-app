@@ -181,17 +181,21 @@ class TripStateNotifier extends StateNotifier<AsyncValue<TripBaseModel?>> {
 
   /// 여행 참가
   Future<bool> joinTrip(int tripId) async {
+    state = const AsyncValue.loading();
+
     try {
       final result = await tripRepository.joinTrip(tripId: tripId);
       if (result) {
         // 여행 참가 성공 시 tripListProvider 갱신
         await ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
+        state = const AsyncValue.data(null);
         return true;
       } else {
         // 실패 시 예외 발생
         throw Exception('여행 참가에 실패했습니다.');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
       rethrow;
     }
   }

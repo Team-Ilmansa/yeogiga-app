@@ -142,7 +142,8 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
 
   @override
   Widget build(BuildContext context) {
-    // 로딩 화면 표시
+    final tripState = ref.watch(tripProvider);
+
     return Scaffold(
       backgroundColor: Color(0xfffafafa),
       appBar: AppBar(
@@ -199,7 +200,11 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _handleInvite,
+                    onPressed: tripState.when(
+                      data: (_) => _handleInvite,
+                      loading: () => null,
+                      error: (_, __) => _handleInvite,
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8287FF),
                       padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -207,12 +212,32 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                     ),
-                    child: Text(
-                      '참가하기',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                    child: tripState.when(
+                      data: (_) => Text(
+                        '참가하기',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      loading: () => SizedBox(
+                        width: 20.w,
+                        height: 20.h,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      ),
+                      error: (_, __) => Text(
+                        '참가하기',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

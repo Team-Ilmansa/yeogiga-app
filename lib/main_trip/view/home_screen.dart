@@ -90,7 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _HomeAppBar(trip: trip),
-                            SizedBox(height: 62.h),
+                            SizedBox(height: 40.h),
                           ],
                         );
                       }
@@ -142,11 +142,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                 ).push('/tripDetailScreen/$tripId');
                               },
                             ),
+                            SizedBox(height: 27.h),
                           ],
                         );
                       },
                     ),
-                    SizedBox(height: 27.h),
+
                     Consumer(
                       builder: (context, ref, _) {
                         final userState = ref.watch(userMeProvider);
