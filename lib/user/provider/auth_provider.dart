@@ -20,6 +20,7 @@ import 'package:yeogiga/user/view/user_recovery_screen.dart';
 import 'package:yeogiga/user/view/nickname_setup_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
+import 'package:yeogiga/trip/view/trip_invite_handler.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider(ref: ref);
@@ -79,6 +80,23 @@ class AuthProvider extends ChangeNotifier {
       builder: (context, state) {
         final tripId = int.parse(state.pathParameters['tripId']!);
         return TripDetailScreen(tripId: tripId);
+      },
+    ),
+    // 딥링크용 화면
+    GoRoute(
+      path: '/trip/invite/:tripId',
+      name: 'tripInvite',
+      builder: (context, state) {
+        final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
+        return TripInviteHandler(tripId: tripId);
+      },
+    ),
+    GoRoute(
+      path: '/invite/:tripId',
+      name: 'tripInviteShortcut',
+      builder: (context, state) {
+        final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
+        return TripInviteHandler(tripId: tripId);
       },
     ),
     GoRoute(
@@ -158,17 +176,30 @@ class AuthProvider extends ChangeNotifier {
     // 유저 정보가 없는데
     // 로그인/회원가입 중이면 그대로 두고
     // 그 외에는 로그인 페이지로 이동
-    // 게스트일 경우 닉네임 페이지로 이동
+    // 게스트(닉네임 없는 소셜로그인)일 경우 닉네임 페이지로 이동
     if (user is UserModelGuest) {
       return '/nickname';
     }
 
     if (user is! UserResponseModel) {
+      // TODO: 딥링크로 여행 초대 진입한 경우 tripId를 보존하여 로그인 페이지로 리다이렉트
+      if (state.matchedLocation.startsWith('/trip/invite/')) {
+        final encodedRedirect = Uri.encodeComponent(state.matchedLocation);
+        return '/login?redirect=$encodedRedirect';
+      }
       return loggingInOrRegister ? null : '/login';
     }
 
     // UserResponseModel이지만 정상 유저 정보(code==200, data!=null)만 홈으로 이동
     if (user.code == 200 && user.data != null) {
+      // 로그인 성공 후 딥링크 redirect 파라미터 확인
+      final uri = Uri.parse(state.location);
+      final redirect = uri.queryParameters['redirect'];
+
+      if (redirect != null && redirect.isNotEmpty) {
+        return Uri.decodeComponent(redirect);
+      }
+
       return loggingInOrRegister || state.location == '/splash' ? '/' : null;
     }
 

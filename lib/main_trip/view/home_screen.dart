@@ -90,7 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _HomeAppBar(trip: trip),
-                            SizedBox(height: 62.h),
+                            SizedBox(height: 40.h),
                           ],
                         );
                       }
@@ -142,11 +142,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                 ).push('/tripDetailScreen/$tripId');
                               },
                             ),
+                            SizedBox(height: 27.h),
                           ],
                         );
                       },
                     ),
-                    SizedBox(height: 27.h),
+
                     Consumer(
                       builder: (context, ref, _) {
                         final userState = ref.watch(userMeProvider);
@@ -166,13 +167,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                     HotScheduleCardGridList(),
                     SizedBox(height: 27.h),
 
-                    //TODO: 이거 끝난 여행 리스트 불러오기 상태로 변경해야함.
                     SectionTitle("지난여행 돌아보기"),
                     Consumer(
-                      builder:
-                          (context, ref, _) => PastTripCardList(
-                            trips: ref.watch(pastTripListProvider),
-                          ),
+                      builder: (context, ref, _) {
+                        final tripsAsync = ref.watch(pastTripListProvider);
+                        return tripsAsync.when(
+                          loading:
+                              () => SizedBox(
+                                height: 321.h,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                          error:
+                              (e, _) => SizedBox(
+                                height: 321.h,
+                                child: Center(
+                                  child: Text(
+                                    '여행 목록을 불러올 수 없습니다.',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          data:
+                              (trips) => TripCardList(
+                                trips: trips,
+                                onTap: (tripId) async {
+                                  await ref
+                                      .read(tripProvider.notifier)
+                                      .getTrip(tripId: tripId);
+                                  if (context.mounted) {
+                                    GoRouter.of(
+                                      context,
+                                    ).push('/tripDetailScreen/$tripId');
+                                  }
+                                },
+                              ),
+                        );
+                      },
                     ),
                   ],
                 ),

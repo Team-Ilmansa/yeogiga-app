@@ -18,6 +18,7 @@ import 'package:yeogiga/user/repository/register_repository.dart';
 import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
+import 'package:yeogiga/common/component/confirmation_dialog.dart';
 
 class MyPageScreen extends ConsumerStatefulWidget {
   const MyPageScreen({super.key});
@@ -186,7 +187,7 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                         ),
                       ),
                   data:
-                      (trips) => PastTripCardList(
+                      (trips) => TripCardList(
                         trips: trips,
                         onTap: (tripId) {
                           GoRouter.of(
@@ -224,8 +225,21 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               ),
             ),
             GestureDetector(
-              onTap: () {
-                ref.read(userMeProvider.notifier).logout();
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => ConfirmationDialog(
+                    title: '로그아웃',
+                    content: '정말 로그아웃 하시겠어요?',
+                    cancelText: '취소',
+                    confirmText: '로그아웃',
+                    confirmColor: const Color(0xFF8287FF),
+                  ),
+                );
+
+                if (confirmed == true) {
+                  ref.read(userMeProvider.notifier).logout();
+                }
               },
               child: SizedBox(
                 width: double.infinity,
@@ -248,9 +262,22 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               ),
             ),
             GestureDetector(
-              onTap: () {
-                ref.read(registerRepositoryProvider).deleteUser();
-                ref.read(userMeProvider.notifier).logout();
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => ConfirmationDialog(
+                    title: '회원 탈퇴',
+                    content: '정말 탈퇴하시겠어요?\n모든 데이터가 삭제됩니다.',
+                    cancelText: '취소',
+                    confirmText: '탈퇴하기',
+                    confirmColor: const Color(0xFFFF6B6B),
+                  ),
+                );
+
+                if (confirmed == true) {
+                  ref.read(registerRepositoryProvider).deleteUser();
+                  ref.read(userMeProvider.notifier).logout();
+                }
               },
               child: SizedBox(
                 width: double.infinity,

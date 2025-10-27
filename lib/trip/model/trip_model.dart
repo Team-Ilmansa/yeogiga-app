@@ -74,7 +74,7 @@ class CompletedTripModel extends TripModel {
 class TripModel extends TripBaseModel {
   final int tripId;
   final String title;
-  final String? city;
+  final List<String>? city;
   final int leaderId;
   final String? startedAt;
   final String? endedAt;

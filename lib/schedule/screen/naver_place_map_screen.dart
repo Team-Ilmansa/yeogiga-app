@@ -10,7 +10,6 @@ import '../component/slider/ping_select_panel.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
-import 'package:yeogiga/schedule/model/schedule_model.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
@@ -347,14 +346,12 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                     .addPlace(
                       tripId: tripState.tripId.toString(),
                       day: day,
-                      place: PendingPlaceModel(
-                        id: _selectedPlace!.link,
-                        name: _selectedPlace!.title,
-                        latitude: _selectedPlace!.mapyCoord,
-                        longitude: _selectedPlace!.mapxCoord,
-                        // placeCategory: _selectedPlace!.category,
-                        placeCategory: placeCategory,
-                      ),
+                      id: _selectedPlace!.link,
+                      name: _selectedPlace!.title,
+                      latitude: _selectedPlace!.mapyCoord,
+                      longitude: _selectedPlace!.mapxCoord,
+                      placeCategory: placeCategory,
+                      address: _selectedPlace!.address,
                     );
               } else {
                 // Confirmed 일정에 추가 (provider만 사용)
@@ -367,8 +364,8 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                         name: _selectedPlace!.title,
                         latitude: _selectedPlace!.mapyCoord,
                         longitude: _selectedPlace!.mapxCoord,
-                        // placeType: _selectedPlace!.category,
                         placeType: placeCategory,
+                        address: _selectedPlace!.address,
                       );
                 }
               }

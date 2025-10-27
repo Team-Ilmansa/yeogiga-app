@@ -42,12 +42,22 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
   Future<bool> addPlace({
     required String tripId,
     required int day,
-    required PendingPlaceModel place,
+    required String id,
+    required String name,
+    required double latitude,
+    required double longitude,
+    required String placeCategory,
+    String? address,
   }) async {
     final success = await repo.postPendingPlace(
       tripId: tripId,
       day: day,
-      place: place,
+      id: id,
+      name: name,
+      latitude: latitude,
+      longitude: longitude,
+      placeCategory: placeCategory,
+      address: address,
     );
     if (success) {
       // 동기화: 해당 일차만 다시 불러와서 state 갱신

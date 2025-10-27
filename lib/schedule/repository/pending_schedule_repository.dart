@@ -24,17 +24,23 @@ class PendingScheduleRepository {
   Future<bool> postPendingPlace({
     required String tripId,
     required int day,
-    required PendingPlaceModel place,
+    required String id,
+    required String name,
+    required double latitude,
+    required double longitude,
+    required String placeCategory,
+    String? address,
   }) async {
     try {
       final response = await dio.post(
         '$baseUrl/api/v1/trip/$tripId/days/$day/places',
         options: Options(headers: {"accessToken": 'true'}),
         data: {
-          "name": place.name,
-          "latitude": place.latitude,
-          "longitude": place.longitude,
-          "placeType": place.placeCategory,
+          "name": name,
+          "latitude": latitude,
+          "longitude": longitude,
+          "placeType": placeCategory,
+          "address": address,
         },
       );
       // 성공: 200, 201 등
@@ -42,7 +48,9 @@ class PendingScheduleRepository {
           response.statusCode! >= 200 &&
           response.statusCode! < 300;
     } catch (e) {
-      if (e is DioError && e.response?.data != null && e.response?.data['message'] != null) {
+      if (e is DioError &&
+          e.response?.data != null &&
+          e.response?.data['message'] != null) {
         throw Exception(e.response?.data['message']);
       }
       return false;

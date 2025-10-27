@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/common/component/confirmation_dialog.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/common/utils/date_picker_util.dart';
 import 'package:yeogiga/schedule/component/slider/category_selector.dart';
@@ -31,6 +32,7 @@ class _SettlementCreateScreenState
   ProviderSubscription<AsyncValue<SettlementModel?>>? _settlementSubscription;
   bool _didPrefillFromSettlement = false;
   SettlementModel? _editingSettlement;
+  bool _isLoading = false; // API 호출 중 로딩 상태
 
   int selectedCategoryIndex = 1; // 초기값: 관광지
 
@@ -405,25 +407,50 @@ class _SettlementCreateScreenState
               children: [
                 SizedBox(width: 6.w),
                 Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          _canConfirm()
-                              ? const Color(0xFF8287FF)
-                              : const Color(0xFFD9D9D9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      elevation: 0,
-                      minimumSize: Size.fromHeight(46.h),
-                      padding: EdgeInsets.zero,
-                    ),
-                    onPressed:
-                        _canConfirm()
-                            ? () async {
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final settlementListAsync = ref.watch(settlementListProvider);
+                      final isLoading = settlementListAsync.isLoading;
+                      final isUpdateMode =
+                          ref.watch(isSettlementUpdateModeProvider) ||
+                          _editingSettlement != null;
+
+                      return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              _canConfirm() && !isLoading
+                                  ? const Color(0xFF8287FF)
+                                  : const Color(0xFFD9D9D9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          elevation: 0,
+                          minimumSize: Size.fromHeight(46.h),
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed:
+                            _canConfirm() && !isLoading
+                                ? () async {
                               final isUpdateMode =
                                   ref.read(isSettlementUpdateModeProvider) ||
                                   _editingSettlement != null;
+
+                              // 수정 모드일 때 확인 모달 표시
+                              if (isUpdateMode) {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder:
+                                      (context) => ConfirmationDialog(
+                                        title: '정산 내역 수정하기',
+                                        content: '정산 내역을 이대로 수정하시겠어요?',
+                                        cancelText: '취소',
+                                        confirmText: '수정하기',
+                                        confirmColor: const Color(0xFF8287FF),
+                                      ),
+                                );
+
+                                if (confirmed != true) return;
+                              }
 
                               final payload = _buildSettlementPayload(
                                 currentUserNickname: currentUserNickname,
@@ -441,58 +468,44 @@ class _SettlementCreateScreenState
                                   settlementListProvider.notifier,
                                 );
 
-                                // Optimistic UI: 화면을 닫기 전에 상위 context 저장
-                                final scaffoldMessenger = ScaffoldMessenger.of(
-                                  context,
-                                );
-
-                                // 화면 닫기
-                                _editingSettlement = null;
-                                if (isUpdateMode) {
-                                  ref
-                                      .read(
-                                        isSettlementUpdateModeProvider.notifier,
-                                      )
-                                      .state = false;
-                                }
-                                GoRouter.of(context).pop();
+                                // BuildContext를 async 이전에 저장 (async gap 대비)
+                                if (!context.mounted) return;
+                                final navigator = GoRouter.of(context);
+                                final messenger = ScaffoldMessenger.of(context);
 
                                 Map<String, dynamic> result;
 
+                                // API 요청 먼저 실행
                                 if (isUpdateMode) {
                                   final settlement =
                                       ref.read(settlementProvider).valueOrNull;
                                   if (settlement == null) {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '정산 정보를 불러오지 못했습니다.',
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '정산 정보를 불러오지 못했습니다.',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          backgroundColor: const Color.fromARGB(
-                                            229,
-                                            226,
-                                            81,
-                                            65,
-                                          ),
-                                          behavior: SnackBarBehavior.floating,
-                                          margin: EdgeInsets.all(5.w),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              14.r,
-                                            ),
-                                          ),
-                                          elevation: 6,
-                                          duration: const Duration(seconds: 2),
                                         ),
-                                      );
-                                    }
+                                        backgroundColor: const Color.fromARGB(
+                                          229,
+                                          226,
+                                          81,
+                                          65,
+                                        ),
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: EdgeInsets.all(5.w),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            14.r,
+                                          ),
+                                        ),
+                                        elevation: 6,
+                                        duration: const Duration(seconds: 2),
+                                      ),
+                                    );
                                     return;
                                   }
 
@@ -506,8 +519,6 @@ class _SettlementCreateScreenState
                                         type: payload['type'],
                                         payers: payload['payers'],
                                       );
-                                  // updateSettlement 내부에서 이미 getSettlements() 호출하므로
-                                  // 중복 fetch 제거 (optimistic UI 사용)
                                 } else {
                                   result = await settlementNotifier
                                       .createSettlement(
@@ -518,12 +529,25 @@ class _SettlementCreateScreenState
                                         type: payload['type'],
                                         payers: payload['payers'],
                                       );
-                                  // createSettlement 내부에서 이미 getSettlements() 호출하므로
-                                  // 추가 fetch 불필요 (optimistic UI 사용)
                                 }
 
-                                // 결과 스낵바 표시 (저장된 scaffoldMessenger 사용)
-                                scaffoldMessenger.showSnackBar(
+                                // 성공 시에만 화면 닫기
+                                if (!mounted) return;
+                                if (result['success'] == true) {
+                                  _editingSettlement = null;
+                                  if (isUpdateMode) {
+                                    ref
+                                        .read(
+                                          isSettlementUpdateModeProvider
+                                              .notifier,
+                                        )
+                                        .state = false;
+                                  }
+                                  navigator.pop();
+                                }
+
+                                // 결과 스낵바 표시
+                                messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(
                                       result['message'] ?? '알 수 없는 오류가 발생했습니다.',
@@ -558,14 +582,25 @@ class _SettlementCreateScreenState
                               }
                             }
                             : null,
-                    child: Text(
-                      isUpdateMode ? '수정하기' : '확인',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                        child: isLoading
+                            ? SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text(
+                                isUpdateMode ? '수정하기' : '확인',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      );
+                    },
                   ),
                 ),
                 SizedBox(width: 6.w),

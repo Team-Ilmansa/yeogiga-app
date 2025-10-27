@@ -60,6 +60,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         password.isEmpty
                     ? null
                     : () async {
+                      // Context를 미리 저장 (async gap 전에)
+                      final currentContext = context;
+                      final location = GoRouterState.of(currentContext).matchedLocation;
+                      final uri = Uri.parse(location);
+                      final redirect = uri.queryParameters['redirect'];
+
                       //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
                       final user = await ref
                           .read(userMeProvider.notifier)
@@ -70,6 +76,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       //   context.go('/userRecovery');
                       //   return;
                       // }
+
+                      if (!mounted) return;
+
+                      // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
+                      if (user is UserResponseModel && user.code == 200) {
+                        if (redirect != null && redirect.isNotEmpty) {
+                          if (!mounted) return;
+                          GoRouter.of(currentContext).go(Uri.decodeComponent(redirect));
+                          return;
+                        }
+                      }
 
                       setState(() {
                         loginFailed = user is UserModelError;

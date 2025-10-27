@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/grey_bar.dart';
+import 'package:yeogiga/common/component/confirmation_dialog.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/settlement/provider/settlement_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -24,7 +25,7 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: 259.h,
+          height: 253.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -44,9 +45,8 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                 () {
                   if (settlement == null) return;
 
-                  ref
-                      .read(isSettlementUpdateModeProvider.notifier)
-                      .state = true;
+                  ref.read(isSettlementUpdateModeProvider.notifier).state =
+                      true;
 
                   final router = GoRouter.of(context);
                   router.pop();
@@ -55,35 +55,21 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                 title: '정산 내역 수정하기',
                 svgAsset: 'asset/icon/menu/title_edit.svg',
               ),
-              // TODO: 정산 내역 삭제하기 - 다이얼로그 수정 필요
+              // 정산 내역 삭제하기
               _SettlementMenuItem(
                 () async {
                   if (settlement == null) return;
 
-                  // 정산 삭제 확인 다이얼로그 표시
+                  // 정산 삭제 확인 다이얼로그 표시 (커스텀 스타일)
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder:
-                        (dialogContext) => AlertDialog(
-                          title: Text('정산 내역 삭제'),
-                          content: Text(
-                            '정산 내역을 삭제하시겠습니까?\n삭제된 내역은 복구할 수 없습니다.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed:
-                                  () => GoRouter.of(dialogContext).pop(false),
-                              child: Text('취소'),
-                            ),
-                            TextButton(
-                              onPressed:
-                                  () => GoRouter.of(dialogContext).pop(true),
-                              child: Text(
-                                '삭제',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
+                        (context) => ConfirmationDialog(
+                          title: '정산 내역 삭제하기',
+                          content: '정산 내역을 삭제하시겠습니까?\n삭제된 내역은 복구할 수 없습니다.',
+                          cancelText: '취소',
+                          confirmText: '삭제하기',
+                          confirmColor: const Color(0xFFE25141),
                         ),
                   );
 

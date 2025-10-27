@@ -88,7 +88,16 @@ class ConfirmScheduleRepository {
     required double latitude,
     required double longitude,
     required String placeType,
+    String? address,
   }) async {
+    var data = {
+      "name": name,
+      "latitude": latitude,
+      "longitude": longitude,
+      "placeType": placeType,
+      "address": address,
+    };
+    print(data);
     try {
       final response = await dio.post(
         '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places',
@@ -98,6 +107,7 @@ class ConfirmScheduleRepository {
           "latitude": latitude,
           "longitude": longitude,
           "placeType": placeType,
+          "address": address,
         },
       );
       return response.statusCode != null &&
@@ -239,7 +249,9 @@ class ConfirmScheduleRepository {
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('방문여부 체크 실패: status: \\${response.statusCode}, body: \\${response.data}');
+        print(
+          '방문여부 체크 실패: status: \\${response.statusCode}, body: \\${response.data}',
+        );
         return false;
       }
     } catch (e) {
@@ -247,5 +259,4 @@ class ConfirmScheduleRepository {
       return false;
     }
   }
-
 }

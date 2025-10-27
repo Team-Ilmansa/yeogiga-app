@@ -3,7 +3,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import '../repository/trip_list_repository.dart';
 
 final pastTripListProvider =
-    StateNotifierProvider<PastTripListNotifier, List<TripModel?>>(
+    StateNotifierProvider<PastTripListNotifier, AsyncValue<List<TripModel?>>>(
       (ref) => PastTripListNotifier(ref.read(tripListRepositoryProvider)),
     );
 
@@ -22,18 +22,23 @@ final settingTripListProvider =
       (ref) => SettingTripListNotifier(ref.read(tripListRepositoryProvider)),
     );
 
-class PastTripListNotifier extends StateNotifier<List<TripModel?>> {
+class PastTripListNotifier extends StateNotifier<AsyncValue<List<TripModel?>>> {
   final TripListRepository repository;
 
-  PastTripListNotifier(this.repository) : super([]);
+  PastTripListNotifier(this.repository) : super(const AsyncValue.loading());
 
   Future<void> fetchAndSetPastTrips() async {
-    final trips = await repository.fetchPastTripList();
-    state = trips;
+    state = const AsyncValue.loading();
+    try {
+      final trips = await repository.fetchPastTripList();
+      state = AsyncValue.data(trips);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   void clear() {
-    state = [];
+    state = const AsyncValue.data([]);
   }
 }
 

@@ -67,6 +67,7 @@ class ConfirmScheduleNotifier extends StateNotifier<AsyncValue<ConfirmedSchedule
     required double latitude,
     required double longitude,
     required String placeType,
+    String? address,
   }) async {
     final success = await repo.addConfirmedPlace(
       tripId: tripId,
@@ -75,6 +76,7 @@ class ConfirmScheduleNotifier extends StateNotifier<AsyncValue<ConfirmedSchedule
       latitude: latitude,
       longitude: longitude,
       placeType: placeType,
+      address: address,
     );
     if (success) {
       await fetchAll(tripId);

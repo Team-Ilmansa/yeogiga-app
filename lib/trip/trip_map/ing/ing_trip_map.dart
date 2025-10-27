@@ -132,6 +132,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   @override
   void dispose() {
     _sheetController.dispose();
+    mapController = null;
     super.dispose();
   }
 
@@ -180,6 +181,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     if (mapController == null || !mounted) return;
     // Remove previous overlays
     try {
+      if (mapController == null) return;
       await mapController!.clearOverlays();
     } catch (e) {
       // 이미 dispose된 경우 무시

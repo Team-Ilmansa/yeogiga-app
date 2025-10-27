@@ -9,7 +9,7 @@ part of 'trip_model.dart';
 TripModel _$TripModelFromJson(Map<String, dynamic> json) => TripModel(
   tripId: (json['tripId'] as num).toInt(),
   title: json['title'] as String,
-  city: json['city'] as String?,
+  city: (json['city'] as List<dynamic>?)?.map((e) => e as String).toList(),
   leaderId: (json['leaderId'] as num).toInt(),
   startedAt: json['startedAt'] as String?,
   endedAt: json['endedAt'] as String?,

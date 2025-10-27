@@ -18,7 +18,7 @@ class DaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 28.h,
+      height: 30.h,
       child: ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 1.5.h),
         scrollDirection: Axis.horizontal,
@@ -46,7 +46,7 @@ class DaySelector extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Color(0x19000000),
-                    blurRadius: 2,
+                    blurRadius: 3,
                     offset: Offset(0, 0),
                     spreadRadius: 0,
                   ),
