@@ -27,21 +27,24 @@ class TripListRepository {
       final content = data['content'];
       if (content == null || content is! List) return <TripModel?>[];
       final now = DateTime.now();
-      return content.map<TripModel?>((e) {
-        try {
-          final trip = TripModel.fromJson(e);
-          // endedAt이 현재보다 이전인 여행만 포함
-          if (trip.endedAt != null) {
-            final endDate = DateTime.parse(trip.endedAt!);
-            if (endDate.isBefore(now)) {
-              return trip;
+      return content
+          .map<TripModel?>((e) {
+            try {
+              final trip = TripModel.fromJson(e);
+              // endedAt이 현재보다 이전인 여행만 포함
+              if (trip.endedAt != null) {
+                final endDate = DateTime.parse(trip.endedAt!);
+                if (endDate.isBefore(now)) {
+                  return trip;
+                }
+              }
+              return null;
+            } catch (_) {
+              return null;
             }
-          }
-          return null;
-        } catch (_) {
-          return null;
-        }
-      }).where((trip) => trip != null).toList();
+          })
+          .where((trip) => trip != null)
+          .toList();
     } catch (e) {
       // TODO: 필요시 에러 로깅
       return <TripModel?>[];
@@ -59,23 +62,26 @@ class TripListRepository {
       final content = data['content'];
       if (content == null || content is! List) return <TripModel?>[];
       final now = DateTime.now();
-      return content.map<TripModel?>((e) {
-        try {
-          final trip = TripModel.fromJson(e);
-          // startedAt이 null이거나 현재보다 이후인 여행만 포함
-          if (trip.startedAt == null) {
-            return trip;
-          } else {
-            final startDate = DateTime.parse(trip.startedAt!);
-            if (startDate.isAfter(now)) {
-              return trip;
+      return content
+          .map<TripModel?>((e) {
+            try {
+              final trip = TripModel.fromJson(e);
+              // startedAt이 null이거나 현재보다 이후인 여행만 포함
+              if (trip.startedAt == null) {
+                return trip;
+              } else {
+                final startDate = DateTime.parse(trip.startedAt!);
+                if (startDate.isAfter(now)) {
+                  return trip;
+                }
+              }
+              return null;
+            } catch (_) {
+              return null;
             }
-          }
-          return null;
-        } catch (_) {
-          return null;
-        }
-      }).where((trip) => trip != null).toList();
+          })
+          .where((trip) => trip != null)
+          .toList();
     } catch (e) {
       // TODO: 필요시 에러 로깅
       return <TripModel?>[];
@@ -89,6 +95,7 @@ class TripListRepository {
         options: Options(headers: {"accessToken": 'true'}),
       );
       final data = response.data['data'];
+      print(data);
       if (data == null) return <TripModel?>[];
       final content = data['content'];
       if (content == null || content is! List) return <TripModel?>[];
@@ -115,18 +122,21 @@ class TripListRepository {
       if (data == null) return <TripModel?>[];
       final content = data['content'];
       if (content == null || content is! List) return <TripModel?>[];
-      return content.map<TripModel?>((e) {
-        try {
-          final trip = TripModel.fromJson(e);
-          // SETTING 상태인 여행만 포함
-          if (trip.status == TripStatus.SETTING) {
-            return trip;
-          }
-          return null;
-        } catch (_) {
-          return null;
-        }
-      }).where((trip) => trip != null).toList();
+      return content
+          .map<TripModel?>((e) {
+            try {
+              final trip = TripModel.fromJson(e);
+              // SETTING 상태인 여행만 포함
+              if (trip.status == TripStatus.SETTING) {
+                return trip;
+              }
+              return null;
+            } catch (_) {
+              return null;
+            }
+          })
+          .where((trip) => trip != null)
+          .toList();
     } catch (e) {
       // TODO: 필요시 에러 로깅
       return <TripModel?>[];

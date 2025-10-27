@@ -32,6 +32,8 @@ class SettlementListNotifier
     required String type,
     required List<Map<String, dynamic>> payers,
   }) async {
+    state = const AsyncValue.loading();
+
     final result = await repo.createSettlement(
       tripId: tripId,
       name: name,
@@ -43,6 +45,11 @@ class SettlementListNotifier
 
     if (result['success'] == true) {
       await getSettlements(tripId: tripId);
+    } else {
+      state = AsyncValue.error(
+        result['message'] ?? '정산 생성 실패',
+        StackTrace.current,
+      );
     }
 
     return result;
@@ -58,6 +65,8 @@ class SettlementListNotifier
     required String type,
     required List<Map<String, dynamic>> payers,
   }) async {
+    state = const AsyncValue.loading();
+
     final result = await repo.updateSettlement(
       tripId: tripId,
       settlementId: settlementId,
@@ -70,6 +79,11 @@ class SettlementListNotifier
 
     if (result['success'] == true) {
       await getSettlements(tripId: tripId);
+    } else {
+      state = AsyncValue.error(
+        result['message'] ?? '정산 수정 실패',
+        StackTrace.current,
+      );
     }
 
     return result;
@@ -80,6 +94,8 @@ class SettlementListNotifier
     required int tripId,
     required int settlementId,
   }) async {
+    state = const AsyncValue.loading();
+
     final result = await repo.deleteSettlement(
       tripId: tripId,
       settlementId: settlementId,
@@ -87,6 +103,11 @@ class SettlementListNotifier
 
     if (result['success'] == true) {
       await getSettlements(tripId: tripId);
+    } else {
+      state = AsyncValue.error(
+        result['message'] ?? '정산 삭제 실패',
+        StackTrace.current,
+      );
     }
 
     return result;
@@ -155,11 +176,9 @@ class SettlementNotifier extends StateNotifier<AsyncValue<SettlementModel?>> {
 
     // Optimistic UI 사용으로 성공 시 추가 fetch 불필요
     // 실패 시에는 화면에서 롤백 처리
+    // But. 완료 후 미정산이 0명이 될 경우 toppanel 새로고침(딤처리, 데이터 변경 등)을 위해 필요하다고 판단
     // if (result['success'] == true) {
-    //   await getOneSettlement(
-    //     tripId: tripId,
-    //     settlementId: settlementId,
-    //   );
+    //   await getOneSettlement(tripId: tripId, settlementId: settlementId);
     // }
 
     return result;

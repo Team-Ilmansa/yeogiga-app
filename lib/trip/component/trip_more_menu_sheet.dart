@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yeogiga/common/component/confirmation_dialog.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/component/grey_bar.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -23,7 +24,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: 323.h,
+          height: trip?.status == TripStatus.SETTING ? 317.h : 253.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -238,16 +239,17 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   }
                 },
               ),
-              // 날짜 수정하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/calendar_edit.svg',
-                text: '일정 수정하기',
-                onTap: () {
-                  GoRouter.of(context).pop();
-                  GoRouter.of(context).push('/W2mConfirmScreen');
-                  // TODO: 일정 수정
-                },
-              ),
+              // 날짜 수정하기 (SETTING 상태일 때만 표시)
+              if (trip?.status == TripStatus.SETTING)
+                _TripMenuItem(
+                  svgUrl: 'asset/icon/menu/calendar_edit.svg',
+                  text: '일정 수정하기',
+                  onTap: () {
+                    GoRouter.of(context).pop();
+                    GoRouter.of(context).push('/W2mConfirmScreen');
+                    // TODO: 일정 수정
+                  },
+                ),
               // 여행 삭제하기
               _TripMenuItem(
                 svgUrl: 'asset/icon/menu/delete_edit.svg',
@@ -256,106 +258,13 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder:
-                        (context) => Dialog(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.r),
-                          ),
-                          insetPadding: EdgeInsets.all(30.w),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 15.h,
-                              horizontal: 15.w,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 3.h),
-                                Text(
-                                  '${trip?.title ?? '이 여행'}을 정말로 삭제하시겠어요?',
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    letterSpacing: -0.3.sp,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                SizedBox(height: 3.h),
-                                Text(
-                                  '해당 작업은 복구할 수 없어요',
-                                  style: TextStyle(
-                                    color: Color(0xff7d7d7d),
-                                    fontSize: 12.sp,
-                                  ),
-                                ),
-                                SizedBox(height: 45.h),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(
-                                            0xfff0f0f0,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12.r,
-                                            ),
-                                          ),
-                                          elevation: 0,
-                                          minimumSize: Size.fromHeight(48.h),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        onPressed:
-                                            () => Navigator.of(
-                                              context,
-                                            ).pop(false),
-                                        child: Text(
-                                          '취소',
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(
-                                            0xFFf0f0f0,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12.r,
-                                            ),
-                                          ),
-                                          elevation: 0,
-                                          minimumSize: Size.fromHeight(48.h),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                        onPressed:
-                                            () =>
-                                                Navigator.of(context).pop(true),
-                                        child: Text(
-                                          '삭제하기',
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                        (context) => ConfirmationDialog(
+                          title: '여행 삭제하기',
+                          content:
+                              '${trip?.title ?? '이 여행'}을 정말로 삭제하시겠어요?\n해당 작업은 복구할 수 없어요.',
+                          cancelText: '취소',
+                          confirmText: '삭제하기',
+                          confirmColor: const Color(0xFFFF6B6B),
                         ),
                   );
                   if (confirm != true) return;
@@ -476,16 +385,16 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     }
                   }
 
-                  final inviteLink =
-                      'yeogiga://trip/invite/$tripId';
+                  final inviteLink = 'yeogiga://trip/invite/$tripId';
                   final message =
                       '$tripTitle\n$dateText\n아래 링크를 눌러 여행에 참여하세요.\n$inviteLink';
 
                   try {
                     final box = context.findRenderObject() as RenderBox?;
-                    final origin = box != null
-                        ? box.localToGlobal(Offset.zero) & box.size
-                        : Rect.zero;
+                    final origin =
+                        box != null
+                            ? box.localToGlobal(Offset.zero) & box.size
+                            : Rect.zero;
                     await Share.share(
                       message,
                       subject: '$tripTitle 초대 링크',

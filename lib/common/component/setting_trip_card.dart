@@ -50,7 +50,7 @@ class SettingTripCardList extends StatelessWidget {
 
 class SettingTripCard extends StatelessWidget {
   final String title;
-  final String? city;
+  final List<String>? city;
   final String? startedAt;
   final String? endedAt;
   final VoidCallback? onTap;
@@ -94,7 +94,7 @@ class SettingTripCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String cityText = (city == null || city!.isEmpty) ? '미정' : city!;
+    String cityText = (city == null || city!.isEmpty) ? '미정' : city!.join(', ');
     String dateText;
     if (startedAt == null || endedAt == null) {
       dateText = '미정';

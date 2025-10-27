@@ -188,7 +188,9 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                     pinned: true,
                     delegate: TabBarHeaderDelegate(
                       child: Container(
-                        key: ValueKey('tab-$totalPayers-$completedPayers'), // 강제 리빌드
+                        key: ValueKey(
+                          'tab-$totalPayers-$completedPayers',
+                        ), // 강제 리빌드
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         color: Color(0xfffafafa),
                         child: SizedBox(
@@ -385,18 +387,24 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
 
                     // Optimistic UI: 먼저 UI 상태를 업데이트
                     // 모든 payer를 새로운 객체로 생성하여 불변성 보장
-                    final List<SettlementPayerModel> updatedPayers = settlement.payers
-                        .cast<SettlementPayerModel>()
-                        .map((p) {
-                      return SettlementPayerModel(
-                        id: p.id,
-                        userId: p.userId,
-                        nickname: p.nickname,
-                        imageUrl: p.imageUrl,
-                        price: p.price,
-                        isCompleted: p.id == payer.id ? !isCompleted : p.isCompleted,
-                      );
-                    }).toList();
+                    final List<SettlementPayerModel> updatedPayers =
+                        settlement.payers.cast<SettlementPayerModel>().map((p) {
+                          return SettlementPayerModel(
+                            id: p.id,
+                            userId: p.userId,
+                            nickname: p.nickname,
+                            imageUrl: p.imageUrl,
+                            price: p.price,
+                            isCompleted:
+                                p.id == payer.id ? !isCompleted : p.isCompleted,
+                          );
+                        }).toList();
+
+                    // ⭐️⭐️⭐️모든 payer가 완료되었는지 확인⭐️⭐️⭐️
+                    // ⭐️⭐️⭐️top panel 딤처리에 매우 중요⭐️⭐️⭐️
+                    final allCompleted = updatedPayers.every(
+                      (p) => p.isCompleted,
+                    );
 
                     final updatedSettlement = SettlementModel(
                       id: settlement.id,
@@ -405,21 +413,23 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                       type: settlement.type,
                       date: settlement.date,
                       payerId: settlement.payerId,
-                      isCompleted: settlement.isCompleted,
+                      isCompleted: allCompleted,
                       payers: updatedPayers,
                     );
 
                     // Optimistic update
-                    ref.read(settlementProvider.notifier)
+                    ref
+                        .read(settlementProvider.notifier)
                         .setOptimisticSettlement(updatedSettlement);
 
                     // settlement의 모든 payer 정보를 payInfos에 담기
-                    final payInfos = updatedPayers.map((p) {
-                      return {
-                        'payInfoId': p.id,
-                        'isCompleted': p.isCompleted,
-                      };
-                    }).toList();
+                    final payInfos =
+                        updatedPayers.map((p) {
+                          return {
+                            'payInfoId': p.id,
+                            'isCompleted': p.isCompleted,
+                          };
+                        }).toList();
 
                     // API 호출 (백그라운드에서 실행)
                     final result = await ref
@@ -433,7 +443,8 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                     // 실패 시에만 롤백 및 에러 표시
                     if (!result['success']) {
                       // 원래 상태로 롤백
-                      ref.read(settlementProvider.notifier)
+                      ref
+                          .read(settlementProvider.notifier)
                           .setOptimisticSettlement(settlement);
 
                       if (!mounted) return;
@@ -446,7 +457,12 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          backgroundColor: const Color.fromARGB(229, 226, 81, 65),
+                          backgroundColor: const Color.fromARGB(
+                            229,
+                            226,
+                            81,
+                            65,
+                          ),
                           behavior: SnackBarBehavior.floating,
                           margin: EdgeInsets.all(5.w),
                           shape: RoundedRectangleBorder(

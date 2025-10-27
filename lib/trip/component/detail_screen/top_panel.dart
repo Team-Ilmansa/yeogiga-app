@@ -35,7 +35,7 @@ class TopPanel extends StatelessWidget {
         if (tripState is TripModel &&
             tripState.city != null &&
             tripState.city!.isNotEmpty) {
-          tripCity = tripState.city!;
+          tripCity = tripState.city!.join(', ');
         }
         // 날짜
         String tripDate = '미정';
