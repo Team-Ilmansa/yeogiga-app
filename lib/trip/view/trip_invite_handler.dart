@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
@@ -8,8 +9,9 @@ import 'package:yeogiga/trip/provider/trip_provider.dart';
 /// 자동으로 joinTrip() API를 호출하고 결과에 따라 화면 이동
 class TripInviteHandler extends ConsumerStatefulWidget {
   final int? tripId;
+  final String? tripTitle;
 
-  const TripInviteHandler({super.key, this.tripId});
+  const TripInviteHandler({super.key, this.tripId, this.tripTitle});
 
   @override
   ConsumerState<TripInviteHandler> createState() => _TripInviteHandlerState();
@@ -163,80 +165,210 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 130.h),
+            // 초대 아이콘 + 배경 원형 디자인
+            Container(
+              width: 120.w,
+              height: 120.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF8287FF).withOpacity(0.1),
+                    const Color(0xFF8287FF).withOpacity(0.05),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  width: 90.w,
+                  height: 90.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF8287FF).withOpacity(0.15),
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'asset/icon/share.svg',
+                      width: 40.w,
+                      height: 40.h,
+                      colorFilter: ColorFilter.mode(
+                        const Color(0xFF8287FF),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            // 제목 - 중앙 정렬
             Text(
               '여행 초대',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w700,
                 color: const Color(0xFF313131),
+                fontSize: 24.sp,
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.w700,
+                height: 1.40,
+                letterSpacing: -0.60,
               ),
             ),
             SizedBox(height: 12.h),
+            // 설명 - 중앙 정렬
             Text(
-              '여행 ID ${widget.tripId ?? '-'}에 초대되었습니다.\n참가하시겠습니까?',
+              '여행에 초대되었습니다.\n참가하시겠습니까?',
+              textAlign: TextAlign.center,
               style: TextStyle(
+                color: const Color(0xFF7D7D7D),
                 fontSize: 15.sp,
-                color: const Color(0xFF505050),
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.w500,
                 height: 1.5,
+                letterSpacing: -0.42,
               ),
             ),
-            SizedBox(height: 28.h),
+            SizedBox(height: 24.h),
+            // 여행 이름 뱃지 디자인 (여행 이름이 있으면 표시, 없으면 Trip ID)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5FF),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: const Color(0xFF8287FF).withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    widget.tripTitle != null ? Icons.card_travel : Icons.tag,
+                    size: 18.sp,
+                    color: const Color(0xFF8287FF),
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    widget.tripTitle ?? 'Trip ID: ${widget.tripId ?? '-'}',
+                    style: TextStyle(
+                      color: const Color(0xFF8287FF),
+                      fontSize: 14.sp,
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Spacer(),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.go('/'),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFFBDBDBD)),
-                      foregroundColor: const Color(0xFF505050),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                  child: GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: Container(
+                      height: 52.h,
+                      decoration: ShapeDecoration(
+                        color: const Color(0xFFF0F0F0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '거절',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: const Color(0xFF313131),
+                            fontSize: 16.sp,
+                            fontFamily: 'Pretendard',
+                            fontWeight: FontWeight.w600,
+                            height: 1.40,
+                            letterSpacing: -0.48,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: const Text('거절'),
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 10.w),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: tripState.when(
+                  child: GestureDetector(
+                    onTap: tripState.when(
                       data: (_) => _handleInvite,
                       loading: () => null,
                       error: (_, __) => _handleInvite,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8287FF),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    child: tripState.when(
-                      data: (_) => Text(
-                        '참가하기',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                    child: Container(
+                      height: 52.h,
+                      decoration: ShapeDecoration(
+                        color:
+                            tripState.isLoading
+                                ? const Color(0xFFD9D9D9)
+                                : const Color(0xFF8287FF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
-                      ),
-                      loading: () => SizedBox(
-                        width: 20.w,
-                        height: 20.h,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                        shadows: [
+                          BoxShadow(
+                            color: const Color(0xFF8287FF).withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: Offset(0, 0),
                           ),
-                        ),
+                        ],
                       ),
-                      error: (_, __) => Text(
-                        '참가하기',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                      child: Center(
+                        child: tripState.when(
+                          data:
+                              (_) => Text(
+                                '참가하기',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                  letterSpacing: -0.48,
+                                ),
+                              ),
+                          loading:
+                              () => SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              ),
+                          error:
+                              (_, __) => Text(
+                                '참가하기',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                  letterSpacing: -0.48,
+                                ),
+                              ),
                         ),
                       ),
                     ),
@@ -244,6 +376,7 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
                 ),
               ],
             ),
+            SizedBox(height: 40.h),
           ],
         ),
       ),
