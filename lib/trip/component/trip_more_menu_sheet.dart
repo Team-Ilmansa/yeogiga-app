@@ -385,7 +385,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     }
                   }
 
-                  final inviteLink = 'yeogiga://trip/invite/$tripId';
+                  final inviteLink = 'yeogiga://trip/invite/$tripId?title=${Uri.encodeComponent(tripTitle)}';
                   final message =
                       '$tripTitle\n$dateText\n아래 링크를 눌러 여행에 참여하세요.\n$inviteLink';
 

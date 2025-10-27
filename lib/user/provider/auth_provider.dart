@@ -88,7 +88,8 @@ class AuthProvider extends ChangeNotifier {
       name: 'tripInvite',
       builder: (context, state) {
         final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
-        return TripInviteHandler(tripId: tripId);
+        final tripTitle = state.queryParameters['title'];
+        return TripInviteHandler(tripId: tripId, tripTitle: tripTitle);
       },
     ),
     GoRoute(
@@ -96,7 +97,8 @@ class AuthProvider extends ChangeNotifier {
       name: 'tripInviteShortcut',
       builder: (context, state) {
         final tripId = int.tryParse(state.pathParameters['tripId'] ?? '0');
-        return TripInviteHandler(tripId: tripId);
+        final tripTitle = state.queryParameters['title'];
+        return TripInviteHandler(tripId: tripId, tripTitle: tripTitle);
       },
     ),
     GoRoute(
