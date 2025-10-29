@@ -8,14 +8,14 @@ class PendingPlaceModel {
   final String name;
   final double latitude;
   final double longitude;
-  final String placeCategory;
+  final String placeType;
 
   PendingPlaceModel({
     required this.id,
     required this.name,
     required this.latitude,
     required this.longitude,
-    required this.placeCategory,
+    required this.placeType,
   });
 
   factory PendingPlaceModel.fromJson(Map<String, dynamic> json) =>

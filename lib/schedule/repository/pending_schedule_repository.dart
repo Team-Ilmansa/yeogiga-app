@@ -28,7 +28,7 @@ class PendingScheduleRepository {
     required String name,
     required double latitude,
     required double longitude,
-    required String placeCategory,
+    required String placeType,
     String? address,
   }) async {
     try {
@@ -39,7 +39,7 @@ class PendingScheduleRepository {
           "name": name,
           "latitude": latitude,
           "longitude": longitude,
-          "placeType": placeCategory,
+          "placeType": placeType,
           "address": address,
         },
       );
