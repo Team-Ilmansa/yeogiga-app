@@ -131,7 +131,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                       // 이메일 코드 검증
                       try {
                         final response = await dio.post(
-                          'https://$ip/api/v1/auth/email-verification/verify',
+                          '$baseUrl/auth/email-verification/verify',
                           data: {
                             "email": _emailController.text,
                             "code": _emailVerifyController.text,
@@ -170,7 +170,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                       // 이메일 코드 보내깅
                       try {
                         final response = await dio.post(
-                          'https://$ip/api/v1/auth/email-verification/request',
+                          '$baseUrl/auth/email-verification/request',
                           data: {"email": _emailController.text},
                         );
                         if (response.data['code'] == 200) {

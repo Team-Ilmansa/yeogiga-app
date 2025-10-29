@@ -7,7 +7,7 @@ import 'package:yeogiga/notice/model/notice_model.dart';
 final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return NoticeRepository(baseUrl: 'https://$ip', dio: dio);
+  return NoticeRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class NoticeRepository {
@@ -24,7 +24,7 @@ class NoticeRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/notices',
+        '$baseUrl/trip/$tripId/notices',
         data: {'title': title, 'description': description},
         options: Options(headers: {"accessToken": 'true'}),
       );
@@ -80,7 +80,7 @@ class NoticeRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/notices',
+        '$baseUrl/trip/$tripId/notices',
         // queryParameters: {
         //   'page': page,
         //   'size': size,
@@ -159,7 +159,7 @@ class NoticeRepository {
   }) async {
     try {
       final response = await dio.put(
-        '$baseUrl/api/v1/trip/$tripId/notices/$noticeId',
+        '$baseUrl/trip/$tripId/notices/$noticeId',
         data: {
           'title': title,
           'description': description,
@@ -214,7 +214,7 @@ class NoticeRepository {
   }) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/notices/$noticeId',
+        '$baseUrl/trip/$tripId/notices/$noticeId',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -253,7 +253,7 @@ class NoticeRepository {
   }) async {
     try {
       final response = await dio.patch(
-        '$baseUrl/api/v1/trip/$tripId/notices/$noticeId/completed',
+        '$baseUrl/trip/$tripId/notices/$noticeId/completed',
         data: {
           'completed': completed,
         },

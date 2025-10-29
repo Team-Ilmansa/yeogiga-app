@@ -170,7 +170,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       state = UserModelLoading();
 
       final response = await dio.post(
-        'https://$ip/api/v1/oauth/sign-in/$platform/mobile',
+        '$baseUrl/oauth/sign-in/$platform/mobile',
         data: {
           "accessToken": token.accessToken, // 카카오 로그인에서 받은 accessToken
         },
@@ -224,7 +224,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
   }) async {
     try {
       final response = await dio.put(
-        'https://$ip/api/v1/oauth/register',
+        '$baseUrl/oauth/register',
         options: Options(headers: {'accessToken': 'temp', 'device': 'MOBILE'}),
         data: {'nickname': nickname},
       );

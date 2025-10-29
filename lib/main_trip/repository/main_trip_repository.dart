@@ -7,7 +7,7 @@ import 'package:yeogiga/main_trip/model/main_trip_model.dart';
 final mainTripRepositoryProvider = Provider<MainTripRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return MainTripRepository(baseUrl: 'https://$ip', dio: dio);
+  return MainTripRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class MainTripRepository {
@@ -20,7 +20,7 @@ class MainTripRepository {
   Future<MainTripModel?> fetchMainTrip() async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/main',
+        '$baseUrl/trip/main',
         options: Options(headers: {"accessToken": 'true'}),
       );
       if (response.statusCode == 200 && response.data['data'] != null) {

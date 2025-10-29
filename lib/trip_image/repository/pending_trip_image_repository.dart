@@ -9,7 +9,7 @@ import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 final pendingTripImageRepository = Provider<PendingTripImageRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return PendingTripImageRepository(baseUrl: 'https://$ip', dio: dio);
+  return PendingTripImageRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class PendingTripImageRepository {
@@ -24,7 +24,7 @@ class PendingTripImageRepository {
     required String tripDayPlaceId,
     required File image,
   }) async {
-    final url = '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/images';
+    final url = '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images';
     final formData = FormData();
 
     print('image.path ======= ${image.path}');
@@ -65,7 +65,7 @@ class PendingTripImageRepository {
     required int day,
   }) async {
     final url =
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/temp-images';
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/temp-images';
 
     try {
       final response = await dio.get(
@@ -103,7 +103,7 @@ class PendingTripImageRepository {
     required List<String> urls,
   }) async {
     final url =
-        '$baseUrl/api/v1/trip/$tripId/day-place/temp-images/$tempPlaceImageId';
+        '$baseUrl/trip/$tripId/day-place/temp-images/$tempPlaceImageId';
 
     try {
       final response = await dio.delete(
@@ -128,7 +128,7 @@ class PendingTripImageRepository {
     required String tripDayPlaceId,
   }) async {
     final url =
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/images/assign';
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images/assign';
     try {
       final response = await dio.post(
         url,

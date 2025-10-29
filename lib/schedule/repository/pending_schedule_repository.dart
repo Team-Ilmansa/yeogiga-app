@@ -9,7 +9,7 @@ final pendingScheduleRepositoryProvider = Provider<PendingScheduleRepository>((
 ) {
   final dio = ref.watch(dioProvider);
 
-  return PendingScheduleRepository(baseUrl: 'https://$ip', dio: dio);
+  return PendingScheduleRepository(baseUrl: baseUrl, dio: dio);
 });
 
 // 여행 생성중 레포
@@ -33,7 +33,7 @@ class PendingScheduleRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/days/$day/places',
+        '$baseUrl/trip/$tripId/days/$day/places',
         options: Options(headers: {"accessToken": 'true'}),
         data: {
           "name": name,
@@ -65,7 +65,7 @@ class PendingScheduleRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/days/$day/places',
+        '$baseUrl/trip/$tripId/days/$day/places',
         options: Options(headers: {"accessToken": 'true'}),
       );
       if (response.statusCode == 200 && response.data['data'] != null) {
@@ -95,7 +95,7 @@ class PendingScheduleRepository {
   }) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/days/$day/places/$placeId',
+        '$baseUrl/trip/$tripId/days/$day/places/$placeId',
         options: Options(headers: {"accessToken": 'true'}),
       );
       return response.statusCode != null &&
@@ -115,7 +115,7 @@ class PendingScheduleRepository {
   }) async {
     try {
       final response = await dio.put(
-        '$baseUrl/api/v1/trip/$tripId/days/$day/places',
+        '$baseUrl/trip/$tripId/days/$day/places',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"orderedPlaceIds": orderedPlaceIds},
       );

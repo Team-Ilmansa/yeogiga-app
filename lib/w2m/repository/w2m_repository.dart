@@ -6,7 +6,7 @@ import 'package:yeogiga/common/dio/dio.dart';
 final w2mRepositoryProvider = Provider<W2mRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return W2mRepository(baseUrl: 'https://$ip', dio: dio);
+  return W2mRepository(baseUrl: baseUrl, dio: dio);
 });
 
 //========================================================================================
@@ -24,7 +24,7 @@ class W2mRepository {
   Future<List<Map<String, dynamic>>?> getTripW2m({required int tripId}) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/calendars',
+        '$baseUrl/trip/$tripId/calendars',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -42,7 +42,7 @@ class W2mRepository {
   Future<List<String>?> getUserW2m({required int tripId}) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/calendars/me',
+        '$baseUrl/trip/$tripId/calendars/me',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -64,7 +64,7 @@ class W2mRepository {
   }) async {
     try {
       await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/calendars',
+        '$baseUrl/trip/$tripId/calendars',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"availableDates": availableDates},
       );

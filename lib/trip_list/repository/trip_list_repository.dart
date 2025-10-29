@@ -7,7 +7,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 final tripListRepositoryProvider = Provider<TripListRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return TripListRepository(baseUrl: 'https://$ip', dio: dio);
+  return TripListRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class TripListRepository {
@@ -19,7 +19,7 @@ class TripListRepository {
   Future<List<TripModel?>> fetchPastTripList() async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip',
+        '$baseUrl/trip',
         options: Options(headers: {"accessToken": 'true'}),
       );
       final data = response.data['data'];
@@ -54,7 +54,7 @@ class TripListRepository {
   Future<List<TripModel?>> fetchUpcomingTripList() async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip',
+        '$baseUrl/trip',
         options: Options(headers: {"accessToken": 'true'}),
       );
       final data = response.data['data'];
@@ -91,7 +91,7 @@ class TripListRepository {
   Future<List<TripModel?>> fetchAllTripList() async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip',
+        '$baseUrl/trip',
         options: Options(headers: {"accessToken": 'true'}),
       );
       final data = response.data['data'];
@@ -115,7 +115,7 @@ class TripListRepository {
   Future<List<TripModel?>> fetchSettingTripList() async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip',
+        '$baseUrl/trip',
         options: Options(headers: {"accessToken": 'true'}),
       );
       final data = response.data['data'];

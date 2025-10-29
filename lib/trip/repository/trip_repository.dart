@@ -9,7 +9,7 @@ import 'dart:convert';
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return TripRepository(baseUrl: 'https://$ip', dio: dio);
+  return TripRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class TripRepository {
@@ -22,7 +22,7 @@ class TripRepository {
   Future<PostTripResponse> postTrip({required String title}) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip',
+        '$baseUrl/trip',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"title": title},
       );
@@ -61,7 +61,7 @@ class TripRepository {
   Future<GetTripResponse> getTripByTripId({required int tripId}) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId',
+        '$baseUrl/trip/$tripId',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -93,7 +93,7 @@ class TripRepository {
           "${end.year.toString().padLeft(4, '0')}-${end.month.toString().padLeft(2, '0')}-${end.day.toString().padLeft(2, '0')}T23:00:00";
 
       await dio.put(
-        '$baseUrl/api/v1/trip/$tripId/time',
+        '$baseUrl/trip/$tripId/time',
         data: {"start": startStr, "end": endStr},
         options: Options(headers: {"accessToken": 'true'}),
       );
@@ -112,7 +112,7 @@ class TripRepository {
   }) async {
     try {
       await dio.put(
-        '$baseUrl/api/v1/trip/$tripId',
+        '$baseUrl/trip/$tripId',
         data: {"title": title},
         options: Options(headers: {"accessToken": 'true'}),
       );
@@ -131,7 +131,7 @@ class TripRepository {
   Future<bool> deleteTrip({required int tripId}) async {
     try {
       await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId',
+        '$baseUrl/trip/$tripId',
         options: Options(headers: {"accessToken": 'true'}),
       );
       return true;
@@ -149,7 +149,7 @@ class TripRepository {
   Future<bool> leaveTrip({required int tripId}) async {
     try {
       await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/members',
+        '$baseUrl/trip/$tripId/members',
         options: Options(headers: {"accessToken": 'true'}),
       );
       return true;
@@ -167,7 +167,7 @@ class TripRepository {
   Future<bool> joinTrip({required int tripId}) async {
     try {
       await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/members',
+        '$baseUrl/trip/$tripId/members',
         options: Options(headers: {"accessToken": 'true'}),
       );
       return true;

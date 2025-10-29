@@ -8,7 +8,7 @@ import 'package:yeogiga/common/model/login_response_wrapper.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return AuthRepository(baseUrl: 'https://$ip', dio: dio);
+  return AuthRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class AuthRepository {
@@ -22,7 +22,7 @@ class AuthRepository {
     required String password,
   }) async {
     final resp = await dio.post(
-      '$baseUrl/api/v1/auth/sign-in',
+      '$baseUrl/auth/sign-in',
       options: Options(
         headers: {'device': 'MOBILE'},
         contentType: 'application/json',
@@ -35,7 +35,7 @@ class AuthRepository {
 
   Future<LoginResponse> token() async {
     final resp = await dio.post(
-      '$baseUrl/api/v1/auth/reissue',
+      '$baseUrl/auth/reissue',
       options: Options(headers: {'device': 'MOBILE', 'refreshToken': 'true'}),
     );
 
@@ -44,7 +44,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> restore({required int userId}) async {
     final resp = await dio.put(
-      '$baseUrl/api/v1/auth/restore',
+      '$baseUrl/auth/restore',
       data: {'userId': userId},
     );
     return resp.data;

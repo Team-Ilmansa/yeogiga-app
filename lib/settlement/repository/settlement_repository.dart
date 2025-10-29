@@ -7,7 +7,7 @@ import 'package:yeogiga/settlement/model/settlement_model.dart';
 
 final settlementRepositoryProvider = Provider<SettlementRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  return SettlementRepository(baseUrl: 'https://$ip', dio: dio);
+  return SettlementRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class SettlementRepository {
@@ -27,7 +27,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/settlements',
+        '$baseUrl/trip/$tripId/settlements',
         data: {
           'name': name,
           'totalPrice': totalPrice,
@@ -59,7 +59,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.put(
-        '$baseUrl/api/v1/trip/$tripId/settlements/$settlementId',
+        '$baseUrl/trip/$tripId/settlements/$settlementId',
         data: {
           'name': name,
           'totalPrice': totalPrice,
@@ -86,7 +86,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/settlements/$settlementId',
+        '$baseUrl/trip/$tripId/settlements/$settlementId',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -105,7 +105,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/settlements',
+        '$baseUrl/trip/$tripId/settlements',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -130,7 +130,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/settlements/$settlementId',
+        '$baseUrl/trip/$tripId/settlements/$settlementId',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -156,7 +156,7 @@ class SettlementRepository {
   }) async {
     try {
       final response = await dio.patch(
-        '$baseUrl/api/v1/trip/$tripId/settlements/$settlementId',
+        '$baseUrl/trip/$tripId/settlements/$settlementId',
         data: {
           'payInfos': payInfos,
         },

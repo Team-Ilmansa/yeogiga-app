@@ -7,7 +7,7 @@ import 'package:yeogiga/notice/model/ping_model.dart';
 final pingRepositoryProvider = Provider<PingRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return PingRepository(baseUrl: 'https://$ip', dio: dio);
+  return PingRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class PingRepository {
@@ -20,7 +20,7 @@ class PingRepository {
   Future<Map<String, dynamic>> fetchPing({required int tripId}) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/pin',
+        '$baseUrl/trip/$tripId/pin',
         options: Options(headers: {"accessToken": 'true'}),
       );
 
@@ -81,7 +81,7 @@ class PingRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/pin',
+        '$baseUrl/trip/$tripId/pin',
         data: {
           'place': place,
           'latitude': latitude,
@@ -139,7 +139,7 @@ class PingRepository {
   Future<Map<String, dynamic>> deletePing({required int tripId}) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/pin',
+        '$baseUrl/trip/$tripId/pin',
         options: Options(headers: {"accessToken": 'true'}),
       );
 

@@ -5,7 +5,7 @@ import 'package:yeogiga/common/dio/dio.dart';
 
 final fcmTokenRepositoryProvider = Provider((ref) {
   final dio = ref.watch(dioProvider);
-  return FcmTokenRepository(dio: dio, baseUrl: 'https://$ip');
+  return FcmTokenRepository(dio: dio, baseUrl: baseUrl);
 });
 
 class FcmTokenRepository {
@@ -17,7 +17,7 @@ class FcmTokenRepository {
   /// FCM 토큰 저장
   Future<bool> saveFcmToken({required String fcmToken}) async {
     try {
-      final url = '$baseUrl/api/v1/users/fcm-token';
+      final url = '$baseUrl/users/fcm-token';
       await dio.post(
         url,
         data: {'fcmToken': fcmToken},
@@ -37,7 +37,7 @@ class FcmTokenRepository {
   /// FCM 토큰 삭제
   Future<bool> deleteFcmToken() async {
     try {
-      final url = '$baseUrl/api/v1/users/fcm-token';
+      final url = '$baseUrl/users/fcm-token';
       await dio.delete(
         url,
         options: Options(headers: {'accessToken': 'true'}),
