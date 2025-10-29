@@ -57,3 +57,5 @@ app.*.map.json
 # 기타 비밀 정보
 .env
 *.pem
+
+CLAUDE.md

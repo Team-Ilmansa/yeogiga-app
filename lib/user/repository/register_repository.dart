@@ -11,7 +11,7 @@ final registerRepositoryProvider = Provider<RegisterRepository>((ref) {
   final dio = ref.watch(dioProvider);
   final storage = ref.watch(secureStorageProvider);
 
-  return RegisterRepository(baseUrl: 'https://$ip', dio: dio, storage: storage);
+  return RegisterRepository(baseUrl: baseUrl, dio: dio, storage: storage);
 });
 
 //api들
@@ -30,7 +30,7 @@ class RegisterRepository {
   Future<bool> checkUsernameAvailable(String username) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/auth/dup-check/username',
+        '$baseUrl/auth/dup-check/username',
         queryParameters: {'value': username},
       );
       final data = response.data;
@@ -52,7 +52,7 @@ class RegisterRepository {
   Future<bool> checkNicknameAvailable(String nickname) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/auth/dup-check/nickname',
+        '$baseUrl/auth/dup-check/nickname',
         queryParameters: {'value': nickname},
       );
       final data = response.data;
@@ -78,7 +78,7 @@ class RegisterRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/auth/sign-up',
+        '$baseUrl/auth/sign-up',
         data: {
           "username": username,
           "password": password,
@@ -97,7 +97,7 @@ class RegisterRepository {
   Future<bool> deleteUser() async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/users',
+        '$baseUrl/users',
         options: Options(headers: {'accessToken': 'true'}),
       );
 

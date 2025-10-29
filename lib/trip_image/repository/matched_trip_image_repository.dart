@@ -7,7 +7,7 @@ import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 final matchedTripImageRepository = Provider<MatchedTripImageRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return MatchedTripImageRepository(baseUrl: 'https://$ip', dio: dio);
+  return MatchedTripImageRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class MatchedTripImageRepository {
@@ -23,7 +23,7 @@ class MatchedTripImageRepository {
   }) async {
     try {
       final response = await dio.patch(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/images/re-assign',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images/re-assign',
         options: Options(headers: {'accessToken': 'true'}),
       );
       final data = response.data;
@@ -48,7 +48,7 @@ class MatchedTripImageRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId/images',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId/images',
         options: Options(headers: {'accessToken': 'true'}),
       );
       final data = response.data;
@@ -73,7 +73,7 @@ class MatchedTripImageRepository {
   }) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/images',
+        '$baseUrl/trip/$tripId/images',
         data: {'imageIds': imageIds, 'urls': urls},
         options: Options(headers: {'accessToken': 'true'}),
       );

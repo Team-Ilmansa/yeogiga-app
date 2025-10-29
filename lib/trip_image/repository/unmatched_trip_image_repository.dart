@@ -9,7 +9,7 @@ final unmatchedTripImageRepository = Provider<UnmatchedTripImageRepository>((
 ) {
   final dio = ref.watch(dioProvider);
 
-  return UnmatchedTripImageRepository(baseUrl: 'https://$ip', dio: dio);
+  return UnmatchedTripImageRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class UnmatchedTripImageRepository {
@@ -26,7 +26,7 @@ class UnmatchedTripImageRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/unmatched-images',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/unmatched-images',
         options: Options(headers: {'accessToken': 'true'}),
       );
       final data = response.data;

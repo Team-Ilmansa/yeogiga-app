@@ -1,16 +1,6 @@
-import 'package:yeogiga/common/const/data.dart';
-
 class DataUtils{
   static DateTime stringToDateTime(String value){
     return DateTime.parse(value);
-  }
-
-  static String pathToUrl(String value){
-    return 'https://$ip$value';
-  }
-
-  static List<String> listPathsToUrls(List paths){
-    return paths.map((e) => pathToUrl(e)).toList();
   }
 
   /// 날짜 포맷 (YYYY-MM-DD -> YYYY. MM. DD)

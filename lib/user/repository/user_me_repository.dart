@@ -10,7 +10,7 @@ part 'user_me_repository.g.dart';
 final userMeRepositoryProvider = Provider<UserMeRepository>((ref) {
   final dio = ref.watch(dioProvider);
 
-  return UserMeRepository(dio, baseUrl: 'https://$ip');
+  return UserMeRepository(dio, baseUrl: baseUrl);
 });
 
 @RestApi()
@@ -18,7 +18,7 @@ abstract class UserMeRepository {
   factory UserMeRepository(Dio dio, {String baseUrl}) = _UserMeRepository;
 
   //내 정보 가져오기
-  @GET('/api/v1/users/my')
+  @GET('/users/my')
   @Headers({'accessToken': 'true'})
   Future<UserResponseModel> getMe();
 }

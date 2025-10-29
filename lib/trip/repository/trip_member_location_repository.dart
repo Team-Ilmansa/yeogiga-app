@@ -7,7 +7,7 @@ import 'package:yeogiga/trip/model/trip_member_location.dart';
 final tripMemberLocationRepository = Provider((ref) {
   final dio = ref.watch(dioProvider);
 
-  return TripMemberLocationRepository(baseUrl: 'https://$ip', dio: dio);
+  return TripMemberLocationRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class TripMemberLocationRepository {
@@ -23,7 +23,7 @@ class TripMemberLocationRepository {
     required double longitude,
   }) async {
     try {
-      final url = '$baseUrl/api/v1/trip/$tripId/members/location';
+      final url = '$baseUrl/trip/$tripId/members/location';
       await dio.post(
         url,
         data: {'latitude': latitude, 'longitude': longitude},
@@ -55,7 +55,7 @@ class TripMemberLocationRepository {
     required String tripId,
   }) async {
     try {
-      final url = '$baseUrl/api/v1/trip/$tripId/members/location';
+      final url = '$baseUrl/trip/$tripId/members/location';
       final response = await dio.get(
         url,
         options: Options(headers: {'accessToken': 'true'}),

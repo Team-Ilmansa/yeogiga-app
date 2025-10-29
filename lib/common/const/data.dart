@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // secure storage용 key
@@ -7,8 +8,7 @@ const SOCIAL_TEMP_TOKEN = 'SOCIAL_TEMP_TOKEN';
 
 final storage = FlutterSecureStorage();
 
-final emulatorIp = '192.168.0.18:3000';
-final simulatorIp = '127.0.0.1:3000';
-
-// final ip = Platform.isIOS ? simulatorIp : emulatorIp;
-final ip = 'api.yeogiga.com';
+// .env에서 API Base URL 로드
+// 프로덕션: https://api.yeogiga.com/api/v1
+// 로컬 개발 시 .env 파일에서 변경 가능
+final baseUrl = dotenv.get('API_BASE_URL', fallback: 'https://api.yeogiga.com/api/v1');

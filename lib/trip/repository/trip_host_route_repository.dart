@@ -6,7 +6,7 @@ import 'package:yeogiga/trip/model/trip_host_route_day.dart';
 
 final tripHostRouteRepositoryProvider = Provider((ref) {
   final dio = ref.watch(dioProvider);
-  return TripHostRouteRepository(dio: dio, baseUrl: 'https://$ip');
+  return TripHostRouteRepository(dio: dio, baseUrl: baseUrl);
 });
 
 class TripHostRouteRepository {
@@ -23,7 +23,7 @@ class TripHostRouteRepository {
     required double longitude,
   }) async {
     try {
-      final url = '$baseUrl/api/v1/trip/$tripId/days/$day/routes';
+      final url = '$baseUrl/trip/$tripId/days/$day/routes';
       await dio.post(
         url,
         data: {'latitude': latitude, 'longitude': longitude},
@@ -45,7 +45,7 @@ class TripHostRouteRepository {
     required String tripId,
   }) async {
     try {
-      final url = '$baseUrl/api/v1/trip/$tripId/routes';
+      final url = '$baseUrl/trip/$tripId/routes';
       final response = await dio.get(
         url,
         options: Options(headers: {'accessToken': 'true'}),

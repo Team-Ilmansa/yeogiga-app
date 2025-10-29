@@ -92,7 +92,7 @@ class CustomInterceptor extends Interceptor {
     print(1);
 
     final isStatus401 = err.response?.statusCode == 401;
-    final isPathRefresh = err.requestOptions.path == '/api/v1/auth/reissue';
+    final isPathRefresh = err.requestOptions.path == '/auth/reissue';
 
     //중간에 토큰 날아갔을 때 대처
     if (isStatus401 && !isPathRefresh) {
@@ -101,7 +101,7 @@ class CustomInterceptor extends Interceptor {
       print(3);
       try {
         final resp = await dio.get(
-          'https://$ip/api/v1/auth/reissue',
+          '$baseUrl/auth/reissue',
           options: Options(
             headers: {'device': 'MOBILE', 'refreshToken': refreshToken},
           ),
@@ -143,12 +143,12 @@ class CustomInterceptor extends Interceptor {
 
     // onError에서 처리하고 싶지 않은 것들은 여기에 하나씩 추가
     final path = err.requestOptions.path;
-    if (path == '/api/v1/auth/dup-check/username' ||
-        path == '/api/v1/auth/dup-check/nickname' ||
-        path == '/api/v1/auth/sign-up' ||
-        path == '/api/v1/users' ||
-        path == '/api/v1/trip' ||
-        path.startsWith('/api/v1/trip/')) {
+    if (path == '/auth/dup-check/username' ||
+        path == '/auth/dup-check/nickname' ||
+        path == '/auth/sign-up' ||
+        path == '/users' ||
+        path == '/trip' ||
+        path.startsWith('/trip/')) {
       //TODO: 응답 전체 출력 (디버깅용)
 
       return handler.reject(err);

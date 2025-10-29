@@ -9,7 +9,7 @@ final confirmScheduleRepositoryProvider = Provider<ConfirmScheduleRepository>((
 ) {
   final dio = ref.watch(dioProvider);
 
-  return ConfirmScheduleRepository(baseUrl: 'https://$ip', dio: dio);
+  return ConfirmScheduleRepository(baseUrl: baseUrl, dio: dio);
 });
 
 class ConfirmScheduleRepository {
@@ -25,7 +25,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/day-place/places',
+        '$baseUrl/trip/$tripId/day-place/places',
         options: Options(headers: {"accessToken": 'true'}),
       );
       if (response.statusCode == 200 && response.data['data'] != null) {
@@ -55,7 +55,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$dayScheduleId/places',
+        '$baseUrl/trip/$tripId/day-place/$dayScheduleId/places',
         options: Options(headers: {"accessToken": 'true'}),
       );
       if (response.statusCode == 200 && response.data['data'] != null) {
@@ -100,7 +100,7 @@ class ConfirmScheduleRepository {
     print(data);
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/places',
         options: Options(headers: {"accessToken": 'true'}),
         data: {
           "name": name,
@@ -132,7 +132,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.delete(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId',
         options: Options(headers: {"accessToken": 'true'}),
       );
       return response.statusCode != null &&
@@ -153,7 +153,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.get(
-        '$baseUrl/api/v1/trip/$tripId/day-place',
+        '$baseUrl/trip/$tripId/day-place',
         options: Options(headers: {"accessToken": 'true'}),
       );
       if (response.statusCode == 200 && response.data['data'] != null) {
@@ -183,7 +183,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.post(
-        '$baseUrl/api/v1/trip/$tripId/complete',
+        '$baseUrl/trip/$tripId/complete',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"lastDay": lastDay},
       );
@@ -212,7 +212,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.put(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/order',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/places/order',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"orderedPlaceIds": orderedPlaceIds},
       );
@@ -242,7 +242,7 @@ class ConfirmScheduleRepository {
   }) async {
     try {
       final response = await dio.patch(
-        '$baseUrl/api/v1/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId/mark',
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/places/$placeId/mark',
         options: Options(headers: {"accessToken": 'true'}),
         data: {"isVisited": isVisited},
       );
