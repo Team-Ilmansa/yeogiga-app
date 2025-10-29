@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
+import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/utils/trip_utils.dart';
 import 'package:yeogiga/settlement/component/settlement_item.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
@@ -22,8 +23,10 @@ class SettlementListScreen extends ConsumerStatefulWidget {
       _SettlementListScreenState();
 }
 
-class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
+class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
+    with RouteAware {
   int _selectedIndex = 0; // 0: 미정산내역, 1: 여행전체, 2: 기타, 3~: Day 1, Day 2, ...
+  bool _isSubscribedToRouteObserver = false;
 
   @override
   void initState() {
@@ -34,6 +37,42 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen> {
         ref
             .read(settlementListProvider.notifier)
             .getSettlements(tripId: tripState.tripId);
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isSubscribedToRouteObserver) {
+      final route = ModalRoute.of(context);
+      if (route != null) {
+        settlementRouteObserver.subscribe(this, route);
+        _isSubscribedToRouteObserver = true;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_isSubscribedToRouteObserver) {
+      settlementRouteObserver.unsubscribe(this);
+      _isSubscribedToRouteObserver = false;
+    }
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    // Detail 화면에서 돌아올 때 백그라운드에서 조용히 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final tripState = ref.read(tripProvider).valueOrNull;
+      if (tripState is TripModel) {
+        ref
+            .read(settlementListProvider.notifier)
+            .silentRefreshSettlements(tripId: tripState.tripId);
       }
     });
   }
