@@ -10,7 +10,8 @@ final pendingScheduleProvider = StateNotifierProvider<
   return PendingScheduleNotifier(repo);
 });
 
-class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleModel?>> {
+class PendingScheduleNotifier
+    extends StateNotifier<AsyncValue<PendingScheduleModel?>> {
   final PendingScheduleRepository repo;
   PendingScheduleNotifier(this.repo) : super(const AsyncValue.data(null));
 
@@ -24,10 +25,12 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
     final validSchedules =
         daySchedules.whereType<PendingDayScheduleModel>().toList();
     // PendingScheduleModel로 만들어 상태에 저장
-    state = AsyncValue.data(PendingScheduleModel(
-      tripId: int.parse(tripId),
-      schedules: validSchedules,
-    ));
+    state = AsyncValue.data(
+      PendingScheduleModel(
+        tripId: int.parse(tripId),
+        schedules: validSchedules,
+      ),
+    );
   }
 
   /// 특정 일차(day)의 일정만 조회
@@ -46,7 +49,7 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
     required String name,
     required double latitude,
     required double longitude,
-    required String placeCategory,
+    required String placeType,
     String? address,
   }) async {
     final success = await repo.postPendingPlace(
@@ -56,7 +59,7 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
       name: name,
       latitude: latitude,
       longitude: longitude,
-      placeCategory: placeCategory,
+      placeType: placeType,
       address: address,
     );
     if (success) {
@@ -98,23 +101,26 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
     // 1. 기존 daySchedule 백업
     final prevState = state;
     final currentState = state.valueOrNull;
-    final dayIndex = currentState?.schedules.indexWhere((d) => d.day == day) ?? -1;
+    final dayIndex =
+        currentState?.schedules.indexWhere((d) => d.day == day) ?? -1;
     if (dayIndex == -1 || currentState == null) return;
     final originalPlaces = List.of(currentState.schedules[dayIndex].places);
 
     // 2. state를 optimistic하게 바로 변경
-    state = AsyncValue.data(currentState.copyWith(
-      schedules: [
-        ...currentState.schedules.sublist(0, dayIndex),
-        currentState.schedules[dayIndex].copyWith(
-          places:
-              orderedPlaceIds
-                  .map((id) => originalPlaces.firstWhere((p) => p.id == id))
-                  .toList(),
-        ),
-        ...currentState.schedules.sublist(dayIndex + 1),
-      ],
-    ));
+    state = AsyncValue.data(
+      currentState.copyWith(
+        schedules: [
+          ...currentState.schedules.sublist(0, dayIndex),
+          currentState.schedules[dayIndex].copyWith(
+            places:
+                orderedPlaceIds
+                    .map((id) => originalPlaces.firstWhere((p) => p.id == id))
+                    .toList(),
+          ),
+          ...currentState.schedules.sublist(dayIndex + 1),
+        ],
+      ),
+    );
 
     // 3. 서버 요청
     final success = await repo.reorderPendingPlaces(
@@ -143,10 +149,9 @@ class PendingScheduleNotifier extends StateNotifier<AsyncValue<PendingScheduleMo
         current.schedules
             .map((d) => d.day == updatedDay.day ? updatedDay : d)
             .toList();
-    state = AsyncValue.data(PendingScheduleModel(
-      tripId: current.tripId,
-      schedules: newSchedules,
-    ));
+    state = AsyncValue.data(
+      PendingScheduleModel(tripId: current.tripId, schedules: newSchedules),
+    );
   }
 
   /// 상태 초기화 (clear)

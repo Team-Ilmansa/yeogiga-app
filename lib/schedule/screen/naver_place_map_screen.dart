@@ -312,28 +312,28 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
         buttonText: '일정에 추가하기',
         onAddPressed: (selectedCategoryIndex) async {
           // 카테고리 index를 문자열로 변환
-          String placeCategory;
+          String placeType;
           switch (selectedCategoryIndex) {
             case 1:
-              placeCategory = 'TOURISM';
+              placeType = 'TOURISM';
               break;
             case 2:
-              placeCategory = 'LODGING';
+              placeType = 'LODGING';
               break;
             case 3:
-              placeCategory = 'RESTAURANT';
+              placeType = 'RESTAURANT';
               break;
             case 4:
-              placeCategory = 'TRANSPORT';
+              placeType = 'TRANSPORT';
               break;
             case 5:
-              placeCategory = 'ETC';
+              placeType = 'ETC';
               break;
             default:
-              placeCategory = 'TOURISM'; // 기본값
+              placeType = 'TOURISM'; // 기본값
           }
 
-          print('선택된 카테고리: $placeCategory (index: $selectedCategoryIndex)');
+          print('선택된 카테고리: $placeType (index: $selectedCategoryIndex)');
           final tripState = ref.read(tripProvider).valueOrNull;
           if (tripState is TripModel) {
             bool success = false;
@@ -350,7 +350,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                       name: _selectedPlace!.title,
                       latitude: _selectedPlace!.mapyCoord,
                       longitude: _selectedPlace!.mapxCoord,
-                      placeCategory: placeCategory,
+                      placeType: placeType,
                       address: _selectedPlace!.address,
                     );
               } else {
@@ -364,7 +364,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                         name: _selectedPlace!.title,
                         latitude: _selectedPlace!.mapyCoord,
                         longitude: _selectedPlace!.mapxCoord,
-                        placeType: placeCategory,
+                        placeType: placeType,
                         address: _selectedPlace!.address,
                       );
                 }

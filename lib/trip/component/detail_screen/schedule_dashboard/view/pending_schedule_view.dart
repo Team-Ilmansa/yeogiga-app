@@ -294,7 +294,7 @@ class _PendingScheduleViewState extends State<PendingScheduleView> {
                                 ),
                                 child: ScheduleItem(
                                   title: place.name,
-                                  category: place.placeCategory,
+                                  category: place.placeType,
                                   time: null,
                                   done: false,
                                 ),

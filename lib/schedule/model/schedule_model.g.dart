@@ -12,7 +12,7 @@ PendingPlaceModel _$PendingPlaceModelFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      placeCategory: json['placeCategory'] as String,
+      placeType: json['placeType'] as String,
     );
 
 Map<String, dynamic> _$PendingPlaceModelToJson(PendingPlaceModel instance) =>
@@ -21,7 +21,7 @@ Map<String, dynamic> _$PendingPlaceModelToJson(PendingPlaceModel instance) =>
       'name': instance.name,
       'latitude': instance.latitude,
       'longitude': instance.longitude,
-      'placeCategory': instance.placeCategory,
+      'placeType': instance.placeType,
     };
 
 PendingDayScheduleModel _$PendingDayScheduleModelFromJson(
