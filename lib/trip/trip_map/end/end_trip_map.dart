@@ -16,10 +16,11 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/model/trip_host_route_day.dart';
 import 'package:yeogiga/trip/provider/trip_host_route_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
+import 'package:yeogiga/trip_image/model/trip_image_model.dart';
+import 'package:yeogiga/common/utils/trip_utils.dart';
 
 class EndTripMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'endTripMap';
@@ -30,20 +31,36 @@ class EndTripMapScreen extends ConsumerStatefulWidget {
 }
 
 class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
+  // _EndTripNaverMap의 GlobalKey
+  final GlobalKey<_EndTripNaverMapState> _mapKey =
+      GlobalKey<_EndTripNaverMapState>();
+
+  // Optimistic UI: 이미지 마커 즉시 제거 (외부에서 호출 가능)
+  Future<void> removeImageMarkers(List<String> imageIds) async {
+    await _mapKey.currentState?.removeImageMarkers(imageIds);
+  }
+
   // 갤러리탭 리프레쉬
   Future<void> refreshAll() async {
-    if (!mounted) return;
+    print('[EndTripMap refreshAll] 시작');
+    if (!mounted) {
+      print('[EndTripMap refreshAll] mounted=false, 종료');
+      return;
+    }
 
     final trip = ref.read(tripProvider).valueOrNull;
     final isCompleted = trip is CompletedTripModel;
     int tripId = (trip is TripModel) ? trip.tripId : 0;
+    print('[EndTripMap refreshAll] tripId=$tripId, isCompleted=$isCompleted');
     // invalidate 일정/이미지 provider
     ref.invalidate(pendingDayTripImagesProvider);
     ref.invalidate(unmatchedTripImagesProvider);
     ref.invalidate(matchedTripImagesProvider);
+    print('[EndTripMap refreshAll] providers invalidated');
     // 일정 fetchAll
     if (isCompleted) {
       if (!mounted) return;
+      print('[EndTripMap refreshAll] completedSchedule fetch 시작');
       await ref.read(completedScheduleProvider.notifier).fetch(tripId);
       final completed = ref.read(completedScheduleProvider).valueOrNull;
       if (completed != null && completed.data.isNotEmpty) {
@@ -75,12 +92,17 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                   ),
                 )
                 .toList();
+        print(
+          '[EndTripMap refreshAll] pendingDayPlaceInfos: ${pendingDayPlaceInfos.map((e) => 'day=${e.day}, id=${e.tripDayPlaceId}').toList()}',
+        );
         await ref
             .read(pendingDayTripImagesProvider.notifier)
             .fetchAll(tripId, pendingDayPlaceInfos);
+        print('[EndTripMap refreshAll] pending fetchAll 완료');
         await ref
             .read(unmatchedTripImagesProvider.notifier)
             .fetchAll(tripId, unmatchedDayPlaceInfos);
+        print('[EndTripMap refreshAll] unmatched fetchAll 완료');
         await ref
             .read(matchedTripImagesProvider.notifier)
             .fetchAll(tripId, matchedDayPlaceInfos);
@@ -136,13 +158,14 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   }
 
   bool _allDaysFetched = false;
-  bool _fetchedAndFitted = false;
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
 
+  // UI 상태만 관리 (지도 관련 상태는 _EndTripNaverMap으로 이동)
   int selectedDayIndex = 0;
-  bool selectionMode = false;
+  bool _isImageMode = false;
+  String? _selectedPlaceId;
 
   Map<String, List<String>> matchedOrUnmatchedPayload = {};
   Map<String, List<String>> pendingPayload = {};
@@ -196,147 +219,24 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     super.dispose();
   }
 
-  NaverMapController? mapController;
-  List<NMarker> _placeMarkers = [];
-  NPolylineOverlay? _polyline;
-  NLocationOverlay? _locationOverlay;
-
-  Future<void> _fitMapToPlaces(List<CompletedTripPlaceModel> places) async {
-    if (mapController == null || places.isEmpty) return;
-    final validPlaces =
-        places.where((p) => p.latitude != null && p.longitude != null).toList();
-    if (validPlaces.length == 1) {
-      await mapController!.updateCamera(
-        NCameraUpdate.withParams(
-          target: NLatLng(validPlaces[0].latitude!, validPlaces[0].longitude!),
-          zoom: 15,
-        ),
-      );
-    } else {
-      final lats = validPlaces.map((p) => p.latitude!).toList();
-      final lngs = validPlaces.map((p) => p.longitude!).toList();
-      final southWest = NLatLng(
-        lats.reduce((a, b) => a < b ? a : b),
-        lngs.reduce((a, b) => a < b ? a : b),
-      );
-      final northEast = NLatLng(
-        lats.reduce((a, b) => a > b ? a : b),
-        lngs.reduce((a, b) => a > b ? a : b),
-      );
-      final bounds = NLatLngBounds(southWest: southWest, northEast: northEast);
-      await mapController!.updateCamera(
-        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(24.w)),
-      );
-    }
-  }
-
-  void _updateMapOverlays(
-    List<CompletedTripPlaceModel> places, {
-    List<NLatLng>? hostRouteCoords,
-  }) async {
-    if (mapController == null || !mounted) return;
-    try {
-      await mapController!.clearOverlays();
-    } catch (e) {
-      // 이미 dispose된 경우 무시
-      return;
-    }
-    _placeMarkers.clear();
-    _polyline = null;
-    final validPlaces =
-        places.where((p) => p.latitude != null && p.longitude != null).toList();
-    for (final place in validPlaces) {
-      final marker = NMarker(
-        id: place.id,
-        position: NLatLng(place.latitude!, place.longitude!),
-        icon: NOverlayImage.fromAssetImage('asset/icon/place.png'),
-        size: Size(32.w, 32.h),
-        caption: NOverlayCaption(text: place.name),
-      );
-      _placeMarkers.add(marker);
-      await mapController!.addOverlay(marker);
-    }
-    // 일정 폴리라인
-    if (validPlaces.length >= 2) {
-      final polyline = NPolylineOverlay(
-        id: 'trip_polyline',
-        coords:
-            validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
-        color: const Color(0xFF8287FF),
-        width: 4.w,
-        lineCap: NLineCap.round,
-        lineJoin: NLineJoin.round,
-      );
-      _polyline = polyline;
-      await mapController!.addOverlay(polyline);
-    }
-    // 방장 경로 폴리라인 (hostRouteCoords)
-    print(hostRouteCoords);
-    if (hostRouteCoords != null && hostRouteCoords.length >= 2) {
-      final hostPolyline = NPolylineOverlay(
-        id: 'host_route_polyline',
-        coords: hostRouteCoords,
-        color: const Color(0xff2ac308), // 빨간색
-        width: 2.w,
-      );
-      await mapController!.addOverlay(hostPolyline);
-    }
-    // 권한 요청
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.always ||
-          permission == LocationPermission.whileInUse) {
-        final pos = await Geolocator.getCurrentPosition();
-        final overlay = mapController!.getLocationOverlay();
-        overlay.setIsVisible(true);
-        overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
-        _locationOverlay = overlay;
-      }
-    } catch (_) {}
-  }
-
-  // TODO: 내 위치로 카메라 이동 함수
-  Future<void> _moveToMyLocation() async {
-    if (mapController == null) return;
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-    if (permission == LocationPermission.deniedForever) return;
-    final pos = await Geolocator.getCurrentPosition();
-    await mapController!.updateCamera(
-      NCameraUpdate.withParams(
-        target: NLatLng(pos.latitude, pos.longitude),
-        zoom: 15,
-      ),
-    );
-  }
-
-  // TODO: day 뽑아내기
-  List<String> getDaysForTrip(TripBaseModel? trip) {
-    if (trip is CompletedTripModel &&
-        trip.startedAt != null &&
-        trip.endedAt != null) {
-      final start = DateTime.parse(trip.startedAt!.substring(0, 10));
-      final end = DateTime.parse(trip.endedAt!.substring(0, 10));
-      final dayCount = end.difference(start).inDays + 1;
-      return List.generate(dayCount, (index) => 'DAY ${index + 1}');
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
     final tripState = ref.watch(tripProvider).valueOrNull;
-    final days = getDaysForTrip(tripState);
-    final hostRouteAsync = ref.watch(tripHostRouteProvider);
+    final days = TripUtils.getDaysForTrip(tripState);
+
     return WillPopScope(
       onWillPop: () async {
-        ref.read(selectionModeProvider.notifier).state = false;
+        // selection mode 해제
+        if (ref.read(selectionModeProvider)) {
+          ref.read(selectionModeProvider.notifier).state = false;
+        }
+        // 이미지 모드 해제
+        if (_isImageMode) {
+          setState(() {
+            _isImageMode = false;
+            _selectedPlaceId = null;
+          });
+        }
         return true; // true를 리턴하면 실제로 pop이 일어남
       },
       child: Scaffold(
@@ -349,99 +249,28 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
-            // TODO: 네이버 지도 파트
-            Consumer(
-              builder: (context, ref, _) {
-                final completedAsync =
-                    ref.watch(completedScheduleProvider).valueOrNull;
-                if (completedAsync == null || completedAsync.data.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!_allDaysFetched) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final schedules = completedAsync.data;
-                final placeList =
-                    selectedDayIndex == 0
-                        ? [for (final day in schedules) ...day.places]
-                            .where(
-                              (p) => p.latitude != null && p.longitude != null,
-                            )
-                            .toList()
-                        : schedules
-                            .firstWhere(
-                              (s) => s.day == selectedDayIndex,
-                              orElse:
-                                  () => CompletedTripDayPlaceModel(
-                                    day: selectedDayIndex,
-                                    places: [],
-                                    id: '',
-                                    unmatchedImage: null,
-                                  ),
-                            )
-                            .places
-                            .where(
-                              (p) => p.latitude != null && p.longitude != null,
-                            )
-                            .toList();
-                // host route polyline 좌표 추출
-                List<NLatLng> hostRouteCoords = [];
-                if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
-                  final hostRoutes = hostRouteAsync.value ?? [];
-                  if (selectedDayIndex == 0) {
-                    // 전체 여행: 모든 day의 좌표를 합침
-                    hostRouteCoords = [
-                      for (final day in hostRoutes)
-                        ...day.routes.map(
-                          (p) => NLatLng(p.latitude, p.longitude),
-                        ),
-                    ];
-                  } else {
-                    // 특정 day: 해당 day의 좌표만
-                    final dayRoute = hostRoutes.firstWhere(
-                      (d) => d.day == selectedDayIndex,
-                      orElse:
-                          () => TripHostRouteDay(
-                            day: selectedDayIndex,
-                            routes: [],
-                          ),
-                    );
-                    hostRouteCoords =
-                        dayRoute.routes
-                            .map((p) => NLatLng(p.latitude, p.longitude))
-                            .toList();
-                  }
-                }
-                if (mapController != null && placeList.isNotEmpty) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    _updateMapOverlays(
-                      placeList,
-                      hostRouteCoords: hostRouteCoords,
-                    );
+            // 네이버 지도 위젯
+            if (_allDaysFetched)
+              _EndTripNaverMap(
+                key: _mapKey,
+                selectedDayIndex: selectedDayIndex,
+                isImageMode: _isImageMode,
+                selectedPlaceId: _selectedPlaceId,
+                onPlaceMarkerTapped: (place) {
+                  setState(() {
+                    _isImageMode = true;
+                    _selectedPlaceId = place.id;
                   });
-                }
-                return NaverMap(
-                  onMapReady: (controller) {
-                    if (mounted) {
-                      setState(() {
-                        mapController = controller;
-                      });
-                    }
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted) return;
-                      _updateMapOverlays(
-                        placeList,
-                        hostRouteCoords: hostRouteCoords,
-                      );
-                    });
-                  },
-                  onMapTapped: (point, latLng) {
-                    FocusScope.of(context).unfocus();
-                  },
-                );
-              },
-            ),
+                },
+                onImageModeExit: () {
+                  setState(() {
+                    _isImageMode = false;
+                    _selectedPlaceId = null;
+                  });
+                },
+              )
+            else
+              const Center(child: CircularProgressIndicator()),
             // TODO: 뒤로 가기 버튼
             Positioned(
               top: 15.h,
@@ -463,10 +292,13 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                 ),
               ),
             ),
-            // 내 위치로 가기 버튼
+            // 내 위치로 가기 버튼 (기능 비활성화)
             MyLocationButton(
               controller: _sheetController,
-              onTap: _moveToMyLocation,
+              onTap: () {
+                // 내 위치 기능은 _EndTripNaverMap 내부에서 처리
+                // 향후 필요시 콜백 추가 가능
+              },
             ),
             // TODO: 하단 슬라이더 위젯
             DraggableScrollableSheet(
@@ -479,85 +311,15 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                   scrollController: scrollController,
                   days: days,
                   selectedDayIndex: selectedDayIndex,
-                  onDayChanged: (index) async {
+                  onDayChanged: (index) {
+                    // selectedDayIndex만 변경하면 _EndTripNaverMap의 didUpdateWidget에서 자동으로 마커 업데이트
                     if (mounted) {
                       setState(() {
                         selectedDayIndex = index;
+                        // Day 변경 시 이미지 모드 해제
+                        _isImageMode = false;
+                        _selectedPlaceId = null;
                       });
-                    }
-
-                    // 기존 DaySelector onChanged의 지도 마커/폴리라인 갱신 로직
-                    final tripState = ref.read(tripProvider).valueOrNull;
-                    if (index == 0) {
-                      // 전체 보기: 지도 전체 리셋
-                      final completedAsync =
-                          ref.read(completedScheduleProvider).valueOrNull;
-                      final schedules = completedAsync?.data ?? [];
-                      final allPlaces =
-                          [for (final day in schedules) ...day.places]
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
-                      // host route polyline 좌표 추출 (전체)
-                      List<NLatLng> hostRouteCoords = [];
-                      final hostRouteAsync = ref.read(tripHostRouteProvider);
-                      if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
-                        final hostRoutes = hostRouteAsync.value ?? [];
-                        hostRouteCoords = [
-                          for (final day in hostRoutes)
-                            ...day.routes.map(
-                              (p) => NLatLng(p.latitude, p.longitude),
-                            ),
-                        ];
-                      }
-                      _updateMapOverlays(
-                        allPlaces,
-                        hostRouteCoords: hostRouteCoords,
-                      );
-                      await _fitMapToPlaces(allPlaces);
-                    } else {
-                      final completedAsync =
-                          ref.read(completedScheduleProvider).valueOrNull;
-                      final schedules = completedAsync?.data ?? [];
-                      final daySchedule = schedules.firstWhere(
-                        (s) => s.day == index,
-                        orElse:
-                            () => CompletedTripDayPlaceModel(
-                              day: index,
-                              places: [],
-                              id: '',
-                              unmatchedImage: null,
-                            ),
-                      );
-                      final places =
-                          daySchedule.places
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
-                      // host route polyline 좌표 추출 (해당 day)
-                      List<NLatLng> hostRouteCoords = [];
-                      final hostRouteAsync = ref.read(tripHostRouteProvider);
-                      if (hostRouteAsync is AsyncData<List<TripHostRouteDay>>) {
-                        final hostRoutes = hostRouteAsync.value ?? [];
-                        final dayRoute = hostRoutes.firstWhere(
-                          (d) => d.day == index,
-                          orElse:
-                              () => TripHostRouteDay(day: index, routes: []),
-                        );
-                        hostRouteCoords =
-                            dayRoute.routes
-                                .map((p) => NLatLng(p.latitude, p.longitude))
-                                .toList();
-                      }
-                      _updateMapOverlays(
-                        places,
-                        hostRouteCoords: hostRouteCoords,
-                      );
-                      await _fitMapToPlaces(places);
                     }
                   },
                   buildPlaceList: () {
@@ -610,20 +372,9 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                                 itemBuilder: (context, idx) {
                                   final place = placeList[idx];
                                   return GestureDetector(
-                                    onTap: () async {
-                                      if (mapController != null &&
-                                          place.latitude != null &&
-                                          place.longitude != null) {
-                                        await mapController!.updateCamera(
-                                          NCameraUpdate.withParams(
-                                            target: NLatLng(
-                                              place.latitude!,
-                                              place.longitude!,
-                                            ),
-                                            zoom: 15,
-                                          ),
-                                        );
-                                      }
+                                    onTap: () {
+                                      // 카메라 이동 기능은 향후 추가 가능
+                                      // 현재는 _EndTripNaverMap 내부에서 처리
                                     },
                                     child: ScheduleItem(
                                       key: ValueKey(place.id),
@@ -663,6 +414,461 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
         ),
       ),
     );
+  }
+}
+
+// ============================================
+// _EndTripNaverMap: 독립적인 지도 위젯
+// ============================================
+class _EndTripNaverMap extends ConsumerStatefulWidget {
+  final int selectedDayIndex;
+  final bool isImageMode;
+  final String? selectedPlaceId;
+  final Function(CompletedTripPlaceModel) onPlaceMarkerTapped;
+  final VoidCallback onImageModeExit;
+
+  const _EndTripNaverMap({
+    Key? key,
+    required this.selectedDayIndex,
+    required this.isImageMode,
+    required this.selectedPlaceId,
+    required this.onPlaceMarkerTapped,
+    required this.onImageModeExit,
+  }) : super(key: key);
+
+  @override
+  ConsumerState<_EndTripNaverMap> createState() => _EndTripNaverMapState();
+}
+
+class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
+  NaverMapController? mapController;
+  final List<NMarker> _placeMarkers = [];
+  NPolylineOverlay? _polyline;
+  NLocationOverlay? _locationOverlay;
+  List<NMarker> _imageMarkers = [];
+
+  @override
+  void didUpdateWidget(covariant _EndTripNaverMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // selectedDayIndex가 변경되었을 때만 마커 업데이트
+    if (widget.selectedDayIndex != oldWidget.selectedDayIndex &&
+        !widget.isImageMode) {
+      _updateMarkersForDay(widget.selectedDayIndex);
+    }
+
+    // 이미지 모드 진입/해제
+    if (widget.isImageMode != oldWidget.isImageMode) {
+      if (widget.isImageMode && widget.selectedPlaceId != null) {
+        _showImageMarkers(widget.selectedPlaceId!);
+      } else if (!widget.isImageMode) {
+        _exitImageMode();
+      }
+    } else if (widget.isImageMode &&
+        widget.selectedPlaceId != oldWidget.selectedPlaceId) {
+      // 이미지 모드 중 다른 장소 선택
+      if (widget.selectedPlaceId != null) {
+        _showImageMarkers(widget.selectedPlaceId!);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NaverMap(
+      onMapReady: (controller) {
+        mapController = controller;
+        _updateMarkersForDay(widget.selectedDayIndex);
+      },
+      onMapTapped: (point, latLng) {
+        FocusScope.of(context).unfocus();
+        if (widget.isImageMode) {
+          widget.onImageModeExit();
+        }
+      },
+    );
+  }
+
+  // 특정 day의 마커 업데이트
+  Future<void> _updateMarkersForDay(int dayIndex) async {
+    if (mapController == null || !mounted) return;
+
+    final completedAsync = ref.read(completedScheduleProvider).valueOrNull;
+    if (completedAsync == null) return;
+
+    final schedules = completedAsync.data;
+    final places = _getPlacesForDay(dayIndex, schedules);
+
+    // host route 가져오기
+    final hostRouteCoords = _getHostRouteForDay(dayIndex);
+
+    // 오버레이 업데이트
+    await _updateMapOverlays(places, hostRouteCoords: hostRouteCoords);
+
+    // 카메라 조정
+    await _fitMapToPlaces(places);
+  }
+
+  // 해당 day의 장소 리스트 반환
+  List<CompletedTripPlaceModel> _getPlacesForDay(
+    int dayIndex,
+    List<CompletedTripDayPlaceModel> schedules,
+  ) {
+    if (dayIndex == 0) {
+      return [
+        for (final day in schedules) ...day.places,
+      ].where((p) => p.latitude != null && p.longitude != null).toList();
+    } else {
+      return schedules
+          .firstWhere(
+            (s) => s.day == dayIndex,
+            orElse:
+                () => CompletedTripDayPlaceModel(
+                  day: dayIndex,
+                  places: [],
+                  id: '',
+                  unmatchedImage: null,
+                ),
+          )
+          .places
+          .where((p) => p.latitude != null && p.longitude != null)
+          .toList();
+    }
+  }
+
+  // host route 좌표 가져오기
+  List<NLatLng> _getHostRouteForDay(int dayIndex) {
+    final hostRouteAsync = ref.read(tripHostRouteProvider);
+    if (hostRouteAsync is! AsyncData<List<TripHostRouteDay>>) {
+      return [];
+    }
+
+    final hostRoutes = hostRouteAsync.value ?? [];
+    if (dayIndex == 0) {
+      return [
+        for (final day in hostRoutes)
+          ...day.routes.map((p) => NLatLng(p.latitude, p.longitude)),
+      ];
+    } else {
+      final dayRoute = hostRoutes.firstWhere(
+        (d) => d.day == dayIndex,
+        orElse: () => TripHostRouteDay(day: dayIndex, routes: []),
+      );
+      return dayRoute.routes
+          .map((p) => NLatLng(p.latitude, p.longitude))
+          .toList();
+    }
+  }
+
+  // 지도 오버레이(마커, 폴리라인) 업데이트
+  Future<void> _updateMapOverlays(
+    List<CompletedTripPlaceModel> places, {
+    List<NLatLng>? hostRouteCoords,
+  }) async {
+    if (mapController == null || !mounted) return;
+
+    try {
+      await mapController!.clearOverlays();
+    } catch (e) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    _placeMarkers.clear();
+    _polyline = null;
+
+    final validPlaces =
+        places.where((p) => p.latitude != null && p.longitude != null).toList();
+
+    // 장소 마커 추가
+    for (final place in validPlaces) {
+      if (!mounted) return;
+
+      final marker = NMarker(
+        id: place.id,
+        position: NLatLng(place.latitude!, place.longitude!),
+        icon: NOverlayImage.fromAssetImage('asset/icon/place.png'),
+        size: Size(32.w, 32.h),
+        caption: NOverlayCaption(text: place.name),
+      );
+
+      marker.setOnTapListener((tappedMarker) {
+        widget.onPlaceMarkerTapped(place);
+      });
+
+      _placeMarkers.add(marker);
+      try {
+        await mapController!.addOverlay(marker);
+      } catch (e) {
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
+    // 일정 폴리라인
+    if (validPlaces.length >= 2) {
+      final polyline = NPolylineOverlay(
+        id: 'trip_polyline',
+        coords:
+            validPlaces.map((p) => NLatLng(p.latitude!, p.longitude!)).toList(),
+        color: const Color(0xFF8287FF),
+        width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
+      );
+      _polyline = polyline;
+      try {
+        await mapController!.addOverlay(polyline);
+      } catch (e) {
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
+    // 방장 경로 폴리라인
+    if (hostRouteCoords != null && hostRouteCoords.length >= 2) {
+      final hostPolyline = NPolylineOverlay(
+        id: 'host_route_polyline',
+        coords: hostRouteCoords,
+        color: const Color(0xff2ac308),
+        width: 2.w,
+      );
+      try {
+        await mapController!.addOverlay(hostPolyline);
+      } catch (e) {
+        return;
+      }
+    }
+
+    // 내 위치 오버레이
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
+        final pos = await Geolocator.getCurrentPosition();
+        final overlay = mapController!.getLocationOverlay();
+        overlay.setIsVisible(true);
+        overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
+        _locationOverlay = overlay;
+      }
+    } catch (_) {}
+  }
+
+  // 카메라를 장소들이 모두 보이도록 조정
+  Future<void> _fitMapToPlaces(List<CompletedTripPlaceModel> places) async {
+    final validPlaces =
+        places.where((p) => p.latitude != null && p.longitude != null).toList();
+    final locations =
+        validPlaces.map((p) => NLatLng(p.latitude, p.longitude)).toList();
+    await _fitCameraToLocations(locations);
+  }
+
+  // 범용 카메라 조정 함수
+  Future<void> _fitCameraToLocations(
+    List<NLatLng> locations, {
+    double padding = 70.0,
+  }) async {
+    if (mapController == null || locations.isEmpty) return;
+
+    if (locations.length == 1) {
+      await mapController!.updateCamera(
+        NCameraUpdate.withParams(target: locations[0], zoom: 15),
+      );
+    } else {
+      final lats = locations.map((loc) => loc.latitude).toList();
+      final lngs = locations.map((loc) => loc.longitude).toList();
+      final southWest = NLatLng(
+        lats.reduce((a, b) => a < b ? a : b),
+        lngs.reduce((a, b) => a < b ? a : b),
+      );
+      final northEast = NLatLng(
+        lats.reduce((a, b) => a > b ? a : b),
+        lngs.reduce((a, b) => a > b ? a : b),
+      );
+      final bounds = NLatLngBounds(southWest: southWest, northEast: northEast);
+      await mapController!.updateCamera(
+        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(padding.w)),
+      );
+    }
+  }
+
+  // 이미지 마커 표시
+  Future<void> _showImageMarkers(String placeId) async {
+    if (mapController == null || !mounted) return;
+
+    await mapController!.clearOverlays();
+
+    final matchedImagesAsync = ref.read(matchedTripImagesProvider);
+
+    matchedImagesAsync.when(
+      data: (matchedDayImages) {
+        for (final dayImage in matchedDayImages) {
+          for (final placeImage in dayImage.placeImagesList) {
+            if (placeImage?.id == placeId && placeImage != null) {
+              _showImageMarkersOnMap(placeImage.placeImages);
+              return;
+            }
+          }
+        }
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
+  }
+
+  // 이미지를 마커로 표시
+  Future<void> _showImageMarkersOnMap(List<MatchedImage> images) async {
+    if (mapController == null || !mounted) return;
+
+    _imageMarkers.clear();
+
+    for (final image in images) {
+      final iconWidget = Container(
+        width: 40.w,
+        height: 40.h,
+        decoration: BoxDecoration(
+          border: Border.all(color: Color(0xff8287ff), width: 2),
+          borderRadius: BorderRadius.circular(8.r),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6.r),
+          child: Image.network(
+            image.url,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey[300],
+                child: Icon(Icons.image, size: 20.w),
+              );
+            },
+          ),
+        ),
+      );
+
+      final marker = NMarker(
+        id: 'image_${image.id}',
+        position: NLatLng(image.latitude, image.longitude),
+        icon: await NOverlayImage.fromWidget(
+          widget: iconWidget,
+          size: Size(40.w, 40.h),
+          context: context,
+        ),
+        size: Size(40.w, 40.h),
+      );
+
+      marker.setOnTapListener((tappedMarker) {
+        _showImageModal(image);
+      });
+
+      _imageMarkers.add(marker);
+      await mapController!.addOverlay(marker);
+    }
+
+    if (images.isNotEmpty) {
+      await _fitMapToImages(images);
+    }
+  }
+
+  // 이미지 모달 표시
+  void _showImageModal(MatchedImage image) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Align(
+                //   alignment: Alignment.topRight,
+                //   child: IconButton(
+                //     icon: Icon(Icons.close, color: Colors.white, size: 30.w),
+                //     onPressed: () => Navigator.of(context).pop(),
+                //   ),
+                // ),
+                Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    maxWidth: MediaQuery.of(context).size.width * 0.9,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Image.network(image.url, fit: BoxFit.contain),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  '촬영 시간: ${_formatDateTime(image.date)}',
+                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _fitMapToImages(List<MatchedImage> images) async {
+    final validImages =
+        images
+            .where((img) => img.latitude != 0.0 && img.longitude != 0.0)
+            .toList();
+    final locations =
+        validImages.map((img) => NLatLng(img.latitude, img.longitude)).toList();
+    await _fitCameraToLocations(locations);
+  }
+
+  // 이미지 모드 종료
+  Future<void> _exitImageMode() async {
+    if (!mounted || mapController == null) return;
+
+    await mapController!.clearOverlays();
+
+    final completedAsync = ref.read(completedScheduleProvider).valueOrNull;
+    if (completedAsync == null) return;
+
+    final schedules = completedAsync.data;
+    final places = _getPlacesForDay(widget.selectedDayIndex, schedules);
+    final hostRouteCoords = _getHostRouteForDay(widget.selectedDayIndex);
+
+    await _updateMapOverlays(places, hostRouteCoords: hostRouteCoords);
+
+    final locations =
+        places.map((p) => NLatLng(p.latitude, p.longitude)).toList();
+    await _fitCameraToLocations(locations, padding: 50.0);
+  }
+
+  // Optimistic UI: 이미지 마커 즉시 제거 (외부에서 호출 가능)
+  Future<void> removeImageMarkers(List<String> imageIds) async {
+    if (mapController == null || !mounted || !widget.isImageMode) return;
+
+    for (final imageId in imageIds) {
+      final markerToRemove =
+          _imageMarkers
+              .where((marker) => marker.info.id == 'image_$imageId')
+              .firstOrNull;
+
+      if (markerToRemove != null) {
+        try {
+          await mapController!.deleteOverlay(markerToRemove.info);
+          _imageMarkers.remove(markerToRemove);
+        } catch (e) {
+          // 에러 무시
+        }
+      }
+    }
   }
 }
 
@@ -749,18 +955,14 @@ Widget? _getPictureOptionBar(
   bool selectionMode = ref.watch(selectionModeProvider);
   if (selectionMode) {
     return BottomAppBarLayout(
-      child: PictureOptionState(
-        selectedDayIndex: selectedDayIndex,
-        matchedOrUnmatchedPayload: matchedOrUnmatchedPayload,
-        pendingPayload: pendingPayload,
-      ),
+      child: PictureOptionState(selectedDayIndex: selectedDayIndex),
     );
   } else {
     return null;
   }
 }
 
-class EndTripBottomSheet extends StatefulWidget {
+class EndTripBottomSheet extends ConsumerStatefulWidget {
   final ScrollController scrollController;
   final List<String> days;
   final int selectedDayIndex;
@@ -780,10 +982,10 @@ class EndTripBottomSheet extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<EndTripBottomSheet> createState() => _EndTripBottomSheetState();
+  ConsumerState<EndTripBottomSheet> createState() => _EndTripBottomSheetState();
 }
 
-class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
+class _EndTripBottomSheetState extends ConsumerState<EndTripBottomSheet> {
   late int _selectedDayIndex;
 
   @override
@@ -854,17 +1056,6 @@ class _EndTripBottomSheetState extends State<EndTripBottomSheet> {
                     });
                   }
                   widget.onDayChanged(index);
-                },
-                onSelectionPayloadChanged: ({
-                  required matchedOrUnmatched,
-                  required pending,
-                }) {
-                  if (widget.onSelectionPayloadChanged != null) {
-                    widget.onSelectionPayloadChanged!(
-                      matchedOrUnmatched,
-                      pending,
-                    );
-                  }
                 },
               ),
             ],

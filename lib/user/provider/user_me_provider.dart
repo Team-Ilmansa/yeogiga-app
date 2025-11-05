@@ -59,6 +59,9 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
     try {
       final resp = await repository.getMe();
       state = resp;
+      if (resp is UserResponseModel && resp.data != null) {
+        await registerFcmToken(ref);
+      }
     } on DioException catch (e) {
       state = UserModelError(message: '유저 정보 불러오기 실패');
     }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/common/component/trip_name_card.dart';
-
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 
 class TripCardList extends StatelessWidget {
@@ -40,7 +40,7 @@ class TripCardList extends StatelessWidget {
             city: trip.city,
             startedAt: trip.startedAt,
             endedAt: trip.endedAt,
-            memberCount: trip.members.length,
+            members: trip.members,
             tripId: trip.tripId,
             onTap: () {
               if (onTap != null && trip.tripId != null) {
@@ -59,7 +59,7 @@ class TripCard extends StatelessWidget {
   final List<String>? city;
   final String? startedAt;
   final String? endedAt;
-  final int memberCount;
+  final List<TripMember> members;
   final VoidCallback? onTap;
   final int? tripId; // Hero tag용
 
@@ -69,7 +69,7 @@ class TripCard extends StatelessWidget {
     required this.city,
     required this.startedAt,
     required this.endedAt,
-    required this.memberCount,
+    required this.members,
     this.onTap,
     this.tripId,
   });
@@ -144,17 +144,65 @@ class TripCard extends StatelessWidget {
                       color: Colors.white,
                     ),
                     SizedBox(width: 4.w),
-                    ...List.generate(
-                      memberCount,
-                      (_) => Padding(
-                        padding: EdgeInsets.only(right: 1.w),
-                        child: Icon(
-                          Icons.circle,
-                          size: 16.sp,
-                          color: Colors.white,
+                    if (members.isEmpty)
+                      Icon(
+                        Icons.person_outline,
+                        size: 16.sp,
+                        color: Colors.white,
+                      )
+                    else ...[
+                      ...members.take(4).map((member) {
+                        final hasImage =
+                            member.imageUrl != null &&
+                            member.imageUrl!.isNotEmpty;
+                        return Padding(
+                          padding: EdgeInsets.only(right: 3.w),
+                          child: ClipOval(
+                            child: SizedBox(
+                              width: 16.w,
+                              height: 16.w,
+                              child: hasImage
+                                  ? Image.network(
+                                      member.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              buildProfileAvatarPlaceholder(
+                                                nickname: member.nickname,
+                                                size: 16.w,
+                                                backgroundColor: Colors.white24,
+                                                textColor: Colors.white,
+                                              ),
+                                    )
+                                  : buildProfileAvatarPlaceholder(
+                                      nickname: member.nickname,
+                                      size: 16.w,
+                                      backgroundColor: Colors.white24,
+                                      textColor: Colors.white,
+                                    ),
+                            ),
+                          ),
+                        );
+                      }),
+                      if (members.length > 4)
+                        Container(
+                          width: 22.w,
+                          height: 16.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '+${members.length - 4}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ],

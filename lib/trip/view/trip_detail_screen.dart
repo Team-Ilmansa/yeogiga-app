@@ -20,6 +20,7 @@ import 'package:yeogiga/trip/component/trip_more_menu_sheet.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
+import 'package:yeogiga/trip/provider/gallery_selection_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -47,23 +48,10 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
   int bottomAppBarState = 1;
   late TabController _tabController;
 
-  Map<String, List<String>> matchedOrUnmatchedPayload = {};
-  Map<String, List<String>> pendingPayload = {};
-
   Timer? _noticeFetchDebounce;
   // Trip 정보가 완전히 로드된 뒤에만 일정 데이터를 다시 불러오기 위해 TripProvider를 구독한다.
   ProviderSubscription<AsyncValue<TripBaseModel?>>? _tripSubscription;
   int? _lastRefreshedTripId;
-
-  void onSelectionPayloadChanged({
-    required Map<String, List<String>> matchedOrUnmatched,
-    required Map<String, List<String>> pending,
-  }) {
-    setState(() {
-      matchedOrUnmatchedPayload = matchedOrUnmatched;
-      pendingPayload = pending;
-    });
-  }
 
   @override
   void initState() {
@@ -74,7 +62,10 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       if (_tabController.index != 1 && _tabController.index != 2) {
+        // 갤러리/즐겨찾는 사진 탭이 아닐 때 selection 모드 해제
         ref.read(selectionModeProvider.notifier).state = false;
+        // ✅ selection provider도 clear
+        ref.read(gallerySelectionProvider.notifier).clear();
       }
       setState(() {
         if (_tabController.index == 0) {
@@ -185,7 +176,10 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
   // 갤러리탭 리프레쉬
   Future<void> refreshAll() async {
-    if (!mounted) return;
+    print('[TripDetailScreen refreshAll] 시작');
+    if (!mounted) {
+      return;
+    }
 
     setState(() {
       isRefreshing = true;
@@ -439,13 +433,9 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
         ],
       ),
       bottomNavigationBar: _getBottomNavigationBar(
-        /// TODO: 하단바 버튼으로
-        /// TODO: 상태, 선택한 날짜, 삭제할 리스트들 전부 넘겨야함.
         ref,
         bottomAppBarState,
         _selectedDayIndex,
-        matchedOrUnmatchedPayload,
-        pendingPayload,
         isLeader,
       ),
       body: NestedScrollView(
@@ -545,7 +535,6 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     _selectedDayIndex = index;
                   });
                 },
-                onSelectionPayloadChanged: onSelectionPayloadChanged,
               ),
             ),
             // 즐겨찾는 사진 탭
@@ -571,8 +560,6 @@ Widget? _getBottomNavigationBar(
   WidgetRef ref,
   int bottomAppBarState,
   int selectedDayIndex,
-  Map<String, List<String>> matchedOrUnmatchedPayload,
-  Map<String, List<String>> pendingPayload,
   bool isLeader,
 ) {
   final tripState = ref.watch(tripProvider).valueOrNull;
@@ -626,8 +613,6 @@ Widget? _getBottomNavigationBar(
         return BottomAppBarLayout(
           child: PictureOptionState(
             selectedDayIndex: selectedDayIndex,
-            matchedOrUnmatchedPayload: matchedOrUnmatchedPayload,
-            pendingPayload: pendingPayload,
           ),
         );
       }

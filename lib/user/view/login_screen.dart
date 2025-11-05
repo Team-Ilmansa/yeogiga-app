@@ -39,84 +39,88 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(userMeProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true, // 키보드 뜰 때 영역 자동 조정
-      // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-      // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: true, // 키보드 뜰 때 영역 자동 조정
+        // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+        // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 
-      // 로그인하기 버튼 섹션
-      bottomNavigationBar: BottomAppBarLayout(
-        child: Padding(
-          padding: EdgeInsets.only(
-            // 키보드 높이만큼 여백 추가
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-
-          child: ElevatedButton(
-            onPressed:
-                state is UserModelLoading ||
-                        username.isEmpty ||
-                        password.isEmpty
-                    ? null
-                    : () async {
-                      // Context를 미리 저장 (async gap 전에)
-                      final currentContext = context;
-                      final location = GoRouterState.of(currentContext).matchedLocation;
-                      final uri = Uri.parse(location);
-                      final redirect = uri.queryParameters['redirect'];
-
-                      //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
-                      final user = await ref
-                          .read(userMeProvider.notifier)
-                          .login(username: username, password: password);
-
-                      // if (user is UserDeleteModel) {
-                      //   if (!mounted) return;
-                      //   context.go('/userRecovery');
-                      //   return;
-                      // }
-
-                      if (!mounted) return;
-
-                      // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
-                      if (user is UserResponseModel && user.code == 200) {
-                        if (redirect != null && redirect.isNotEmpty) {
-                          if (!mounted) return;
-                          GoRouter.of(currentContext).go(Uri.decodeComponent(redirect));
-                          return;
-                        }
-                      }
-
-                      setState(() {
-                        loginFailed = user is UserModelError;
-                      });
-                    },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff8287ff),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(11.r),
-              ),
-              elevation: 0,
+        // 로그인하기 버튼 섹션
+        bottomNavigationBar: BottomAppBarLayout(
+          child: Padding(
+            padding: EdgeInsets.only(
+              // 키보드 높이만큼 여백 추가
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: Text(
-              '로그인하기',
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+
+            child: ElevatedButton(
+              onPressed:
+                  state is UserModelLoading ||
+                          username.isEmpty ||
+                          password.isEmpty
+                      ? null
+                      : () async {
+                        // Context를 미리 저장 (async gap 전에)
+                        final currentContext = context;
+                        final location =
+                            GoRouterState.of(currentContext).matchedLocation;
+                        final uri = Uri.parse(location);
+                        final redirect = uri.queryParameters['redirect'];
+
+                        //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
+                        final user = await ref
+                            .read(userMeProvider.notifier)
+                            .login(username: username, password: password);
+
+                        // if (user is UserDeleteModel) {
+                        //   if (!mounted) return;
+                        //   context.go('/userRecovery');
+                        //   return;
+                        // }
+
+                        if (!mounted) return;
+
+                        // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
+                        if (user is UserResponseModel && user.code == 200) {
+                          if (redirect != null && redirect.isNotEmpty) {
+                            if (!mounted) return;
+                            GoRouter.of(
+                              currentContext,
+                            ).go(Uri.decodeComponent(redirect));
+                            return;
+                          }
+                        }
+
+                        setState(() {
+                          loginFailed = user is UserModelError;
+                        });
+                      },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff8287ff),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(11.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                '로그인하기',
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+              ),
             ),
           ),
         ),
-      ),
 
-      // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-      // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: SafeArea(
+        // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+        // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               child: Column(
@@ -261,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 134.h),
+                  SizedBox(height: 124.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ

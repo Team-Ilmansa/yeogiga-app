@@ -95,6 +95,7 @@ class PendingDayTripImageNotifier
       print('이미지 업로드 중 예외 발생: $e\n$st');
       allSuccess = false;
     }
+    // Note: 업로드 후 state 업데이트는 호출하는 쪽에서 refreshAll() 호출로 처리됨
     return allSuccess;
   }
 
@@ -139,5 +140,26 @@ class PendingDayTripImageNotifier
     //항상 맵핑 완료라고 보여줄거라서 true반환으로 수정
     // return allSuccess;
     return true;
+  }
+
+  /// Optimistic UI: 이미지 ID 리스트로 즉시 state에서 제거
+  void optimisticRemove(List<String> imageIds) {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    final updatedState = currentState.map((dayPlace) {
+      // pendingImages에서 imageIds에 해당하는 이미지 제거
+      final filteredImages = dayPlace.pendingImages
+          .where((img) => !imageIds.contains(img.id))
+          .toList();
+
+      return PendingDayTripImage(
+        tripDayPlaceId: dayPlace.tripDayPlaceId,
+        day: dayPlace.day,
+        pendingImages: filteredImages,
+      );
+    }).toList();
+
+    state = AsyncValue.data(updatedState);
   }
 }

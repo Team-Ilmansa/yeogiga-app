@@ -19,6 +19,7 @@ import 'package:yeogiga/trip/model/trip_member_location.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/notice/model/ping_model.dart';
+import 'package:yeogiga/trip/trip_map/ing/member_marker_widget.dart';
 
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
@@ -206,33 +207,15 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       await mapController!.addOverlay(marker);
     }
     // --- 여행 멤버 위치 마커 ---
-    print('[DEBUG] memberLocations: $memberLocations');
-    print('[DEBUG] myNickname: $myNickname');
     if (memberLocations != null && myNickname != null) {
       final filtered =
           memberLocations
               .where((m) => m.nickname != null && m.nickname != myNickname)
               .toList();
-      print('[DEBUG] filtered memberLocations:');
-      for (final m in filtered) {
-        print(
-          'nickname: \'${m.nickname}\', lat: ${m.latitude}, lng: ${m.longitude}',
-        );
-      }
       for (final member in filtered) {
-        print(
-          '[DEBUG] adding marker: ${member.nickname}, ${member.latitude}, ${member.longitude}',
-        );
-
-        // TODO: 팀원 위치 마커는, 각각 프로필 사진으로 변경 필요
-        final marker = NMarker(
-          id: 'member_${member.userId}',
-          position: NLatLng(member.latitude, member.longitude),
-          icon: NOverlayImage.fromAssetImage('asset/img/marker-pin-01.png'),
-          size: Size(30.w, 30.h),
-          caption: NOverlayCaption(text: member.nickname),
-        );
+        final marker = await _createMemberMarker(member);
         _memberMarkers.add(marker);
+        if (!mounted || mapController == null) return;
         await mapController!.addOverlay(marker);
       }
     }
@@ -297,6 +280,24 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
         target: NLatLng(pos.latitude, pos.longitude),
         zoom: 15,
       ),
+    );
+  }
+
+  Future<NMarker> _createMemberMarker(TripMemberLocation member) async {
+    final style = MemberMarkerStyle();
+    final markerWidget = MemberMarkerWidget(member: member, style: style);
+    final overlayImage = await NOverlayImage.fromWidget(
+      widget: markerWidget,
+      size: Size(style.width, style.height),
+      context: context,
+    );
+
+    return NMarker(
+      id: 'member_${member.userId}',
+      position: NLatLng(member.latitude, member.longitude),
+      icon: overlayImage,
+      size: Size(style.width, style.height),
+      caption: NOverlayCaption(text: member.nickname),
     );
   }
 

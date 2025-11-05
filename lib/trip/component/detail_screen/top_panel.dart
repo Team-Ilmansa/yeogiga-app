@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/trip_name_card.dart';
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
@@ -52,11 +53,9 @@ class TopPanel extends StatelessWidget {
                   : tripState.endedAt!;
           tripDate = '$startStr - $endStr';
         }
-        // 멤버 수
-        int memberCount = 0;
-        if (tripState is TripModel && tripState.members.isNotEmpty) {
-          memberCount = tripState.members.length;
-        }
+        // 멤버 목록
+        final members =
+            tripState is TripModel ? tripState.members : <TripMember>[];
 
         return Padding(
           padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 0),
@@ -105,17 +104,47 @@ class TopPanel extends StatelessWidget {
                     color: const Color(0xff7d7d7d),
                   ),
                   SizedBox(width: 4.w),
-                  ...List.generate(
-                    memberCount,
-                    (_) => Padding(
-                      padding: EdgeInsets.only(right: 4.w),
-                      child: Icon(
-                        Icons.circle,
-                        size: 18.sp,
-                        color: const Color.fromARGB(255, 235, 235, 235),
-                      ),
-                    ),
-                  ),
+                  if (members.isEmpty)
+                    Icon(
+                      Icons.person_outline,
+                      size: 18.sp,
+                      color: const Color(0xffc6c6c6),
+                    )
+                  else
+                    ...members.map((member) {
+                      final imageUrl = member.imageUrl;
+                      return Padding(
+                        padding: EdgeInsets.only(right: 4.w),
+                        child: ClipOval(
+                          child: SizedBox(
+                            width: 18.w,
+                            height: 18.w,
+                            child: (imageUrl != null && imageUrl.isNotEmpty)
+                                ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            buildProfileAvatarPlaceholder(
+                                              nickname: member.nickname,
+                                              size: 18.w,
+                                              backgroundColor:
+                                                  const Color(0xffebebeb),
+                                              textColor:
+                                                  const Color(0xff8287ff),
+                                            ),
+                                  )
+                                : buildProfileAvatarPlaceholder(
+                                    nickname: member.nickname,
+                                    size: 18.w,
+                                    backgroundColor:
+                                        const Color(0xffebebeb),
+                                    textColor: const Color(0xff8287ff),
+                                  ),
+                          ),
+                        ),
+                      );
+                    }),
                 ],
               ),
             ],

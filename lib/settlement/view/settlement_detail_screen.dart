@@ -13,6 +13,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/common/utils/category_icon_util.dart';
 import 'package:yeogiga/common/utils/data_utils.dart';
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 
@@ -613,40 +614,35 @@ class _TopPanel extends StatelessWidget {
                   ),
                   SizedBox(width: 4.w),
                   ...settlement.payers.map((payer) {
-                    // // payerId와 일치하는 사람만 테두리 표시
-                    // final isActualPayer = payer.userId == settlement.payerId;
-
+                    final hasImage =
+                        payer.imageUrl != null && payer.imageUrl!.isNotEmpty;
                     return Padding(
                       padding: EdgeInsets.only(right: 4.w),
-                      child: Container(
-                        width: 18.w,
-                        height: 18.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40.r),
-                          // border:
-                          //     isActualPayer
-                          //         ? Border.all(
-                          //           width: 0.889.sp,
-                          //           color: Color(0xff8287ff),
-                          //         )
-                          //         : null,
-                          image:
-                              payer.imageUrl != null &&
-                                      payer.imageUrl!.isNotEmpty
-                                  ? DecorationImage(
-                                    image: NetworkImage(payer.imageUrl!),
-                                    fit: BoxFit.cover,
-                                  )
-                                  : null,
-                        ),
-                        child:
-                            payer.imageUrl == null || payer.imageUrl!.isEmpty
-                                ? Icon(
-                                  Icons.person,
-                                  size: 10.sp,
-                                  color: Color(0xff8287ff),
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 18.w,
+                          height: 18.w,
+                          child: hasImage
+                              ? Image.network(
+                                  payer.imageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          buildProfileAvatarPlaceholder(
+                                            nickname: payer.nickname,
+                                            size: 18.w,
+                                            backgroundColor:
+                                                const Color(0xffebebeb),
+                                            textColor: const Color(0xff8287ff),
+                                          ),
                                 )
-                                : null,
+                              : buildProfileAvatarPlaceholder(
+                                  nickname: payer.nickname,
+                                  size: 18.w,
+                                  backgroundColor: const Color(0xffebebeb),
+                                  textColor: const Color(0xff8287ff),
+                                ),
+                        ),
                       ),
                     );
                   }),

@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/main_trip/view/home_screen.dart';
-import 'package:yeogiga/common/component/past_trip_card.dart';
+import 'package:yeogiga/common/component/trip_card.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/utils/category_icon_util.dart';
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
 
 class SettlementItem extends StatelessWidget {
@@ -81,9 +82,11 @@ class SettlementItem extends StatelessWidget {
                             ),
                             SizedBox(width: 4.w),
                             ...settlement.payers.map((payer) {
-                              // payerId와 일치하는 사람만 테두리 표시
                               final isActualPayer =
                                   payer.userId == settlement.payerId;
+                              final hasImage =
+                                  payer.imageUrl != null &&
+                                  payer.imageUrl!.isNotEmpty;
 
                               return Padding(
                                 padding: EdgeInsets.only(right: 4.w),
@@ -99,26 +102,41 @@ class SettlementItem extends StatelessWidget {
                                               color: Color(0xff8287ff),
                                             )
                                             : null,
-                                    image:
-                                        payer.imageUrl != null &&
-                                                payer.imageUrl!.isNotEmpty
-                                            ? DecorationImage(
-                                              image: NetworkImage(
-                                                payer.imageUrl!,
-                                              ),
-                                              fit: BoxFit.cover,
-                                            )
-                                            : null,
                                   ),
-                                  child:
-                                      payer.imageUrl == null ||
-                                              payer.imageUrl!.isEmpty
-                                          ? Icon(
-                                            Icons.person,
-                                            size: 10.sp,
-                                            color: Color(0xff8287ff),
-                                          )
-                                          : null,
+                                  child: ClipOval(
+                                    child: SizedBox(
+                                      width: 16.w,
+                                      height: 16.h,
+                                      child: hasImage
+                                          ? Image.network(
+                                              payer.imageUrl!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) =>
+                                                      buildProfileAvatarPlaceholder(
+                                                        nickname:
+                                                            payer.nickname,
+                                                        size: 16.w,
+                                                        backgroundColor:
+                                                            const Color(
+                                                              0xffebebeb,
+                                                            ),
+                                                        textColor:
+                                                            const Color(
+                                                              0xff8287ff,
+                                                            ),
+                                                      ),
+                                            )
+                                          : buildProfileAvatarPlaceholder(
+                                              nickname: payer.nickname,
+                                              size: 16.w,
+                                              backgroundColor:
+                                                  const Color(0xffebebeb),
+                                              textColor:
+                                                  const Color(0xff8287ff),
+                                            ),
+                                    ),
+                                  ),
                                 ),
                               );
                             }),

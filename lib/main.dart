@@ -19,21 +19,61 @@ import 'package:yeogiga/firebase_options.dart';
 // 백그라운드 핸들러는 반드시 background isolate에서 ProviderContainer를 새로 생성해야 함
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('========================================');
+  print('[FCM] 🔔 Background 알림 수신됨!');
+  print('[FCM] messageId: ${message.messageId}');
+  print('[FCM] sentTime: ${message.sentTime}');
+  print('[FCM] data: ${message.data}');
+  print('[FCM] notification: ${message.notification}');
+  if (message.notification != null) {
+    print('[FCM] notification.title: ${message.notification!.title}');
+    print('[FCM] notification.body: ${message.notification!.body}');
+  }
+  print('========================================');
+
   final container = ProviderContainer();
   await fcmBackgroundHandler(message, container);
   container.dispose(); // 메모리 누수 방지
+
+  print('[FCM] Background 메시지 처리 완료');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 화면 방향을 세로 모드로 고정
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Firebase 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // FCM 백그라운드 핸들러 등록 (background isolate 안전 패턴)
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // foreground 용 ProviderContainer (포그라운드에서만 사용)
+  final container = ProviderContainer();
+
+  // FCM 포그라운드 메시지 처리
+  FirebaseMessaging.onMessage.listen((message) async {
+    print('========================================');
+    print('[FCM] 🔔 Foreground 알림 수신됨!');
+    print('[FCM] messageId: ${message.messageId}');
+    print('[FCM] sentTime: ${message.sentTime}');
+    print('[FCM] data: ${message.data}');
+    print('[FCM] notification: ${message.notification}');
+    if (message.notification != null) {
+      print('[FCM] notification.title: ${message.notification!.title}');
+      print('[FCM] notification.body: ${message.notification!.body}');
+    }
+    print('========================================');
+
+    // 사일런트(데이터-only) 메시지일 때만 처리
+    if (message.notification == null) {
+      print('[FCM][Foreground][Silent] 사일런트 메시지 처리 시작');
+      await fcmBackgroundHandler(message, container);
+      print('[FCM][Foreground][Silent] 사일런트 메시지 처리 완료');
+    }
+  });
 
   // env 파일 적용
   await dotenv.load(fileName: ".env");
@@ -54,21 +94,6 @@ void main() async {
           NAnotherAuthFailedException() => print("인증 실패: $ex"),
         },
   );
-
-  // FCM 백그라운드 핸들러 등록 (background isolate 안전 패턴)
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // foreground 용 ProviderContainer (포그라운드에서만 사용)
-  final container = ProviderContainer();
-
-  // FCM 포그라운드 메시지 처리
-  FirebaseMessaging.onMessage.listen((message) async {
-    // 사일런트(데이터-only) 메시지일 때만 print 및 처리
-    if (message.notification == null) {
-      print('[FCM][Foreground][Silent] 받은 메시지: ${message.data}');
-      await fcmBackgroundHandler(message, container);
-    }
-  });
 
   // 카카오 소셜로그인 설정
   KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_NATIVE_APP_KEY'));
