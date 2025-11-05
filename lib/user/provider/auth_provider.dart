@@ -21,6 +21,7 @@ import 'package:yeogiga/user/view/nickname_setup_screen.dart';
 import 'package:yeogiga/common/view/screen_wrapper.dart';
 import 'package:yeogiga/w2m/view/w2m_overlap_calendar_screen.dart';
 import 'package:yeogiga/trip/view/trip_invite_handler.dart';
+import 'package:yeogiga/dev/marker_preview_screen.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider(ref: ref);
@@ -38,6 +39,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   List<GoRoute> get routes => [
+    GoRoute(
+      path: '/markerPreview',
+      name: MarkerPreviewScreen.routeName,
+      builder: (_, __) => const MarkerPreviewScreen(),
+    ),
     GoRoute(
       path: '/',
       name: ScreenWrapper.routeName,
@@ -165,6 +171,10 @@ class AuthProvider extends ChangeNotifier {
   // 홈 스크린으로 보내줄지 확인하는 과정이 필요하다.
   String? redirectLogic(BuildContext context, GoRouterState state) {
     final UserModelBase? user = ref.read(userMeProvider);
+
+    if (state.location == '/markerPreview') {
+      return null;
+    }
 
     final loggingInOrRegister =
         state.location == '/login' || state.location == '/register';

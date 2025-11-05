@@ -1,18 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/setting_trip_card.dart';
+import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
-import 'package:yeogiga/common/component/past_trip_card.dart';
+import 'package:yeogiga/common/component/trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
-import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
-import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/settlement/provider/settlement_provider.dart';
-import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/common/provider/weather_provider.dart';
@@ -22,8 +21,7 @@ import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/common/route_observer.dart';
-import 'package:yeogiga/w2m/model/user_w2m_model.dart';
-import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
+import 'package:yeogiga/common/service/fcm_token_manager.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -208,6 +206,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                               ),
                         );
                       },
+                    ),
+                    //TODO: 디버그시?
+                    Column(
+                      children: [
+                        SizedBox(height: 20.h),
+                        // ✅ FCM 테스트 버튼
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 14.w),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              print('[FCM Test] 버튼 클릭');
+                              try {
+                                // Firebase에서 직접 FCM 토큰 가져오기 (APNs 토큰 대기 포함)
+                                final fcmToken =
+                                    await fetchFcmTokenWithApnsWait();
+
+                                if (fcmToken == null || fcmToken.isEmpty) {
+                                  print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('FCM 토큰을 가져올 수 없습니다.'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                print('[FCM Test] FCM Token: $fcmToken');
+                                print(
+                                  '[FCM Test] 토큰 앞부분: ${fcmToken.substring(0, 20)}...',
+                                );
+
+                                // API 호출
+                                final dio = ref.watch(dioProvider);
+                                final response = await dio.get(
+                                  'https://api.yeogiga.com/fcm-test',
+                                  queryParameters: {'token': fcmToken},
+                                );
+
+                                print(
+                                  '[FCM Test] API 응답: ${response.statusCode}',
+                                );
+                                print('[FCM Test] 응답 데이터: ${response.data}');
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
+                                      ),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              } catch (e, st) {
+                                print('[FCM Test] 오류 발생: $e');
+                                print('[FCM Test] Stack trace: $st');
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('오류: $e'),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF8287FF),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'FCM 테스트',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                      ],
                     ),
                   ],
                 ),

@@ -102,4 +102,38 @@ class MatchedDayTripImageNotifier
     );
     return result;
   }
+
+  /// Optimistic UI: 이미지 ID 리스트로 즉시 state에서 제거
+  void optimisticRemove(List<String> imageIds) {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    final updatedState = currentState.map((dayPlace) {
+      final updatedPlaceImagesList = dayPlace.placeImagesList.map((placeImages) {
+        if (placeImages == null) return null;
+
+        // placeImages에서 imageIds에 해당하는 이미지 제거
+        final filteredImages = placeImages.placeImages
+            .where((img) => !imageIds.contains(img.id))
+            .toList();
+
+        return MatchedPlaceImage(
+          id: placeImages.id,
+          name: placeImages.name,
+          latitude: placeImages.latitude,
+          longitude: placeImages.longitude,
+          type: placeImages.type,
+          placeImages: filteredImages,
+        );
+      }).toList();
+
+      return MatchedDayTripPlaceImage(
+        tripDayPlaceId: dayPlace.tripDayPlaceId,
+        day: dayPlace.day,
+        placeImagesList: updatedPlaceImagesList,
+      );
+    }).toList();
+
+    state = AsyncValue.data(updatedState);
+  }
 }

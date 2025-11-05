@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:yeogiga/common/component/past_trip_card.dart';
+import 'package:yeogiga/common/component/trip_card.dart';
 import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
@@ -228,13 +228,14 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               onTap: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
-                  builder: (context) => ConfirmationDialog(
-                    title: '로그아웃',
-                    content: '정말 로그아웃 하시겠어요?',
-                    cancelText: '취소',
-                    confirmText: '로그아웃',
-                    confirmColor: const Color(0xFF8287FF),
-                  ),
+                  builder:
+                      (context) => ConfirmationDialog(
+                        title: '로그아웃',
+                        content: '정말 로그아웃 하시겠어요?',
+                        cancelText: '취소',
+                        confirmText: '로그아웃',
+                        confirmColor: const Color(0xFF8287FF),
+                      ),
                 );
 
                 if (confirmed == true) {
@@ -265,13 +266,14 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               onTap: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
-                  builder: (context) => ConfirmationDialog(
-                    title: '회원 탈퇴',
-                    content: '정말 탈퇴하시겠어요?\n모든 데이터가 삭제됩니다.',
-                    cancelText: '취소',
-                    confirmText: '탈퇴하기',
-                    confirmColor: const Color(0xFFFF6B6B),
-                  ),
+                  builder:
+                      (context) => ConfirmationDialog(
+                        title: '회원 탈퇴',
+                        content: '정말 탈퇴하시겠어요?\n모든 데이터가 삭제됩니다.',
+                        cancelText: '취소',
+                        confirmText: '탈퇴하기',
+                        confirmColor: const Color(0xFFFF6B6B),
+                      ),
                 );
 
                 if (confirmed == true) {

@@ -54,7 +54,7 @@ class UnmatchedDayTripImageNotifier
       (e) => e.day == day && e.tripDayPlaceId == tripDayPlaceId,
     );
     if (index == -1) return;
-    
+
     try {
       final newItem = await repo.fetchUnmatchedDayTripImages(
         tripId: tripId,
@@ -67,5 +67,26 @@ class UnmatchedDayTripImageNotifier
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
+  }
+
+  /// Optimistic UI: 이미지 ID 리스트로 즉시 state에서 제거
+  void optimisticRemove(List<String> imageIds) {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    final updatedState = currentState.map((dayPlace) {
+      // unmatchedImages에서 imageIds에 해당하는 이미지 제거
+      final filteredImages = dayPlace.unmatchedImages
+          .where((img) => !imageIds.contains(img.id))
+          .toList();
+
+      return UnMatchedDayTripImage(
+        tripDayPlaceId: dayPlace.tripDayPlaceId,
+        day: dayPlace.day,
+        unmatchedImages: filteredImages,
+      );
+    }).toList();
+
+    state = AsyncValue.data(updatedState);
   }
 }

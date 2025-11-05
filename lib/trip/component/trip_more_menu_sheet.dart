@@ -385,7 +385,8 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     }
                   }
 
-                  final inviteLink = 'yeogiga://trip/invite/$tripId?title=${Uri.encodeComponent(tripTitle)}';
+                  final inviteLink =
+                      'yeogiga://trip/invite/$tripId?title=${Uri.encodeComponent(tripTitle)}';
                   final message =
                       '$tripTitle\n$dateText\n아래 링크를 눌러 여행에 참여하세요.\n$inviteLink';
 
@@ -403,19 +404,19 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
 
                     // 성공 메시지
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('초대 링크를 공유했습니다!'),
-                        backgroundColor: Color(0xFF38D479),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text('초대 링크를 공유했습니다!'),
+                    //     backgroundColor: Color(0xFF38D479),
+                    //     duration: Duration(seconds: 2),
+                    //     behavior: SnackBarBehavior.floating,
+                    //     margin: EdgeInsets.all(5.w),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(14.r),
+                    //     ),
+                    //     elevation: 0,
+                    //   ),
+                    // );
                   } catch (error) {
                     print('카카오톡 공유 실패: $error');
                     if (!context.mounted) return;
@@ -708,6 +709,101 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                         ),
                       );
                     }
+                  }
+                },
+              ),
+              // 링크공유로 초대하기
+              _TripMenuItem(
+                svgUrl: 'asset/icon/menu/share_edit.svg',
+                text: '링크공유로 초대하기',
+                onTap: () async {
+                  GoRouter.of(context).pop();
+
+                  // 여행 정보 가져오기
+                  final tripState = ref.read(tripProvider).valueOrNull;
+                  if (tripState is! TripModel) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('여행 정보를 불러올 수 없습니다.'),
+                        backgroundColor: Color(0xFFE25141),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final tripId = tripState.tripId;
+                  final tripTitle = tripState.title;
+
+                  // 날짜 포맷팅
+                  String dateText = '날짜 미정';
+                  if (tripState.startedAt != null &&
+                      tripState.endedAt != null) {
+                    try {
+                      final start = DateTime.parse(tripState.startedAt!);
+                      final end = DateTime.parse(tripState.endedAt!);
+                      final formatter = DateFormat('yyyy.MM.dd');
+                      dateText =
+                          '${formatter.format(start)} - ${formatter.format(end)}';
+                    } catch (e) {
+                      // 날짜 파싱 실패 시 기본값 유지
+                    }
+                  }
+
+                  final inviteLink =
+                      'yeogiga://trip/invite/$tripId?title=${Uri.encodeComponent(tripTitle)}';
+                  final message =
+                      '$tripTitle\n$dateText\n아래 링크를 눌러 여행에 참여하세요.\n$inviteLink';
+
+                  try {
+                    final box = context.findRenderObject() as RenderBox?;
+                    final origin =
+                        box != null
+                            ? box.localToGlobal(Offset.zero) & box.size
+                            : Rect.zero;
+                    await Share.share(
+                      message,
+                      subject: '$tripTitle 초대 링크',
+                      sharePositionOrigin: origin,
+                    );
+
+                    // 성공 메시지
+                    if (!context.mounted) return;
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text('초대 링크를 공유했습니다!'),
+                    //     backgroundColor: Color(0xFF38D479),
+                    //     duration: Duration(seconds: 2),
+                    //     behavior: SnackBarBehavior.floating,
+                    //     margin: EdgeInsets.all(5.w),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(14.r),
+                    //     ),
+                    //     elevation: 0,
+                    //   ),
+                    // );
+                  } catch (error) {
+                    print('카카오톡 공유 실패: $error');
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('공유에 실패했습니다.'),
+                        backgroundColor: Color(0xFFE25141),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.all(5.w),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    );
                   }
                 },
               ),

@@ -151,9 +151,7 @@ class _CompletedTripMiniMapState extends State<CompletedTripMiniMap> {
             NaverMap(
               options: NaverMapViewOptions(
                 initialCameraPosition: NCameraPosition(target: center, zoom: 3),
-                locationButtonEnable: false,
                 indoorEnable: false,
-                scaleBarEnable: false,
                 logoAlign: NLogoAlign.leftBottom,
               ),
               onMapReady: (controller) async {

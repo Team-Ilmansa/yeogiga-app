@@ -10,6 +10,7 @@ class BottomAppBarLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
+      height: 90.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),
         color: Colors.white,

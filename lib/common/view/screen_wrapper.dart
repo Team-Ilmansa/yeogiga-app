@@ -90,47 +90,54 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
                           builder:
                               (context) => TripNameDialog(
                                 nameController: nameController,
-                                onConfirm: ref.watch(tripProvider).isLoading 
-                                    ? null 
-                                    : () async {
-                                        TripBaseModel trip = await ref
-                                            .read(tripProvider.notifier)
-                                            .postTrip(title: nameController.text);
-                                        if (trip is! SettingTripModel) {
-                                    if (!mounted) return;
-                                    GoRouter.of(context).pop();
-                                    await showDialog(
-                                      context: context,
-                                      barrierDismissible: true,
-                                      builder:
-                                          (context) => Dialog(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18),
-                                            ),
-                                            child: SizedBox(
-                                              height: 134.h,
-                                              child: Center(
-                                                child: Text(
-                                                  '여행 생성에 실패했어요! ㅠㅠ',
-                                                  style: TextStyle(
-                                                    fontSize: 18.sp,
-                                                    fontWeight: FontWeight.bold,
+                                onConfirm:
+                                    ref.watch(tripProvider).isLoading
+                                        ? null
+                                        : () async {
+                                          TripBaseModel trip = await ref
+                                              .read(tripProvider.notifier)
+                                              .postTrip(
+                                                title: nameController.text,
+                                              );
+                                          if (trip is! SettingTripModel) {
+                                            if (!mounted) return;
+                                            GoRouter.of(context).pop();
+                                            await showDialog(
+                                              context: context,
+                                              barrierDismissible: true,
+                                              builder:
+                                                  (context) => Dialog(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            18,
+                                                          ),
+                                                    ),
+                                                    child: SizedBox(
+                                                      height: 134.h,
+                                                      child: Center(
+                                                        child: Text(
+                                                          '여행 생성에 실패했어요! ㅠㅠ',
+                                                          style: TextStyle(
+                                                            fontSize: 18.sp,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                    );
-                                  } else {
-                                    if (!mounted) return;
-                                    Navigator.of(context).pop();
-                                    GoRouter.of(
-                                      context,
-                                    ).push('/dateRangePicker');
-                                  }
-                                },
+                                            );
+                                          } else {
+                                            if (!mounted) return;
+                                            Navigator.of(context).pop();
+                                            GoRouter.of(
+                                              context,
+                                            ).push('/dateRangePicker');
+                                          }
+                                        },
                               ),
                         );
                       },
@@ -231,21 +238,21 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
 class ConvexBottomBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    print(
-      "[v0] Painting convex bottom bar with size: ${size.width} x ${size.height}",
-    );
+    // print(
+    //   "[v0] Painting convex bottom bar with size: ${size.width} x ${size.height}",
+    // );
 
     final bottomBarShadowPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.2)
+          ..color = Colors.black.withOpacity(0.1)
           ..style = PaintingStyle.fill
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     final semicircleShadowPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.12)
+          ..color = Colors.black.withOpacity(0.1)
           ..style = PaintingStyle.fill
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     final paint =
         Paint()
