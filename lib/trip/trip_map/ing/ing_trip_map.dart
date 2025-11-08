@@ -5,13 +5,11 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
-import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
-import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
 import 'package:yeogiga/schedule/model/schedule_model.dart';
-import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 import 'package:yeogiga/trip/provider/trip_member_location_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
@@ -19,6 +17,7 @@ import 'package:yeogiga/trip/model/trip_member_location.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/notice/model/ping_model.dart';
+import 'package:yeogiga/common/utils/location_helper.dart';
 import 'package:yeogiga/trip/trip_map/ing/member_marker_widget.dart';
 
 // TODO: 여행 멤버들 위치 구해오는 provider watch하기
@@ -167,7 +166,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       );
       final bounds = NLatLngBounds(southWest: southWest, northEast: northEast);
       await mapController!.updateCamera(
-        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(24.w)),
+        NCameraUpdate.fitBounds(bounds, padding: EdgeInsets.all(70.w)),
       );
     }
   }
@@ -256,11 +255,19 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       }
       if (permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse) {
-        final pos = await Geolocator.getCurrentPosition();
         final overlay = mapController!.getLocationOverlay();
-        overlay.setIsVisible(true);
-        overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
-        _locationOverlay = overlay;
+        final lastKnown = await LocationHelper.getLastKnownPositionSafe();
+        if (lastKnown != null) {
+          overlay.setIsVisible(true);
+          overlay.setPosition(NLatLng(lastKnown.latitude, lastKnown.longitude));
+          _locationOverlay = overlay;
+        }
+        LocationHelper.refreshPositionAsync((pos) {
+          if (!mounted || mapController == null) return;
+          overlay.setIsVisible(true);
+          overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
+          _locationOverlay = overlay;
+        });
       }
     } catch (_) {}
   }
@@ -268,19 +275,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   // 내 위치로 이동하기
   Future<void> _moveToMyLocation() async {
     if (mapController == null) return;
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-    if (permission == LocationPermission.deniedForever) return;
-    final pos = await Geolocator.getCurrentPosition();
-    await mapController!.updateCamera(
-      NCameraUpdate.withParams(
-        target: NLatLng(pos.latitude, pos.longitude),
-        zoom: 15,
-      ),
-    );
+    await LocationHelper.moveCameraToUser(controller: mapController!);
   }
 
   Future<NMarker> _createMemberMarker(TripMemberLocation member) async {
@@ -317,304 +312,261 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
     final tripState = ref.watch(tripProvider).valueOrNull;
     final days = getDaysForTrip(tripState);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Consumer(
-            builder: (context, ref, _) {
-              // fetch가 모두 끝날 때까지 로딩만 보여줌
-              if (!_allDaysFetched) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final scheduleAsync =
-                  ref.watch(confirmScheduleProvider).valueOrNull;
-              final schedules = scheduleAsync?.schedules ?? [];
-              List<ConfirmedPlaceModel> placeList = [];
-              if (selectedDayIndex == 0) {
-                placeList =
-                    [for (final day in schedules) ...day.places]
-                        .where((p) => p.latitude != null && p.longitude != null)
-                        .toList();
-              } else {
-                final daySchedule = schedules.firstWhere(
-                  (s) => s.day == selectedDayIndex,
-                  orElse:
-                      () => ConfirmedDayScheduleModel(
-                        id: '',
-                        day: selectedDayIndex,
-                        places: [],
-                      ),
-                );
-                placeList =
-                    daySchedule.places
-                        .where((p) => p.latitude != null && p.longitude != null)
-                        .toList();
-              }
-
-              final memberLocationAsync = ref.watch(tripMemberLocationProvider);
-              final userMe = ref.watch(userMeProvider);
-              final ping = ref.watch(pingProvider);
-
-              String? myNickname;
-              if (userMe is UserResponseModel &&
-                  userMe.data?.nickname != null) {
-                myNickname = userMe.data!.nickname;
-              }
-              List<TripMemberLocation>? memberLocations;
-              memberLocationAsync.when(
-                data: (data) {
-                  memberLocations = data;
-                },
-                loading: () {},
-                error: (_, __) {},
-              );
-              if (mapController != null) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  _updateMapOverlays(
-                    placeList,
-                    memberLocations: memberLocations,
-                    myNickname: myNickname,
-                    ping: ping,
-                  );
-                });
-              }
-
-              return NaverMap(
-                onMapReady: (controller) async {
-                  if (mounted) {
-                    setState(() {
-                      mapController = controller;
-                    });
-                  }
-
-                  // TODO: PingCard에서 온 경우 ping 좌표로 카메라 이동
-                  if (widget.extra != null &&
-                      widget.extra!['focusPing'] == true) {
-                    final pingLat = widget.extra!['pingLatitude'] as double?;
-                    final pingLng = widget.extra!['pingLongitude'] as double?;
-                    if (pingLat != null && pingLng != null) {
-                      await controller.updateCamera(
-                        NCameraUpdate.withParams(
-                          target: NLatLng(pingLat, pingLng),
-                          zoom: 15,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            Consumer(
+              builder: (context, ref, _) {
+                // fetch가 모두 끝날 때까지 로딩만 보여줌
+                if (!_allDaysFetched) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final scheduleAsync =
+                    ref.watch(confirmScheduleProvider).valueOrNull;
+                final schedules = scheduleAsync?.schedules ?? [];
+                List<ConfirmedPlaceModel> placeList = [];
+                if (selectedDayIndex == 0) {
+                  placeList =
+                      [for (final day in schedules) ...day.places]
+                          .where(
+                            (p) => p.latitude != null && p.longitude != null,
+                          )
+                          .toList();
+                } else {
+                  final daySchedule = schedules.firstWhere(
+                    (s) => s.day == selectedDayIndex,
+                    orElse:
+                        () => ConfirmedDayScheduleModel(
+                          id: '',
+                          day: selectedDayIndex,
+                          places: [],
                         ),
-                      );
-                      _cameraFitted = true;
-                      return;
-                    }
-                  }
+                  );
+                  placeList =
+                      daySchedule.places
+                          .where(
+                            (p) => p.latitude != null && p.longitude != null,
+                          )
+                          .toList();
+                }
 
-                  // 최초 진입 시 전체 마커 기준으로 카메라 이동 (중복 호출 방지 플래그 사용)
-                  if (!_cameraFitted) {
-                    List<ConfirmedPlaceModel> fitPlaces = [];
-                    if (selectedDayIndex == 0) {
-                      fitPlaces =
-                          [for (final day in schedules) ...day.places]
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
-                    } else {
-                      final daySchedule = schedules.firstWhere(
-                        (s) => s.day == selectedDayIndex,
-                        orElse:
-                            () => ConfirmedDayScheduleModel(
-                              id: '',
-                              day: selectedDayIndex,
-                              places: [],
-                            ),
-                      );
-                      fitPlaces =
-                          daySchedule.places
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
+                final memberLocationAsync = ref.watch(
+                  tripMemberLocationProvider,
+                );
+                final userMe = ref.watch(userMeProvider);
+                final ping = ref.watch(pingProvider);
+
+                String? myNickname;
+                if (userMe is UserResponseModel &&
+                    userMe.data?.nickname != null) {
+                  myNickname = userMe.data!.nickname;
+                }
+                List<TripMemberLocation>? memberLocations;
+                memberLocationAsync.when(
+                  data: (data) {
+                    memberLocations = data;
+                  },
+                  loading: () {},
+                  error: (_, __) {},
+                );
+                if (mapController != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    _updateMapOverlays(
+                      placeList,
+                      memberLocations: memberLocations,
+                      myNickname: myNickname,
+                      ping: ping,
+                    );
+                  });
+                }
+
+                return NaverMap(
+                  onMapReady: (controller) async {
+                    if (mounted) {
+                      setState(() {
+                        mapController = controller;
+                      });
                     }
-                    if (fitPlaces.isNotEmpty) {
-                      await _fitMapToPlaces(fitPlaces);
-                      _cameraFitted = true;
+
+                    // TODO: PingCard에서 온 경우 ping 좌표로 카메라 이동
+                    if (widget.extra != null &&
+                        widget.extra!['focusPing'] == true) {
+                      final pingLat = widget.extra!['pingLatitude'] as double?;
+                      final pingLng = widget.extra!['pingLongitude'] as double?;
+                      if (pingLat != null && pingLng != null) {
+                        await controller.updateCamera(
+                          NCameraUpdate.withParams(
+                            target: NLatLng(pingLat, pingLng),
+                            zoom: 15,
+                          ),
+                        );
+                        _cameraFitted = true;
+                        return;
+                      }
                     }
-                  }
-                  // ------ 최초 진입 카메라 로직
-                },
-                onMapTapped: (point, latLng) {
-                  FocusScope.of(context).unfocus();
-                },
-                // ... 기타 옵션 ...
-              );
-            },
-          ),
-          // Custom floating back button
-          Positioned(
-            top: 15.h,
-            left: 9.w,
-            child: SafeArea(
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 9.w),
-                  child: Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 17.w,
-                    color: Colors.black,
+
+                    // 최초 진입 시 전체 마커 기준으로 카메라 이동 (중복 호출 방지 플래그 사용)
+                    if (!_cameraFitted) {
+                      List<ConfirmedPlaceModel> fitPlaces = [];
+                      if (selectedDayIndex == 0) {
+                        fitPlaces =
+                            [for (final day in schedules) ...day.places]
+                                .where(
+                                  (p) =>
+                                      p.latitude != null && p.longitude != null,
+                                )
+                                .toList();
+                      } else {
+                        final daySchedule = schedules.firstWhere(
+                          (s) => s.day == selectedDayIndex,
+                          orElse:
+                              () => ConfirmedDayScheduleModel(
+                                id: '',
+                                day: selectedDayIndex,
+                                places: [],
+                              ),
+                        );
+                        fitPlaces =
+                            daySchedule.places
+                                .where(
+                                  (p) =>
+                                      p.latitude != null && p.longitude != null,
+                                )
+                                .toList();
+                      }
+                      if (fitPlaces.isNotEmpty) {
+                        await _fitMapToPlaces(fitPlaces);
+                        _cameraFitted = true;
+                      }
+                    }
+                    // ------ 최초 진입 카메라 로직
+                  },
+                  onMapTapped: (point, latLng) {
+                    FocusScope.of(context).unfocus();
+                  },
+                  // ... 기타 옵션 ...
+                );
+              },
+            ),
+            // Custom floating back button
+            Positioned(
+              top: 15.h,
+              left: 9.w,
+              child: SafeArea(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 9.w),
+                    child: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 17.w,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          // 내 위치로 가기 버튼
-          MyLocationButton(
-            controller: _sheetController,
-            onTap: _moveToMyLocation,
-          ),
-          DraggableScrollableSheet(
-            controller: _sheetController,
-            initialChildSize: 0.215,
-            minChildSize: 0.08,
-            maxChildSize: 0.215,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(16.r),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 3,
+            // 내 위치로 가기 버튼
+            MyLocationButton(
+              controller: _sheetController,
+              onTap: _moveToMyLocation,
+            ),
+            DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: 0.215,
+              minChildSize: 0.08,
+              maxChildSize: 0.215,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16.r),
                     ),
-                  ],
-                ),
-                child: ListView(
-                  controller: scrollController,
-                  physics: ClampingScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  children: [
-                    Column(
-                      children: [
-                        Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
-                            child: Container(
-                              width: 99.w,
-                              height: 5.h,
-                              decoration: BoxDecoration(
-                                color: const Color(0xffe1e1e1),
-                                borderRadius: BorderRadius.circular(2.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                  child: ListView(
+                    controller: scrollController,
+                    physics: ClampingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    children: [
+                      Column(
+                        children: [
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
+                              child: Container(
+                                width: 99.w,
+                                height: 5.h,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffe1e1e1),
+                                  borderRadius: BorderRadius.circular(2.r),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        DaySelector(
-                          itemCount: days.length + 1,
-                          selectedIndex: selectedDayIndex,
-                          onChanged: (index) async {
-                            if (mounted) {
-                              setState(() {
-                                selectedDayIndex = index;
-                              });
-                            }
-                            await Future.delayed(
-                              const Duration(milliseconds: 100),
-                            ); // 상태 반영 대기
-                            if (!mounted) return; // delay 후 체크
+                          DaySelector(
+                            itemCount: days.length + 1,
+                            selectedIndex: selectedDayIndex,
+                            onChanged: (index) async {
+                              if (mounted) {
+                                setState(() {
+                                  selectedDayIndex = index;
+                                });
+                              }
+                              await Future.delayed(
+                                const Duration(milliseconds: 100),
+                              ); // 상태 반영 대기
+                              if (!mounted) return; // delay 후 체크
 
-                            final tripState =
-                                ref.read(tripProvider).valueOrNull;
-                            final scheduleAsync =
-                                ref.read(confirmScheduleProvider).valueOrNull;
-                            final schedules = scheduleAsync?.schedules ?? [];
-                            if (index == 0) {
-                              // 전체 보기: 모든 day의 place를 순서대로 합쳐서 마커/폴리라인 표시
-                              final allPlaces =
-                                  [for (final day in schedules) ...day.places]
-                                      .where(
-                                        (p) =>
-                                            p.latitude != null &&
-                                            p.longitude != null,
-                                      )
-                                      .toList();
-                              if (mapController != null &&
-                                  allPlaces.isNotEmpty) {
-                                await _fitMapToPlaces(allPlaces);
-                              } else if (mapController != null) {
-                                await mapController!.updateCamera(
-                                  NCameraUpdate.withParams(
-                                    target: NLatLng(
-                                      36.5,
-                                      127.5,
-                                    ), // 대한민국 중심부 (예시)
-                                    zoom: 7,
-                                  ),
-                                );
-                              }
-                              // Fetch member locations and user info for overlays
-                              final memberLocationAsync = ref.read(
-                                tripMemberLocationProvider,
-                              );
-                              final userMe = ref.read(userMeProvider);
-                              String? myNickname;
-                              if (userMe is UserResponseModel &&
-                                  userMe.data?.nickname != null) {
-                                myNickname = userMe.data!.nickname;
-                              }
-                              List<TripMemberLocation>? memberLocations;
-                              memberLocationAsync.when(
-                                data: (data) => memberLocations = data,
-                                loading: () {},
-                                error: (_, __) {},
-                              );
-                              _updateMapOverlays(
-                                allPlaces,
-                                memberLocations: memberLocations,
-                                myNickname: myNickname,
-                                ping: ref.read(pingProvider),
-                              );
-                            } else {
-                              // Day 선택 시마다 무조건 fetch
-                              if (tripState is TripModel) {
-                                // schedules에서 해당 day의 id를 찾아서 넘긴다
-                                final daySchedule = schedules.firstWhere(
-                                  (s) => s.day == index,
-                                  orElse:
-                                      () => ConfirmedDayScheduleModel(
-                                        id: '',
-                                        day: index,
-                                        places: [],
-                                      ),
-                                );
-                                // ref.invalidate(confirmScheduleProvider);// ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
-                                final fetched = await ref
-                                    .read(confirmScheduleProvider.notifier)
-                                    .fetchDaySchedule(
-                                      tripId: tripState.tripId,
-                                      dayScheduleId: daySchedule.id,
-                                      day: index,
-                                    );
-                                List<ConfirmedPlaceModel> places = [];
-                                if (fetched != null) {
-                                  places =
-                                      fetched.places
-                                          .where(
-                                            (p) =>
-                                                p.latitude != null &&
-                                                p.longitude != null,
-                                          )
-                                          .toList();
+                              final tripState =
+                                  ref.read(tripProvider).valueOrNull;
+                              final scheduleAsync =
+                                  ref.read(confirmScheduleProvider).valueOrNull;
+                              final schedules = scheduleAsync?.schedules ?? [];
+                              if (index == 0) {
+                                // 전체 보기: 모든 day의 place를 순서대로 합쳐서 마커/폴리라인 표시
+                                final allPlaces =
+                                    [for (final day in schedules) ...day.places]
+                                        .where(
+                                          (p) =>
+                                              p.latitude != null &&
+                                              p.longitude != null,
+                                        )
+                                        .toList();
+                                if (mapController != null &&
+                                    allPlaces.isNotEmpty) {
+                                  await _fitMapToPlaces(allPlaces);
+                                } else if (mapController != null) {
+                                  await mapController!.updateCamera(
+                                    NCameraUpdate.withParams(
+                                      target: NLatLng(
+                                        36.5,
+                                        127.5,
+                                      ), // 대한민국 중심부 (예시)
+                                      zoom: 7,
+                                    ),
+                                  );
                                 }
+                                // Fetch member locations and user info for overlays
                                 final memberLocationAsync = ref.read(
                                   tripMemberLocationProvider,
                                 );
                                 final userMe = ref.read(userMeProvider);
                                 String? myNickname;
-                                if (userMe is UserModel) {
-                                  myNickname = userMe.nickname;
+                                if (userMe is UserResponseModel &&
+                                    userMe.data?.nickname != null) {
+                                  myNickname = userMe.data!.nickname;
                                 }
                                 List<TripMemberLocation>? memberLocations;
                                 memberLocationAsync.when(
@@ -623,117 +575,172 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                   error: (_, __) {},
                                 );
                                 _updateMapOverlays(
-                                  places,
+                                  allPlaces,
                                   memberLocations: memberLocations,
                                   myNickname: myNickname,
                                   ping: ref.read(pingProvider),
                                 );
-                                await _fitMapToPlaces(places);
-                              }
-                            }
-                          },
-                        ),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final scheduleAsync =
-                                ref.watch(confirmScheduleProvider).valueOrNull;
-                            final tripState =
-                                ref.watch(tripProvider).valueOrNull;
-                            if (scheduleAsync == null) {
-                              final trip =
-                                  tripState is TripModel ? tripState : null;
-                              if (trip != null) {
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (!mounted) return;
-                                  ref
-                                      .read(confirmScheduleProvider.notifier)
-                                      .fetchAll(trip.tripId);
-                                });
-                              }
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            final schedules = scheduleAsync.schedules;
-                            List<ConfirmedPlaceModel> placeList = [];
-                            if (selectedDayIndex == 0) {
-                              for (final day in schedules) {
-                                placeList.addAll(day.places);
-                              }
-                            } else {
-                              final daySchedule = schedules.firstWhere(
-                                (s) => s.day == selectedDayIndex,
-                                orElse:
-                                    () => ConfirmedDayScheduleModel(
-                                      id: '',
-                                      day: selectedDayIndex,
-                                      places: [],
-                                    ),
-                              );
-                              placeList = daySchedule.places;
-                            }
-                            final hasPlaces = placeList.isNotEmpty;
-                            return SizedBox(
-                              height: 92.h,
-                              child:
-                                  hasPlaces
-                                      ? PageView.builder(
-                                        itemCount: placeList.length,
-                                        controller: PageController(
-                                          viewportFraction: 0.95,
+                              } else {
+                                // Day 선택 시마다 무조건 fetch
+                                if (tripState is TripModel) {
+                                  // schedules에서 해당 day의 id를 찾아서 넘긴다
+                                  final daySchedule = schedules.firstWhere(
+                                    (s) => s.day == index,
+                                    orElse:
+                                        () => ConfirmedDayScheduleModel(
+                                          id: '',
+                                          day: index,
+                                          places: [],
                                         ),
-                                        itemBuilder: (context, idx) {
-                                          final place = placeList[idx];
-                                          return GestureDetector(
-                                            onTap: () async {
-                                              if (mapController != null &&
-                                                  place.latitude != null &&
-                                                  place.longitude != null) {
-                                                await mapController!
-                                                    .updateCamera(
-                                                      NCameraUpdate.withParams(
-                                                        target: NLatLng(
-                                                          place.latitude!,
-                                                          place.longitude!,
+                                  );
+                                  // ref.invalidate(confirmScheduleProvider);// ← TODO: 진입 전 초기화 (앱 박살나는거 방지)
+                                  final fetched = await ref
+                                      .read(confirmScheduleProvider.notifier)
+                                      .fetchDaySchedule(
+                                        tripId: tripState.tripId,
+                                        dayScheduleId: daySchedule.id,
+                                        day: index,
+                                      );
+                                  List<ConfirmedPlaceModel> places = [];
+                                  if (fetched != null) {
+                                    places =
+                                        fetched.places
+                                            .where(
+                                              (p) =>
+                                                  p.latitude != null &&
+                                                  p.longitude != null,
+                                            )
+                                            .toList();
+                                  }
+                                  final memberLocationAsync = ref.read(
+                                    tripMemberLocationProvider,
+                                  );
+                                  final userMe = ref.read(userMeProvider);
+                                  String? myNickname;
+                                  if (userMe is UserModel) {
+                                    myNickname = userMe.nickname;
+                                  }
+                                  List<TripMemberLocation>? memberLocations;
+                                  memberLocationAsync.when(
+                                    data: (data) => memberLocations = data,
+                                    loading: () {},
+                                    error: (_, __) {},
+                                  );
+                                  _updateMapOverlays(
+                                    places,
+                                    memberLocations: memberLocations,
+                                    myNickname: myNickname,
+                                    ping: ref.read(pingProvider),
+                                  );
+                                  await _fitMapToPlaces(places);
+                                }
+                              }
+                            },
+                          ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final scheduleAsync =
+                                  ref
+                                      .watch(confirmScheduleProvider)
+                                      .valueOrNull;
+                              final tripState =
+                                  ref.watch(tripProvider).valueOrNull;
+                              if (scheduleAsync == null) {
+                                final trip =
+                                    tripState is TripModel ? tripState : null;
+                                if (trip != null) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (!mounted) return;
+                                    ref
+                                        .read(confirmScheduleProvider.notifier)
+                                        .fetchAll(trip.tripId);
+                                  });
+                                }
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              final schedules = scheduleAsync.schedules;
+                              List<ConfirmedPlaceModel> placeList = [];
+                              if (selectedDayIndex == 0) {
+                                for (final day in schedules) {
+                                  placeList.addAll(day.places);
+                                }
+                              } else {
+                                final daySchedule = schedules.firstWhere(
+                                  (s) => s.day == selectedDayIndex,
+                                  orElse:
+                                      () => ConfirmedDayScheduleModel(
+                                        id: '',
+                                        day: selectedDayIndex,
+                                        places: [],
+                                      ),
+                                );
+                                placeList = daySchedule.places;
+                              }
+                              final hasPlaces = placeList.isNotEmpty;
+                              return SizedBox(
+                                height: 92.h,
+                                child:
+                                    hasPlaces
+                                        ? PageView.builder(
+                                          itemCount: placeList.length,
+                                          controller: PageController(
+                                            viewportFraction: 0.95,
+                                          ),
+                                          itemBuilder: (context, idx) {
+                                            final place = placeList[idx];
+                                            return GestureDetector(
+                                              onTap: () async {
+                                                if (mapController != null &&
+                                                    place.latitude != null &&
+                                                    place.longitude != null) {
+                                                  await mapController!
+                                                      .updateCamera(
+                                                        NCameraUpdate.withParams(
+                                                          target: NLatLng(
+                                                            place.latitude!,
+                                                            place.longitude!,
+                                                          ),
+                                                          zoom: 15,
                                                         ),
-                                                        zoom: 15,
-                                                      ),
-                                                    );
-                                              }
-                                            },
-                                            child: ScheduleItem(
-                                              key: ValueKey(place.id),
-                                              title: place.name,
-                                              category: place.placeType,
-                                              time: null,
-                                              done: false,
+                                                      );
+                                                }
+                                              },
+                                              child: ScheduleItem(
+                                                key: ValueKey(place.id),
+                                                title: place.name,
+                                                category: place.placeType,
+                                                time: null,
+                                                done: false,
+                                              ),
+                                            );
+                                          },
+                                        )
+                                        : Center(
+                                          child: Text(
+                                            '등록된 일정이 없습니다.',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: const Color(0xffc6c6c6),
+                                              fontWeight: FontWeight.w500,
                                             ),
-                                          );
-                                        },
-                                      )
-                                      : Center(
-                                        child: Text(
-                                          '등록된 일정이 없습니다.',
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: const Color(0xffc6c6c6),
-                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                      ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

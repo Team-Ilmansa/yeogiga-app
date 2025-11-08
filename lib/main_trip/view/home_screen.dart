@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +21,7 @@ import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -66,13 +66,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xfffafafa),
-      child: SingleChildScrollView(
-        physics: ClampingScrollPhysics(),
-        child: SafeArea(
-          top: false,
-          bottom: true,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Container(
+        color: Color(0xfffafafa),
+        child: SingleChildScrollView(
+          physics: ClampingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -290,7 +290,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                             ),
                           ),
                         ),
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 40.h),
                       ],
                     ),
                   ],
@@ -346,79 +346,77 @@ class _HomeAppBar extends ConsumerWidget {
                 ),
               ),
 
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: 15.h),
-                    AppBarTop(
-                      trip: trip,
-                      weatherMain: weatherMain,
-                      temp: temp,
-                      isWhiteTheme:
-                          weatherMain.toLowerCase() == 'rain' ||
-                          weatherMain.toLowerCase() == 'thunderstorm',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 15.h),
+                  AppBarTop(
+                    trip: trip,
+                    weatherMain: weatherMain,
+                    temp: temp,
+                    isWhiteTheme:
+                        weatherMain.toLowerCase() == 'rain' ||
+                        weatherMain.toLowerCase() == 'thunderstorm',
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 14.h,
+                      left: 14.w,
+                      right: 14.w,
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        top: 14.h,
-                        left: 14.w,
-                        right: 14.w,
-                      ),
-                      child: Builder(
-                        builder: (context) {
-                          if (trip != null) {
-                            final now = DateTime.now();
-                            final start = trip.staredAt;
-                            final title = trip.title;
-                            final diff = start.difference(now).inDays;
+                    child: Builder(
+                      builder: (context) {
+                        if (trip != null) {
+                          final now = DateTime.now();
+                          final start = trip.staredAt;
+                          final title = trip.title;
+                          final diff = start.difference(now).inDays;
 
-                            if (now.isBefore(start)) {
-                              // 여행 시작 전
-                              return Text(
-                                '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
-                                style: TextStyle(
-                                  color: Color(0xff313131),
-                                  fontSize: 25.sp,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.1,
-                                  height: 1.4,
-                                ),
-                              );
-                            } else {
-                              // 여행 진행 중 or 이후
-                              final day = now.difference(start).inDays + 1;
-                              return Text(
-                                '오늘은\n$title ${day}일차에요!',
-                                style: TextStyle(
-                                  color: Color(0xff313131),
-                                  fontSize: 25.sp,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.1,
-                                  height: 1.4,
-                                ),
-                              );
-                            }
+                          if (now.isBefore(start)) {
+                            // 여행 시작 전
+                            return Text(
+                              '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
+                              style: TextStyle(
+                                color: Color(0xff313131),
+                                fontSize: 25.sp,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.1,
+                                height: 1.4,
+                              ),
+                            );
                           } else {
-                            if (userMe is UserResponseModel) {
-                              return Text(
-                                '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
-                                style: TextStyle(
-                                  color: Color(0xff313131),
-                                  fontSize: 25.sp,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.1,
-                                  height: 1.4,
-                                ),
-                              );
-                            }
-                            return Container();
+                            // 여행 진행 중 or 이후
+                            final day = now.difference(start).inDays + 1;
+                            return Text(
+                              '오늘은\n$title ${day}일차에요!',
+                              style: TextStyle(
+                                color: Color(0xff313131),
+                                fontSize: 25.sp,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.1,
+                                height: 1.4,
+                              ),
+                            );
                           }
-                        },
-                      ),
+                        } else {
+                          if (userMe is UserResponseModel) {
+                            return Text(
+                              '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
+                              style: TextStyle(
+                                color: Color(0xff313131),
+                                fontSize: 25.sp,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.1,
+                                height: 1.4,
+                              ),
+                            );
+                          }
+                          return Container();
+                        }
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               // Positioned(child: SizedBox(height: 6)),

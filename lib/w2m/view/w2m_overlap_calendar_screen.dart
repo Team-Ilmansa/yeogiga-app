@@ -5,6 +5,7 @@ import 'package:yeogiga/w2m/provider/trip_w2m_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 // 필요시: import 'package:yeogiga/user/provider/user_me_provider.dart';
 
 class W2MOverlapCalendarScreen extends ConsumerStatefulWidget {
@@ -47,26 +48,28 @@ class _W2MOverlapCalendarScreenState
       error: (e, _) => Scaffold(body: Center(child: Text('에러: $e'))),
       data: (tripW2m) {
         final now = DateTime.now();
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            scrolledUnderElevation: 0,
+        return SafeArea(
+          top: false,
+          bottom: shouldUseSafeAreaBottom(context),
+          child: Scaffold(
             backgroundColor: Colors.white,
-            elevation: 0,
-            leading: Padding(
-              padding: EdgeInsets.only(left: 4.w),
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 16.sp,
-                  color: Colors.black,
+            appBar: AppBar(
+              scrolledUnderElevation: 0,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 4.w),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 16.sp,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
-          ),
-          body: SafeArea(
-            child: Column(
+            body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 11.h),
@@ -140,8 +143,7 @@ class _W2MOverlapCalendarScreenState
                 ),
               ],
             ),
-          ),
-          bottomNavigationBar:
+            bottomNavigationBar:
               (_startDate != null && _endDate != null)
                   ? Container(
                     decoration: BoxDecoration(
@@ -268,6 +270,7 @@ class _W2MOverlapCalendarScreenState
                     ),
                   )
                   : null,
+          ),
         );
       },
     );

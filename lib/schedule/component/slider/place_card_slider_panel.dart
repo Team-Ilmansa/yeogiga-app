@@ -59,51 +59,52 @@ class _PlaceCardSliderPanelState extends State<PlaceCardSliderPanel> {
             ),
           ),
           SizedBox(height: 20.h),
-          SizedBox(
-            height: 100.h,
-            child: ListView.separated(
-              primary: false,
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => SizedBox(width: 8.w),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 100.w,
-                  height: 100.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF4F4F4),
-                    borderRadius: BorderRadius.circular(11.r),
-                  ),
-                  child:
-                      widget.imageUrl != null && widget.imageUrl!.isNotEmpty
-                          ? ClipRRect(
-                            borderRadius: BorderRadius.circular(11.r),
-                            child: Image.network(
-                              widget.imageUrl!,
-                              fit: BoxFit.cover,
-                              width: 89.w,
-                              height: 89.w,
-                              errorBuilder:
-                                  (_, __, ___) => Icon(
-                                    Icons.image,
-                                    size: 19.sp,
-                                    color: Colors.grey[300],
-                                  ),
-                            ),
-                          )
-                          : Icon(
-                            Icons.image,
-                            size: 30.sp,
-                            color: Colors.grey[300],
-                          ),
-                );
-              },
-            ),
-          ),
-          SizedBox(height: 17.h),
 
+          // TODO: 나중에 만나자
+          // SizedBox(
+          //   height: 100.h,
+          //   child: ListView.separated(
+          //     primary: false,
+          //     shrinkWrap: true,
+          //     padding: EdgeInsets.symmetric(horizontal: 16.w),
+          //     scrollDirection: Axis.horizontal,
+          //     separatorBuilder: (context, index) => SizedBox(width: 8.w),
+          //     itemCount: 5,
+          //     itemBuilder: (context, index) {
+          //       return Container(
+          //         width: 100.w,
+          //         height: 100.w,
+          //         decoration: BoxDecoration(
+          //           color: const Color(0xFFF4F4F4),
+          //           borderRadius: BorderRadius.circular(11.r),
+          //         ),
+          //         child:
+          //             widget.imageUrl != null && widget.imageUrl!.isNotEmpty
+          //                 ? ClipRRect(
+          //                   borderRadius: BorderRadius.circular(11.r),
+          //                   child: Image.network(
+          //                     widget.imageUrl!,
+          //                     fit: BoxFit.cover,
+          //                     width: 89.w,
+          //                     height: 89.w,
+          //                     errorBuilder:
+          //                         (_, __, ___) => Icon(
+          //                           Icons.image,
+          //                           size: 19.sp,
+          //                           color: Colors.grey[300],
+          //                         ),
+          //                   ),
+          //                 )
+          //                 : Icon(
+          //                   Icons.image,
+          //                   size: 30.sp,
+          //                   color: Colors.grey[300],
+          //                 ),
+          //       );
+          //     },
+          //   ),
+          // ),
+          // SizedBox(height: 17.h),
           Padding(
             padding: EdgeInsets.only(right: 16.w, left: 16.w, bottom: 32.h),
             child: Column(

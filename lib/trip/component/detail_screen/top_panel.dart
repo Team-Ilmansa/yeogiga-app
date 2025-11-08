@@ -27,19 +27,19 @@ class TopPanel extends StatelessWidget {
           tripStatusText = '종료된 여행';
         }
         // 여행이름
-        String tripTitle = '미정';
+        String tripTitle = '아직 정해지지 않았어요';
         if (tripState is TripModel && tripState.title.isNotEmpty) {
           tripTitle = tripState.title;
         }
         // 도시
-        String tripCity = '미정';
+        String tripCity = '아직 정해지지 않았어요';
         if (tripState is TripModel &&
             tripState.city != null &&
             tripState.city!.isNotEmpty) {
           tripCity = tripState.city!.join(', ');
         }
         // 날짜
-        String tripDate = '미정';
+        String tripDate = '아직 정해지지 않았어요';
         if (tripState is TripModel &&
             tripState.startedAt != null &&
             tripState.endedAt != null) {
@@ -119,28 +119,30 @@ class TopPanel extends StatelessWidget {
                           child: SizedBox(
                             width: 18.w,
                             height: 18.w,
-                            child: (imageUrl != null && imageUrl.isNotEmpty)
-                                ? Image.network(
-                                    imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            buildProfileAvatarPlaceholder(
-                                              nickname: member.nickname,
-                                              size: 18.w,
-                                              backgroundColor:
-                                                  const Color(0xffebebeb),
-                                              textColor:
-                                                  const Color(0xff8287ff),
-                                            ),
-                                  )
-                                : buildProfileAvatarPlaceholder(
-                                    nickname: member.nickname,
-                                    size: 18.w,
-                                    backgroundColor:
-                                        const Color(0xffebebeb),
-                                    textColor: const Color(0xff8287ff),
-                                  ),
+                            child:
+                                (imageUrl != null && imageUrl.isNotEmpty)
+                                    ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              buildProfileAvatarPlaceholder(
+                                                nickname: member.nickname,
+                                                size: 18.w,
+                                                backgroundColor: const Color(
+                                                  0xffebebeb,
+                                                ),
+                                                textColor: const Color(
+                                                  0xff8287ff,
+                                                ),
+                                              ),
+                                    )
+                                    : buildProfileAvatarPlaceholder(
+                                      nickname: member.nickname,
+                                      size: 18.w,
+                                      backgroundColor: const Color(0xffebebeb),
+                                      textColor: const Color(0xff8287ff),
+                                    ),
                           ),
                         ),
                       );

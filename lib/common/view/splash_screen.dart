@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class SplashScreen extends StatelessWidget {
   static String get routeName => 'splash';
@@ -7,10 +8,11 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        top: true,
-        child: SizedBox(
+    return SafeArea(
+      top: true,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
+        body: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

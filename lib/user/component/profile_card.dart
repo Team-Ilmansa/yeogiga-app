@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 
 class ProfileCard extends ConsumerWidget {
   const ProfileCard({super.key});
@@ -26,29 +27,24 @@ class ProfileCard extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-              width: 80.w,
-              height: 80.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey[300],
-              ),
-              child:
-                  userState is UserResponseModel &&
-                          userState.data != null &&
-                          userState.data!.imageUrl != null
-                      ? ClipOval(
-                        child: Image.network(
-                          userState.data!.imageUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                      : Icon(
-                        Icons.person,
-                        size: 45.sp,
-                        color: Colors.grey[600],
-                      ),
-            ),
+            userState is UserResponseModel &&
+                    userState.data != null &&
+                    userState.data!.imageUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      userState.data!.imageUrl!,
+                      width: 80.w,
+                      height: 80.w,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : buildProfileAvatarPlaceholder(
+                    nickname: userState is UserResponseModel &&
+                            userState.data != null
+                        ? userState.data!.nickname
+                        : '사용자',
+                    size: 80.w,
+                  ),
             SizedBox(width: 16.w),
             Expanded(
               child: Column(

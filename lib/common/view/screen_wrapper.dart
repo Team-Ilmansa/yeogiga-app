@@ -3,12 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'dart:math'; // Added dart:math import for asin function
 import 'package:yeogiga/main_trip/view/home_screen.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/user/view/my_page.dart';
-import 'package:yeogiga/trip/component/create_trip/trip_name_dialog.dart';
+import 'package:yeogiga/trip/component/create_trip/create_trip_dialog.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:yeogiga/user/view/my_page_screen.dart';
@@ -51,133 +52,143 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.white,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.white,
 
-      bottomNavigationBar: Container(
-        height: 90.h,
-        child: Stack(
-          children: [
-            CustomPaint(
-              size: Size(MediaQuery.of(context).size.width, 90.h),
-              painter: ConvexBottomBarPainter(),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTabButton(
-                    0,
-                    'asset/icon/home.svg',
-                    '홈',
-                    refresh: () => ref.refresh(mainTripFutureProvider),
+        bottomNavigationBar: Container(
+          height: 90.h,
+          child: Stack(
+            children: [
+              CustomPaint(
+                size: Size(MediaQuery.of(context).size.width, 90.h),
+                painter: ConvexBottomBarPainter(),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTabButton(
+                      0,
+                      'asset/icon/home.svg',
+                      '홈',
+                      refresh: () => ref.refresh(mainTripFutureProvider),
+                    ),
                   ),
-                ),
-                Container(
-                  width: 100.w,
-                  height: 90.h,
-                  alignment: Alignment.center,
-                  child: Container(
-                    width: 80.w,
-                    height: 80.h,
-                    transform: Matrix4.translationValues(0, -15.h, 0),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final nameController = TextEditingController();
-                        await showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder:
-                              (context) => TripNameDialog(
-                                nameController: nameController,
-                                onConfirm:
-                                    ref.watch(tripProvider).isLoading
-                                        ? null
-                                        : () async {
-                                          TripBaseModel trip = await ref
-                                              .read(tripProvider.notifier)
-                                              .postTrip(
-                                                title: nameController.text,
-                                              );
-                                          if (trip is! SettingTripModel) {
-                                            if (!mounted) return;
-                                            GoRouter.of(context).pop();
-                                            await showDialog(
-                                              context: context,
-                                              barrierDismissible: true,
-                                              builder:
-                                                  (context) => Dialog(
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            18,
+                  Container(
+                    width: 100.w,
+                    height: 90.h,
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 80.w,
+                      height: 80.h,
+                      transform: Matrix4.translationValues(0, -15.h, 0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final nameController = TextEditingController();
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder:
+                                (context) => CreateTripDialog(
+                                  nameController: nameController,
+                                  onConfirm:
+                                      ref.watch(tripProvider).isLoading
+                                          ? null
+                                          : () async {
+                                            TripBaseModel trip = await ref
+                                                .read(tripProvider.notifier)
+                                                .postTrip(
+                                                  title: nameController.text,
+                                                );
+                                            if (trip is! SettingTripModel) {
+                                              if (!mounted) return;
+                                              GoRouter.of(context).pop();
+                                              await showDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                builder:
+                                                    (context) => Dialog(
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              18,
+                                                            ),
+                                                      ),
+                                                      child: SizedBox(
+                                                        height: 134.h,
+                                                        child: Center(
+                                                          child: Text(
+                                                            '여행 생성에 실패했어요! ㅠㅠ',
+                                                            style: TextStyle(
+                                                              fontSize: 18.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                            textAlign:
+                                                                TextAlign
+                                                                    .center,
                                                           ),
-                                                    ),
-                                                    child: SizedBox(
-                                                      height: 134.h,
-                                                      child: Center(
-                                                        child: Text(
-                                                          '여행 생성에 실패했어요! ㅠㅠ',
-                                                          style: TextStyle(
-                                                            fontSize: 18.sp,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                            );
-                                          } else {
-                                            if (!mounted) return;
-                                            Navigator.of(context).pop();
-                                            GoRouter.of(
-                                              context,
-                                            ).push('/dateRangePicker');
-                                          }
-                                        },
-                              ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8287FF),
-                        elevation: 0,
-                        shape: const CircleBorder(),
-                        padding: EdgeInsets.zero,
+                                              );
+                                            } else {
+                                              if (!mounted) return;
+                                              Navigator.of(context).pop();
+                                              GoRouter.of(
+                                                context,
+                                              ).push('/dateRangePicker');
+                                            }
+                                          },
+                                ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8287FF),
+                          elevation: 0,
+                          shape: const CircleBorder(),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Icon(
+                          Icons.add,
+                          size: 40.sp,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: Icon(Icons.add, size: 40.sp, color: Colors.white),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: _buildTabButton(
-                    1,
-                    'asset/icon/user-02.svg',
-                    '마이페이지',
-                    refresh:
-                        () =>
-                            ref
-                                .read(allTripListProvider.notifier)
-                                .fetchAndSetAllTrips(),
+                  Expanded(
+                    child: _buildTabButton(
+                      1,
+                      'asset/icon/user-02.svg',
+                      '마이페이지',
+                      refresh:
+                          () =>
+                              ref
+                                  .read(allTripListProvider.notifier)
+                                  .fetchAndSetAllTrips(),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
 
-      body: PageView(
-        controller: _pageController,
-        physics: ClampingScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        children: const [HomeScreen(), MyPageScreen()],
+        body: PageView(
+          controller: _pageController,
+          physics: ClampingScrollPhysics(),
+          onPageChanged: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          children: const [HomeScreen(), MyPageScreen()],
+        ),
       ),
     );
   }

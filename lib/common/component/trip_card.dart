@@ -88,10 +88,11 @@ class TripCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String cityText = (city == null || city!.isEmpty) ? '미정' : city!.join(', ');
+    String cityText =
+        (city == null || city!.isEmpty) ? '아직 정해지지 않았어요' : city!.join(', ');
     String dateText;
     if (startedAt == null || endedAt == null) {
-      dateText = '미정';
+      dateText = '아직 정해지지 않았어요';
     } else {
       dateText = '${_formatDate(startedAt!)} - ${_formatDate(endedAt!)}';
     }
@@ -161,25 +162,27 @@ class TripCard extends StatelessWidget {
                             child: SizedBox(
                               width: 16.w,
                               height: 16.w,
-                              child: hasImage
-                                  ? Image.network(
-                                      member.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              buildProfileAvatarPlaceholder(
-                                                nickname: member.nickname,
-                                                size: 16.w,
-                                                backgroundColor: Colors.white24,
-                                                textColor: Colors.white,
-                                              ),
-                                    )
-                                  : buildProfileAvatarPlaceholder(
-                                      nickname: member.nickname,
-                                      size: 16.w,
-                                      backgroundColor: Colors.white24,
-                                      textColor: Colors.white,
-                                    ),
+                              child:
+                                  hasImage
+                                      ? Image.network(
+                                        member.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                buildProfileAvatarPlaceholder(
+                                                  nickname: member.nickname,
+                                                  size: 16.w,
+                                                  backgroundColor:
+                                                      Colors.white24,
+                                                  textColor: Colors.white,
+                                                ),
+                                      )
+                                      : buildProfileAvatarPlaceholder(
+                                        nickname: member.nickname,
+                                        size: 16.w,
+                                        backgroundColor: Colors.white24,
+                                        textColor: Colors.white,
+                                      ),
                             ),
                           ),
                         );

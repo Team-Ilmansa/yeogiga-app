@@ -11,6 +11,7 @@ import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   static String get routeName => 'login';
@@ -41,6 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return SafeArea(
       top: false,
+      bottom: shouldUseSafeAreaBottom(context),
       child: Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true, // 키보드 뜰 때 영역 자동 조정

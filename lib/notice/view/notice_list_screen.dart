@@ -63,7 +63,7 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> {
           final tripState = ref.watch(tripProvider).valueOrNull;
           final userMe = ref.watch(userMeProvider);
 
-          String tripTitle = '미정';
+          String tripTitle = '아직 정해지지 않았어요';
           if (tripState is TripModel && tripState.title.isNotEmpty) {
             tripTitle = tripState.title;
           }
