@@ -4,21 +4,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 
-class TripNameDialog extends ConsumerStatefulWidget {
+class CreateTripDialog extends ConsumerStatefulWidget {
   final TextEditingController nameController;
   final VoidCallback? onConfirm;
 
-  const TripNameDialog({
+  const CreateTripDialog({
     super.key,
     required this.nameController,
     this.onConfirm,
   });
 
   @override
-  ConsumerState<TripNameDialog> createState() => _TripNameDialogState();
+  ConsumerState<CreateTripDialog> createState() => _CreateTripDialogState();
 }
 
-class _TripNameDialogState extends ConsumerState<TripNameDialog> {
+class _CreateTripDialogState extends ConsumerState<CreateTripDialog> {
   bool get _hasText => widget.nameController.text.trim().isNotEmpty;
 
   @override
@@ -128,63 +128,72 @@ class _TripNameDialogState extends ConsumerState<TripNameDialog> {
                   child: Consumer(
                     builder: (context, ref, child) {
                       final tripAsync = ref.watch(tripProvider);
-                      
+
                       return tripAsync.when(
-                        loading: () => ElevatedButton(
-                          onPressed: null, // 로딩 중에는 비활성화
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xffcccccc),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
+                        loading:
+                            () => ElevatedButton(
+                              onPressed: null, // 로딩 중에는 비활성화
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xffcccccc),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: SizedBox(
+                                width: 20.w,
+                                height: 20.h,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                            elevation: 0,
-                          ),
-                          child: SizedBox(
-                            width: 20.w,
-                            height: 20.h,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                        data:
+                            (trip) => ElevatedButton(
+                              onPressed: _hasText ? widget.onConfirm : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    _hasText
+                                        ? const Color(0xff8287ff)
+                                        : const Color(0xffcccccc),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                '확인',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        data: (trip) => ElevatedButton(
-                          onPressed: _hasText ? widget.onConfirm : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _hasText ? const Color(0xff8287ff) : const Color(0xffcccccc),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
+                        error:
+                            (error, stack) => ElevatedButton(
+                              onPressed: _hasText ? widget.onConfirm : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    _hasText
+                                        ? const Color(0xff8287ff)
+                                        : const Color(0xffcccccc),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                '확인',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            '확인',
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        error: (error, stack) => ElevatedButton(
-                          onPressed: _hasText ? widget.onConfirm : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _hasText ? const Color(0xff8287ff) : const Color(0xffcccccc),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            '확인',
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
                       );
                     },
                   ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +21,14 @@ import 'package:yeogiga/firebase_options.dart';
 // 백그라운드 핸들러는 반드시 background isolate에서 ProviderContainer를 새로 생성해야 함
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // 백그라운드 isolate에서도 플러터/플러그인들이 동작하도록 필수 초기화
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  // Firebase 서비스 초기화 (foreground와 동일한 설정)
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   print('========================================');
-  print('[FCM] 🔔 Background 알림 수신됨!');
+  print('[FCM] Background 알림 수신됨!');
   print('[FCM] messageId: ${message.messageId}');
   print('[FCM] sentTime: ${message.sentTime}');
   print('[FCM] data: ${message.data}');

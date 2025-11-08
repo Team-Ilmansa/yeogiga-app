@@ -13,6 +13,7 @@ import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/trip/model/trip_host_route_day.dart';
 import 'package:yeogiga/trip/provider/trip_host_route_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
@@ -21,6 +22,7 @@ import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/model/trip_image_model.dart';
 import 'package:yeogiga/common/utils/trip_utils.dart';
+import 'package:yeogiga/common/utils/location_helper.dart';
 
 class EndTripMapScreen extends ConsumerStatefulWidget {
   static String get routeName => 'endTripMap';
@@ -224,193 +226,196 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
     final tripState = ref.watch(tripProvider).valueOrNull;
     final days = TripUtils.getDaysForTrip(tripState);
 
-    return WillPopScope(
-      onWillPop: () async {
-        // selection mode 해제
-        if (ref.read(selectionModeProvider)) {
-          ref.read(selectionModeProvider.notifier).state = false;
-        }
-        // 이미지 모드 해제
-        if (_isImageMode) {
-          setState(() {
-            _isImageMode = false;
-            _selectedPlaceId = null;
-          });
-        }
-        return true; // true를 리턴하면 실제로 pop이 일어남
-      },
-      child: Scaffold(
-        bottomNavigationBar: _getPictureOptionBar(
-          ref,
-          selectedDayIndex,
-          matchedOrUnmatchedPayload,
-          pendingPayload,
-        ),
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            // 네이버 지도 위젯
-            if (_allDaysFetched)
-              _EndTripNaverMap(
-                key: _mapKey,
-                selectedDayIndex: selectedDayIndex,
-                isImageMode: _isImageMode,
-                selectedPlaceId: _selectedPlaceId,
-                onPlaceMarkerTapped: (place) {
-                  setState(() {
-                    _isImageMode = true;
-                    _selectedPlaceId = place.id;
-                  });
-                },
-                onImageModeExit: () {
-                  setState(() {
-                    _isImageMode = false;
-                    _selectedPlaceId = null;
-                  });
-                },
-              )
-            else
-              const Center(child: CircularProgressIndicator()),
-            // TODO: 뒤로 가기 버튼
-            Positioned(
-              top: 15.h,
-              left: 9.w,
-              child: SafeArea(
-                child: GestureDetector(
-                  onTap: () {
-                    ref.read(selectionModeProvider.notifier).state = false;
-                    Navigator.of(context).pop();
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: WillPopScope(
+        onWillPop: () async {
+          // selection mode 해제
+          if (ref.read(selectionModeProvider)) {
+            ref.read(selectionModeProvider.notifier).state = false;
+          }
+          // 이미지 모드 해제
+          if (_isImageMode) {
+            setState(() {
+              _isImageMode = false;
+              _selectedPlaceId = null;
+            });
+          }
+          return true; // true를 리턴하면 실제로 pop이 일어남
+        },
+        child: Scaffold(
+          bottomNavigationBar: _getPictureOptionBar(
+            ref,
+            selectedDayIndex,
+            matchedOrUnmatchedPayload,
+            pendingPayload,
+          ),
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              // 네이버 지도 위젯
+              if (_allDaysFetched)
+                _EndTripNaverMap(
+                  key: _mapKey,
+                  selectedDayIndex: selectedDayIndex,
+                  isImageMode: _isImageMode,
+                  selectedPlaceId: _selectedPlaceId,
+                  onPlaceMarkerTapped: (place) {
+                    setState(() {
+                      _isImageMode = true;
+                      _selectedPlaceId = place.id;
+                    });
                   },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 9.w),
-                    child: Icon(
-                      Icons.arrow_back_ios_new,
-                      size: 17.w,
-                      color: Colors.black,
+                  onImageModeExit: () {
+                    setState(() {
+                      _isImageMode = false;
+                      _selectedPlaceId = null;
+                    });
+                  },
+                )
+              else
+                const Center(child: CircularProgressIndicator()),
+              // TODO: 뒤로 가기 버튼
+              Positioned(
+                top: 15.h,
+                left: 9.w,
+                child: SafeArea(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref.read(selectionModeProvider.notifier).state = false;
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 9.w),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 17.w,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            // 내 위치로 가기 버튼 (기능 비활성화)
-            MyLocationButton(
-              controller: _sheetController,
-              onTap: () {
-                // 내 위치 기능은 _EndTripNaverMap 내부에서 처리
-                // 향후 필요시 콜백 추가 가능
-              },
-            ),
-            // TODO: 하단 슬라이더 위젯
-            DraggableScrollableSheet(
-              controller: _sheetController,
-              initialChildSize: 0.215,
-              minChildSize: 0.08,
-              maxChildSize: 0.9,
-              builder: (context, scrollController) {
-                return EndTripBottomSheet(
-                  scrollController: scrollController,
-                  days: days,
-                  selectedDayIndex: selectedDayIndex,
-                  onDayChanged: (index) {
-                    // selectedDayIndex만 변경하면 _EndTripNaverMap의 didUpdateWidget에서 자동으로 마커 업데이트
-                    if (mounted) {
-                      setState(() {
-                        selectedDayIndex = index;
-                        // Day 변경 시 이미지 모드 해제
-                        _isImageMode = false;
-                        _selectedPlaceId = null;
-                      });
-                    }
-                  },
-                  buildPlaceList: () {
-                    final completedAsync =
-                        ref.watch(completedScheduleProvider).valueOrNull;
-                    final tripState = ref.watch(tripProvider).valueOrNull;
+              // 내 위치로 가기 버튼 (기능 비활성화)
+              MyLocationButton(
+                controller: _sheetController,
+                onTap: () {
+                  _mapKey.currentState?.moveToMyLocation();
+                },
+              ),
+              // TODO: 하단 슬라이더 위젯
+              DraggableScrollableSheet(
+                controller: _sheetController,
+                initialChildSize: 0.215,
+                minChildSize: 0.08,
+                maxChildSize: 0.9,
+                builder: (context, scrollController) {
+                  return EndTripBottomSheet(
+                    scrollController: scrollController,
+                    days: days,
+                    selectedDayIndex: selectedDayIndex,
+                    onDayChanged: (index) {
+                      // selectedDayIndex만 변경하면 _EndTripNaverMap의 didUpdateWidget에서 자동으로 마커 업데이트
+                      if (mounted) {
+                        setState(() {
+                          selectedDayIndex = index;
+                          // Day 변경 시 이미지 모드 해제
+                          _isImageMode = false;
+                          _selectedPlaceId = null;
+                        });
+                      }
+                    },
+                    buildPlaceList: () {
+                      final completedAsync =
+                          ref.watch(completedScheduleProvider).valueOrNull;
+                      final tripState = ref.watch(tripProvider).valueOrNull;
 
-                    if (completedAsync == null) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final schedules = completedAsync.data;
-                    List<CompletedTripPlaceModel> placeList = [];
-                    if (selectedDayIndex == 0) {
-                      placeList =
-                          [for (final day in schedules) ...day.places]
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
-                    } else {
-                      final daySchedule = schedules.firstWhere(
-                        (s) => s.day == selectedDayIndex,
-                        orElse:
-                            () => CompletedTripDayPlaceModel(
-                              day: selectedDayIndex,
-                              places: [],
-                              id: '',
-                              unmatchedImage: null,
-                            ),
-                      );
-                      placeList =
-                          daySchedule.places
-                              .where(
-                                (p) =>
-                                    p.latitude != null && p.longitude != null,
-                              )
-                              .toList();
-                    }
-                    final hasPlaces = placeList.isNotEmpty;
-                    return SizedBox(
-                      height: 92.h,
-                      child:
-                          hasPlaces
-                              ? PageView.builder(
-                                itemCount: placeList.length,
-                                controller: PageController(
-                                  viewportFraction: 0.95,
-                                ),
-                                itemBuilder: (context, idx) {
-                                  final place = placeList[idx];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      // 카메라 이동 기능은 향후 추가 가능
-                                      // 현재는 _EndTripNaverMap 내부에서 처리
-                                    },
-                                    child: ScheduleItem(
-                                      key: ValueKey(place.id),
-                                      title: place.name,
-                                      category: place.type,
-                                      time: null,
-                                      done: true,
+                      if (completedAsync == null) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final schedules = completedAsync.data;
+                      List<CompletedTripPlaceModel> placeList = [];
+                      if (selectedDayIndex == 0) {
+                        placeList =
+                            [for (final day in schedules) ...day.places]
+                                .where(
+                                  (p) =>
+                                      p.latitude != null && p.longitude != null,
+                                )
+                                .toList();
+                      } else {
+                        final daySchedule = schedules.firstWhere(
+                          (s) => s.day == selectedDayIndex,
+                          orElse:
+                              () => CompletedTripDayPlaceModel(
+                                day: selectedDayIndex,
+                                places: [],
+                                id: '',
+                                unmatchedImage: null,
+                              ),
+                        );
+                        placeList =
+                            daySchedule.places
+                                .where(
+                                  (p) =>
+                                      p.latitude != null && p.longitude != null,
+                                )
+                                .toList();
+                      }
+                      final hasPlaces = placeList.isNotEmpty;
+                      return SizedBox(
+                        height: 92.h,
+                        child:
+                            hasPlaces
+                                ? PageView.builder(
+                                  itemCount: placeList.length,
+                                  controller: PageController(
+                                    viewportFraction: 0.95,
+                                  ),
+                                  itemBuilder: (context, idx) {
+                                    final place = placeList[idx];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        // 카메라 이동 기능은 향후 추가 가능
+                                        // 현재는 _EndTripNaverMap 내부에서 처리
+                                      },
+                                      child: ScheduleItem(
+                                        key: ValueKey(place.id),
+                                        title: place.name,
+                                        category: place.type,
+                                        time: null,
+                                        done: true,
+                                      ),
+                                    );
+                                  },
+                                )
+                                : Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '등록된 일정이 없습니다.',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: const Color(0xffc6c6c6),
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  );
-                                },
-                              )
-                              : Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '등록된 일정이 없습니다.',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: const Color(0xffc6c6c6),
-                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                    );
-                  },
-                  onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
-                    if (mounted) {
-                      setState(() {
-                        matchedOrUnmatchedPayload = matchedOrUnmatched;
-                        pendingPayload = pending;
-                      });
-                    }
-                  },
-                );
-              },
-            ),
-          ],
+                      );
+                    },
+                    onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
+                      if (mounted) {
+                        setState(() {
+                          matchedOrUnmatchedPayload = matchedOrUnmatched;
+                          pendingPayload = pending;
+                        });
+                      }
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -507,6 +512,11 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
 
     // 카메라 조정
     await _fitMapToPlaces(places);
+  }
+
+  Future<void> moveToMyLocation() async {
+    if (mapController == null) return;
+    await LocationHelper.moveCameraToUser(controller: mapController!);
   }
 
   // 해당 day의 장소 리스트 반환
@@ -634,7 +644,9 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
         id: 'host_route_polyline',
         coords: hostRouteCoords,
         color: const Color(0xff2ac308),
-        width: 2.w,
+        width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
       );
       try {
         await mapController!.addOverlay(hostPolyline);
@@ -651,11 +663,19 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
       }
       if (permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse) {
-        final pos = await Geolocator.getCurrentPosition();
         final overlay = mapController!.getLocationOverlay();
-        overlay.setIsVisible(true);
-        overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
-        _locationOverlay = overlay;
+        final lastKnown = await LocationHelper.getLastKnownPositionSafe();
+        if (lastKnown != null) {
+          overlay.setIsVisible(true);
+          overlay.setPosition(NLatLng(lastKnown.latitude, lastKnown.longitude));
+          _locationOverlay = overlay;
+        }
+        LocationHelper.refreshPositionAsync((pos) {
+          if (mapController == null) return;
+          overlay.setIsVisible(true);
+          overlay.setPosition(NLatLng(pos.latitude, pos.longitude));
+          _locationOverlay = overlay;
+        });
       }
     } catch (_) {}
   }

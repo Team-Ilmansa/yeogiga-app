@@ -1348,195 +1348,206 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
             ),
             child: Container(
               width: 340.w,
-              height: 437.h,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(Icons.close, size: 24),
-                    ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 16.h,
                   ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    '공지하기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20.sp,
-                      height: 1.4,
-                      letterSpacing: -0.3,
-                      color: Color(0xff313131),
-                    ),
-                  ),
-                  Text(
-                    '팀원들에게 공지를 보낼 수 있어요',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      height: 1.4,
-                      letterSpacing: -0.3,
-                      color: Color(0xff7d7d7d),
-                    ),
-                  ),
-                  SizedBox(height: 22.h),
-                  //TODO: 제목 작성 필드
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xfff0f0f0),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: TextField(
-                      controller: titleTextController,
-                      maxLength: 20,
-                      onChanged: (value) => setState(() {}),
-                      decoration: InputDecoration(
-                        hintText: '제목을 작성해주세요',
-                        hintStyle: TextStyle(
-                          fontSize: 16.sp,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Icon(Icons.close, size: 24),
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        '공지하기',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
                           height: 1.4,
                           letterSpacing: -0.3,
-                          color: Color(0xffc6c6c6),
-                        ),
-                        border: InputBorder.none,
-                        counterText: '',
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20.w,
-                          vertical: 19.h,
+                          color: Color(0xff313131),
                         ),
                       ),
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        height: 1.4,
-                        letterSpacing: -0.3,
-                        color: Color(0xff313131),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  //TODO: 내용 작성 필드
-                  Container(
-                    height: 146.h,
-                    decoration: BoxDecoration(
-                      color: Color(0xfff0f0f0),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: TextField(
-                      controller: contentTextController,
-                      maxLength: 100,
-                      maxLines: null,
-                      expands: true,
-                      textAlignVertical: TextAlignVertical.top,
-                      onChanged: (value) => setState(() {}),
-                      decoration: InputDecoration(
-                        hintText: '공지사항을 작성해주세요',
-                        hintStyle: TextStyle(
-                          fontSize: 16.sp,
+                      Text(
+                        '팀원들에게 공지를 보낼 수 있어요',
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           height: 1.4,
                           letterSpacing: -0.3,
-                          color: Color(0xffc6c6c6),
-                        ),
-                        border: InputBorder.none,
-                        counterText: '',
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20.w,
-                          vertical: 19.h,
+                          color: Color(0xff7d7d7d),
                         ),
                       ),
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        height: 1.4,
-                        letterSpacing: -0.3,
-                        color: Color(0xff313131),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '${contentTextController.text.length}/100',
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.5,
-                        letterSpacing: -0.3,
-                        color: Color(0xffc6c6c6),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: SizedBox(
-                      width: 120.w,
-                      height: 52.h,
-                      child: ElevatedButton(
-                        onPressed:
-                            titleTextController.text.trim().isEmpty ||
-                                    contentTextController.text.trim().isEmpty
-                                ? null
-                                : () async {
-                                  final title = titleTextController.text.trim();
-                                  final content =
-                                      contentTextController.text.trim();
-
-                                  final tripState =
-                                      ref.read(tripProvider).valueOrNull;
-                                  if (tripState is TripModel) {
-                                    final result = await ref
-                                        .read(noticeListProvider.notifier)
-                                        .createNotice(
-                                          tripId: tripState.tripId,
-                                          title: title,
-                                          description: content,
-                                        );
-
-                                    if (result['success']) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text('공지사항이 성공적으로 등록되었습니다.'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text('공지사항 등록에 실패했습니다.'),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    }
-                                    GoRouter.of(context).pop();
-                                  }
-                                },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xff8287ff),
-                          disabledBackgroundColor: Color(0xffc6c6c6),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
+                      SizedBox(height: 22.h),
+                      //TODO: 제목 작성 필드
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xfff0f0f0),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: TextField(
+                          controller: titleTextController,
+                          maxLength: 20,
+                          onChanged: (value) => setState(() {}),
+                          decoration: InputDecoration(
+                            hintText: '제목을 작성해주세요',
+                            hintStyle: TextStyle(
+                              fontSize: 16.sp,
+                              height: 1.4,
+                              letterSpacing: -0.3,
+                              color: Color(0xffc6c6c6),
+                            ),
+                            border: InputBorder.none,
+                            counterText: '',
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 19.h,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          '확인',
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
                             fontSize: 16.sp,
                             height: 1.4,
                             letterSpacing: -0.3,
-                            color: Color(0xffffffff),
+                            color: Color(0xff313131),
                           ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 12.h),
+                      //TODO: 내용 작성 필드
+                      Container(
+                        height: 146.h,
+                        decoration: BoxDecoration(
+                          color: Color(0xfff0f0f0),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: TextField(
+                          controller: contentTextController,
+                          maxLength: 100,
+                          maxLines: null,
+                          expands: true,
+                          textAlignVertical: TextAlignVertical.top,
+                          onChanged: (value) => setState(() {}),
+                          decoration: InputDecoration(
+                            hintText: '공지사항을 작성해주세요',
+                            hintStyle: TextStyle(
+                              fontSize: 16.sp,
+                              height: 1.4,
+                              letterSpacing: -0.3,
+                              color: Color(0xffc6c6c6),
+                            ),
+                            border: InputBorder.none,
+                            counterText: '',
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 19.h,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            height: 1.4,
+                            letterSpacing: -0.3,
+                            color: Color(0xff313131),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '${contentTextController.text.length}/100',
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.5,
+                            letterSpacing: -0.3,
+                            color: Color(0xffc6c6c6),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: SizedBox(
+                          width: 120.w,
+                          height: 52.h,
+                          child: ElevatedButton(
+                            onPressed:
+                                titleTextController.text.trim().isEmpty ||
+                                        contentTextController.text
+                                            .trim()
+                                            .isEmpty
+                                    ? null
+                                    : () async {
+                                      final title =
+                                          titleTextController.text.trim();
+                                      final content =
+                                          contentTextController.text.trim();
+
+                                      final tripState =
+                                          ref.read(tripProvider).valueOrNull;
+                                      if (tripState is TripModel) {
+                                        final result = await ref
+                                            .read(noticeListProvider.notifier)
+                                            .createNotice(
+                                              tripId: tripState.tripId,
+                                              title: title,
+                                              description: content,
+                                            );
+
+                                        if (result['success']) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '공지사항이 성공적으로 등록되었습니다.',
+                                              ),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text('공지사항 등록에 실패했습니다.'),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+                                        GoRouter.of(context).pop();
+                                      }
+                                    },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xff8287ff),
+                              disabledBackgroundColor: Color(0xffc6c6c6),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.r),
+                              ),
+                            ),
+                            child: Text(
+                              '확인',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.sp,
+                                height: 1.4,
+                                letterSpacing: -0.3,
+                                color: Color(0xffffffff),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           );

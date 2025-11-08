@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/route_observer.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/common/utils/trip_utils.dart';
 import 'package:yeogiga/settlement/component/settlement_item.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
@@ -129,97 +130,101 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
       headerMessage = '모든 정산이\n완료되었어요!';
     }
 
-    return Scaffold(
-      backgroundColor: Color(0xfffafafa),
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        toolbarHeight: 48.h,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
         backgroundColor: Color(0xfffafafa),
-        shadowColor: Colors.transparent, // 그림자도 제거
-        foregroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(width: 4.w),
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
-            ),
-          ],
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          toolbarHeight: 48.h,
+          backgroundColor: Color(0xfffafafa),
+          shadowColor: Colors.transparent, // 그림자도 제거
+          foregroundColor: Colors.black,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 4.w),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomAppBarLayout(
-        child: Row(
-          children: [
-            SizedBox(width: 6.w),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8287FF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+        bottomNavigationBar: BottomAppBarLayout(
+          child: Row(
+            children: [
+              SizedBox(width: 6.w),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8287FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    elevation: 0,
+                    minimumSize: Size.fromHeight(46.h),
+                    padding: EdgeInsets.zero,
                   ),
-                  elevation: 0,
-                  minimumSize: Size.fromHeight(46.h),
-                  padding: EdgeInsets.zero,
-                ),
-                onPressed: () {
-                  GoRouter.of(context).push('/settlementCreateScreen');
-                },
-                child: Text(
-                  '내역 추가하기',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                  onPressed: () {
+                    GoRouter.of(context).push('/settlementCreateScreen');
+                  },
+                  child: Text(
+                    '내역 추가하기',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: 6.w),
-          ],
+              SizedBox(width: 6.w),
+            ],
+          ),
         ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 14.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14.w),
-            child: Text(
-              headerMessage,
-              style: TextStyle(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w700,
-                height: 1.4,
-                letterSpacing: -0.84,
-                color: Color(0xff313131),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 14.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              child: Text(
+                headerMessage,
+                style: TextStyle(
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.w700,
+                  height: 1.4,
+                  letterSpacing: -0.84,
+                  color: Color(0xff313131),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 17.h),
-          DaySelector(
-            itemCount: itemCount,
-            selectedIndex: _selectedIndex,
-            onChanged: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            labelBuilder: (index) {
-              if (index == 0) return '미정산 내역';
-              if (index == 1) return '여행 전체';
-              if (index == 2) return '기타';
-              // index 3부터는 Day 1, Day 2, ...
-              return 'DAY ${index - 2}';
-            },
-          ),
+            SizedBox(height: 17.h),
+            DaySelector(
+              itemCount: itemCount,
+              selectedIndex: _selectedIndex,
+              onChanged: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              labelBuilder: (index) {
+                if (index == 0) return '미정산 내역';
+                if (index == 1) return '여행 전체';
+                if (index == 2) return '기타';
+                // index 3부터는 Day 1, Day 2, ...
+                return 'DAY ${index - 2}';
+              },
+            ),
 
-          // TODO: 선택된 인덱스에 따라 필터링된 정산 내역 표시
-          Expanded(child: _buildSettlementList()),
-        ],
+            // TODO: 선택된 인덱스에 따라 필터링된 정산 내역 표시
+            Expanded(child: _buildSettlementList()),
+          ],
+        ),
       ),
     );
   }

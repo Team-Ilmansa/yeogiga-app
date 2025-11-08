@@ -5,6 +5,7 @@ import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class NicknameSetupScreen extends ConsumerStatefulWidget {
   static String get routeName => 'nickname';
@@ -12,7 +13,8 @@ class NicknameSetupScreen extends ConsumerStatefulWidget {
   const NicknameSetupScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<NicknameSetupScreen> createState() => _NicknameSetupScreenState();
+  ConsumerState<NicknameSetupScreen> createState() =>
+      _NicknameSetupScreenState();
 }
 
 class _NicknameSetupScreenState extends ConsumerState<NicknameSetupScreen> {
@@ -29,90 +31,93 @@ class _NicknameSetupScreenState extends ConsumerState<NicknameSetupScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(userMeProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            // UserModelGuest 상태를 null로 변경해서 로그인 화면으로 이동
-            ref.read(userMeProvider.notifier).logout();
-          },
-        ),
-      ),
-      
-      // 닉네임 설정 버튼
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(72.r),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              offset: const Offset(0, -2),
-              blurRadius: 1,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            36.w,
-            36.h,
-            36.w,
-            MediaQuery.of(context).viewInsets.bottom + 75.h,
-          ),
-          child: ElevatedButton(
-            onPressed: state is UserModelLoading || _nicknameController.text.isEmpty
-                ? null
-                : () async {
-                    final result = await ref
-                        .read(userMeProvider.notifier)
-                        .setGuestNickname(
-                          dio: ref.watch(dioProvider),
-                          nickname: _nicknameController.text.trim(),
-                        );
-                    setState(() {
-                      if (result is UserModelError) {
-                        errorMessage = result.message;
-                      } else {
-                        errorMessage = null;
-                      }
-                    });
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff8287ff),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 48.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(36.r),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              '시작하기',
-              style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
-            ),
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+            onPressed: () {
+              // UserModelGuest 상태를 null로 변경해서 로그인 화면으로 이동
+              ref.read(userMeProvider.notifier).logout();
+            },
           ),
         ),
-      ),
 
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: SafeArea(
+        // 닉네임 설정 버튼
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(72.r),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                offset: const Offset(0, -2),
+                blurRadius: 1,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              36.w,
+              36.h,
+              36.w,
+              MediaQuery.of(context).viewInsets.bottom + 75.h,
+            ),
+            child: ElevatedButton(
+              onPressed:
+                  state is UserModelLoading || _nicknameController.text.isEmpty
+                      ? null
+                      : () async {
+                        final result = await ref
+                            .read(userMeProvider.notifier)
+                            .setGuestNickname(
+                              dio: ref.watch(dioProvider),
+                              nickname: _nicknameController.text.trim(),
+                            );
+                        setState(() {
+                          if (result is UserModelError) {
+                            errorMessage = result.message;
+                          } else {
+                            errorMessage = null;
+                          }
+                        });
+                      },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff8287ff),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 48.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(36.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                '시작하기',
+                style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
+        ),
+
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 48.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SizedBox(height: 240.h),
-                  
+
                   // 로고
                   Logo(),
                   SizedBox(height: 120.h),
@@ -157,16 +162,17 @@ class _NicknameSetupScreenState extends ConsumerState<NicknameSetupScreen> {
                         child: SizedBox(
                           width: double.infinity,
                           height: 60.h,
-                          child: errorMessage != null
-                              ? Text(
-                                  errorMessage!,
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 39.sp,
-                                  ),
-                                  textAlign: TextAlign.end,
-                                )
-                              : null,
+                          child:
+                              errorMessage != null
+                                  ? Text(
+                                    errorMessage!,
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 39.sp,
+                                    ),
+                                    textAlign: TextAlign.end,
+                                  )
+                                  : null,
                         ),
                       ),
                     ],

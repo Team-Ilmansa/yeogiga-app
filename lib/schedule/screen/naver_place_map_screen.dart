@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:yeogiga/common/utils/location_helper.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/naver/provider/naver_place_search_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 import '../component/slider/place_card_slider_panel.dart';
 import '../component/slider/ping_select_panel.dart';
 import 'package:yeogiga/naver/model/naver_place_search_response.dart';
@@ -57,7 +58,9 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
       child: Scaffold(
         // bottomNavigationBar: AnimatedSlide(
         //   offset: _showSliderBar ? Offset(0, 0) : Offset(0, 1),
@@ -513,20 +516,6 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
 
   Future<void> _moveToMyLocation() async {
     if (mapController == null) return;
-    // 위치 권한 체크 및 요청
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-    if (permission == LocationPermission.deniedForever) return;
-    // 현재 위치 가져오기
-    final pos = await Geolocator.getCurrentPosition();
-    await mapController!.updateCamera(
-      NCameraUpdate.withParams(
-        target: NLatLng(pos.latitude, pos.longitude),
-        zoom: 15,
-      ),
-    );
+    await LocationHelper.moveCameraToUser(controller: mapController!);
   }
 }

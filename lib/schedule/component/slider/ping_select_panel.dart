@@ -104,38 +104,39 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
             ),
           ),
           SizedBox(height: 20.h),
-          SizedBox(
-            height: 100.h,
-            child: ListView.separated(
-              primary: false,
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => SizedBox(width: 8.w),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 100.w,
-                  height: 100.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF4F4F4),
-                    borderRadius: BorderRadius.circular(11.r),
-                  ),
-                  child:
-                      widget.imageUrl != null && widget.imageUrl!.isNotEmpty
-                          ? ClipRRect(
-                            borderRadius: BorderRadius.circular(11.r),
-                            child: Image.network(
-                              widget.imageUrl!,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                          : const Icon(Icons.image, color: Colors.grey),
-                );
-              },
-            ),
-          ),
-          SizedBox(height: 16.h),
+          // TODO: 나중에 만나자
+          // SizedBox(
+          //   height: 100.h,
+          //   child: ListView.separated(
+          //     primary: false,
+          //     shrinkWrap: true,
+          //     padding: EdgeInsets.symmetric(horizontal: 16.w),
+          //     scrollDirection: Axis.horizontal,
+          //     separatorBuilder: (context, index) => SizedBox(width: 8.w),
+          //     itemCount: 5,
+          //     itemBuilder: (context, index) {
+          //       return Container(
+          //         width: 100.w,
+          //         height: 100.w,
+          //         decoration: BoxDecoration(
+          //           color: const Color(0xFFF4F4F4),
+          //           borderRadius: BorderRadius.circular(11.r),
+          //         ),
+          //         child:
+          //             widget.imageUrl != null && widget.imageUrl!.isNotEmpty
+          //                 ? ClipRRect(
+          //                   borderRadius: BorderRadius.circular(11.r),
+          //                   child: Image.network(
+          //                     widget.imageUrl!,
+          //                     fit: BoxFit.cover,
+          //                   ),
+          //                 )
+          //                 : const Icon(Icons.image, color: Colors.grey),
+          //       );
+          //     },
+          //   ),
+          // ),
+          // SizedBox(height: 16.h),
           Padding(
             padding: EdgeInsets.only(right: 16.w, left: 16.w, bottom: 32.h),
             child: Column(
@@ -233,14 +234,15 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildDateSelector() {
     return GestureDetector(
-      onTap: () => DatePickerUtil.showDateListPicker(
-        context: context,
-        selectedDateTime: selectedDateTime,
-        availableDates: availableDates,
-        onDateChanged: (date) {
-          setState(() => selectedDateTime = date);
-        },
-      ),
+      onTap:
+          () => DatePickerUtil.showDateListPicker(
+            context: context,
+            selectedDateTime: selectedDateTime,
+            availableDates: availableDates,
+            onDateChanged: (date) {
+              setState(() => selectedDateTime = date);
+            },
+          ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -270,13 +272,14 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildTimeSelector() {
     return GestureDetector(
-      onTap: () => DatePickerUtil.showTimePicker(
-        context: context,
-        selectedDateTime: selectedDateTime,
-        onDateChanged: (date) {
-          setState(() => selectedDateTime = date);
-        },
-      ),
+      onTap:
+          () => DatePickerUtil.showTimePicker(
+            context: context,
+            selectedDateTime: selectedDateTime,
+            onDateChanged: (date) {
+              setState(() => selectedDateTime = date);
+            },
+          ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
@@ -306,13 +309,14 @@ class _PingSelectPanelState extends State<PingSelectPanel> {
 
   Widget _buildMinuteSelector() {
     return GestureDetector(
-      onTap: () => DatePickerUtil.showMinutePicker(
-        context: context,
-        selectedDateTime: selectedDateTime,
-        onDateChanged: (date) {
-          setState(() => selectedDateTime = date);
-        },
-      ),
+      onTap:
+          () => DatePickerUtil.showMinutePicker(
+            context: context,
+            selectedDateTime: selectedDateTime,
+            onDateChanged: (date) {
+              setState(() => selectedDateTime = date);
+            },
+          ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(

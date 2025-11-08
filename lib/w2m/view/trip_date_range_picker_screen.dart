@@ -8,6 +8,7 @@ import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
 import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class TripDateRangePickerScreen extends ConsumerStatefulWidget {
   static String get routeName => 'dateRangePicker';
@@ -44,35 +45,37 @@ class _TripDateRangePickerScreenState
     // 한국 로케일로 날짜 포맷 적용
     Intl.defaultLocale = 'ko_KR';
     final now = DateTime.now();
-    return Scaffold(
-      //헤더 공간
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
+        //헤더 공간
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Padding(
-          padding: EdgeInsets.only(left: 4.w),
-          child: GestureDetector(
-            onTap: () {
-              // GoRouter 6.x 이상이면 context.canPop/context.pop 사용, 아니면 Navigator fallback
-              if (GoRouter.of(context).canPop()) {
-                GoRouter.of(context).pop();
-              } else {
-                Navigator.of(context).maybePop();
-              }
-            },
-            child: Icon(
-              Icons.arrow_back_ios_new,
-              size: 16.sp,
-              color: Colors.black,
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: Padding(
+            padding: EdgeInsets.only(left: 4.w),
+            child: GestureDetector(
+              onTap: () {
+                // GoRouter 6.x 이상이면 context.canPop/context.pop 사용, 아니면 Navigator fallback
+                if (GoRouter.of(context).canPop()) {
+                  GoRouter.of(context).pop();
+                } else {
+                  Navigator.of(context).maybePop();
+                }
+              },
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                size: 16.sp,
+                color: Colors.black,
+              ),
             ),
           ),
         ),
-      ),
-      //달력 선택 공간
-      body: SafeArea(
-        child: Column(
+        //달력 선택 공간
+        body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. 상단 안내 영역
@@ -120,9 +123,8 @@ class _TripDateRangePickerScreenState
             ),
           ],
         ),
-      ),
-      //하단 바 (날짜 선택 시 노출)
-      bottomNavigationBar:
+        //하단 바 (날짜 선택 시 노출)
+        bottomNavigationBar:
           (_startDate != null && _endDate != null)
               ? BottomAppBarLayout(
                 child: Padding(
@@ -217,6 +219,7 @@ class _TripDateRangePickerScreenState
                 ),
               )
               : null,
+      ),
     );
   }
 

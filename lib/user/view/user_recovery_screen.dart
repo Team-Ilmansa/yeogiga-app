@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 
 class UserRecoveryScreen extends ConsumerWidget {
   static String get routeName => 'userRecovery';
@@ -25,7 +26,10 @@ class UserRecoveryScreen extends ConsumerWidget {
     final userData = state.data;
     final nickname = userData.nickname;
 
-    return Scaffold(
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
 
@@ -81,12 +85,11 @@ class UserRecoveryScreen extends ConsumerWidget {
         ),
       ),
 
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: SafeArea(
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               child: Column(

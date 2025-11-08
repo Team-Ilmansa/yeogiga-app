@@ -24,7 +24,7 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: trip?.status == TripStatus.SETTING ? 317.h : 253.h,
+          height: trip?.status == TripStatus.SETTING ? 329.h : 265.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -456,7 +456,7 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: 195.h,
+          height: 207.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),

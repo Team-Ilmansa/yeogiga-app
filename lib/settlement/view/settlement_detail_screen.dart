@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
+import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/settlement/component/settlement_more_menu_sheet.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
 import 'package:yeogiga/settlement/model/settlement_payer_model.dart';
@@ -119,174 +120,185 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
     final settlementAsync = ref.watch(settlementProvider);
     final settlement = settlementAsync.valueOrNull;
 
-    return Scaffold(
-      backgroundColor: Color(0xfffafafa),
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        toolbarHeight: 48.h,
+    return SafeArea(
+      top: false,
+      bottom: shouldUseSafeAreaBottom(context),
+      child: Scaffold(
         backgroundColor: Color(0xfffafafa),
-        shadowColor: Colors.transparent, // 그림자도 제거
-        foregroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        centerTitle: true, // 타이틀 중앙 정렬
-        leading: Padding(
-          padding: EdgeInsets.only(left: 4.w),
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          toolbarHeight: 48.h,
+          backgroundColor: Color(0xfffafafa),
+          shadowColor: Colors.transparent, // 그림자도 제거
+          foregroundColor: Colors.black,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          centerTitle: true, // 타이틀 중앙 정렬
+          leading: Padding(
+            padding: EdgeInsets.only(left: 4.w),
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Icon(Icons.arrow_back_ios_new, size: 16.sp),
+            ),
           ),
-        ),
-        actions: [
-          if (_canEditSettlement(settlement)) ...[
-            GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: false,
-                  backgroundColor: Colors.transparent,
-                  barrierColor: Colors.black.withOpacity(0.5),
-                  builder: (context) {
-                    return SettlementMoreMenuSheet();
-                  },
-                );
-              },
-              child: Icon(Icons.more_vert, color: Colors.black),
-            ),
-            SizedBox(width: 14.w),
+          actions: [
+            if (_canEditSettlement(settlement)) ...[
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: false,
+                    useSafeArea: shouldUseSafeAreaBottom(context),
+                    backgroundColor: Colors.transparent,
+                    barrierColor: Colors.black.withOpacity(0.5),
+                    builder: (context) {
+                      return SettlementMoreMenuSheet();
+                    },
+                  );
+                },
+                child: Icon(Icons.more_vert, color: Colors.black),
+              ),
+              SizedBox(width: 14.w),
+            ],
           ],
-        ],
-      ),
-      body: settlementAsync.when(
-        loading: () => Center(child: CircularProgressIndicator()),
-        error:
-            (error, stack) => Center(
-              child: Text(
-                '정산 내역을 불러오는데 실패했습니다.',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+        ),
+        body: settlementAsync.when(
+          loading: () => Center(child: CircularProgressIndicator()),
+          error:
+              (error, stack) => Center(
+                child: Text(
+                  '정산 내역을 불러오는데 실패했습니다.',
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                ),
               ),
-            ),
-        data: (settlement) {
-          if (settlement == null) {
-            return Center(
-              child: Text(
-                '정산 내역이 없습니다.',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-              ),
-            );
-          }
+          data: (settlement) {
+            if (settlement == null) {
+              return Center(
+                child: Text(
+                  '정산 내역이 없습니다.',
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                ),
+              );
+            }
 
-          // 총 정산자 수와 완료한 사람 수 계산
-          final totalPayers = settlement.payers.length;
-          final completedPayers =
-              settlement.payers.where((p) => p.isCompleted).length;
+            // 총 정산자 수와 완료한 사람 수 계산
+            final totalPayers = settlement.payers.length;
+            final completedPayers =
+                settlement.payers.where((p) => p.isCompleted).length;
 
-          return NestedScrollView(
-            headerSliverBuilder:
-                (context, innerBoxIsScrolled) => [
-                  _TopPanel(settlement: settlement),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: TabBarHeaderDelegate(
-                      child: Container(
-                        key: ValueKey(
-                          'tab-$totalPayers-$completedPayers',
-                        ), // 강제 리빌드
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        color: Color(0xfffafafa),
-                        child: SizedBox(
-                          height: 36.h,
-                          child: TabBar(
-                            controller: _tabController,
-                            indicator: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Color(0xFF8287FF),
-                                  width: 2.w,
+            return NestedScrollView(
+              headerSliverBuilder:
+                  (context, innerBoxIsScrolled) => [
+                    _TopPanel(settlement: settlement),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: TabBarHeaderDelegate(
+                        child: Container(
+                          key: ValueKey(
+                            'tab-$totalPayers-$completedPayers',
+                          ), // 강제 리빌드
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          color: Color(0xfffafafa),
+                          child: SizedBox(
+                            height: 36.h,
+                            child: TabBar(
+                              controller: _tabController,
+                              indicator: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Color(0xFF8287FF),
+                                    width: 2.w,
+                                  ),
                                 ),
                               ),
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              labelColor: Color(0xFF8287FF),
+                              unselectedLabelColor: Colors.grey,
+                              tabs: [
+                                Tab(
+                                  child: Text(
+                                    '미정산 ${totalPayers - completedPayers}',
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      height: 1.40,
+                                      letterSpacing: -0.48,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Tab(
+                                  child: Text(
+                                    '정산 완료 $completedPayers',
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      height: 1.40,
+                                      letterSpacing: -0.48,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            labelColor: Color(0xFF8287FF),
-                            unselectedLabelColor: Colors.grey,
-                            tabs: [
-                              Tab(
-                                child: Text(
-                                  '미정산 ${totalPayers - completedPayers}',
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    height: 1.40,
-                                    letterSpacing: -0.48,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              Tab(
-                                child: Text(
-                                  '정산 완료 $completedPayers',
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    height: 1.40,
-                                    letterSpacing: -0.48,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ),
                     ),
+                  ],
+              body: TabBarView(
+                controller: _tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // 미정산 탭
+                  ListView.separated(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 20.h,
+                    ),
+                    itemCount:
+                        settlement.payers.where((p) => !p.isCompleted).length,
+                    separatorBuilder:
+                        (context, index) => SizedBox(height: 20.h),
+                    itemBuilder: (context, index) {
+                      final unpaidPayers =
+                          settlement.payers
+                              .where((p) => !p.isCompleted)
+                              .toList();
+                      final payer = unpaidPayers[index];
+                      return getPayerCard(
+                        payer: payer,
+                        settlement: settlement,
+                        isCompleted: false,
+                      );
+                    },
+                  ),
+                  // 정산 완료 탭
+                  ListView.separated(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 20.h,
+                    ),
+                    itemCount:
+                        settlement.payers.where((p) => p.isCompleted).length,
+                    separatorBuilder:
+                        (context, index) => SizedBox(height: 20.h),
+                    itemBuilder: (context, index) {
+                      final completedPayers =
+                          settlement.payers
+                              .where((p) => p.isCompleted)
+                              .toList();
+                      final payer = completedPayers[index];
+                      return getPayerCard(
+                        payer: payer,
+                        settlement: settlement,
+                        isCompleted: true,
+                      );
+                    },
                   ),
                 ],
-            body: TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                // 미정산 탭
-                ListView.separated(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 20.h,
-                  ),
-                  itemCount:
-                      settlement.payers.where((p) => !p.isCompleted).length,
-                  separatorBuilder: (context, index) => SizedBox(height: 20.h),
-                  itemBuilder: (context, index) {
-                    final unpaidPayers =
-                        settlement.payers.where((p) => !p.isCompleted).toList();
-                    final payer = unpaidPayers[index];
-                    return getPayerCard(
-                      payer: payer,
-                      settlement: settlement,
-                      isCompleted: false,
-                    );
-                  },
-                ),
-                // 정산 완료 탭
-                ListView.separated(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 20.h,
-                  ),
-                  itemCount:
-                      settlement.payers.where((p) => p.isCompleted).length,
-                  separatorBuilder: (context, index) => SizedBox(height: 20.h),
-                  itemBuilder: (context, index) {
-                    final completedPayers =
-                        settlement.payers.where((p) => p.isCompleted).toList();
-                    final payer = completedPayers[index];
-                    return getPayerCard(
-                      payer: payer,
-                      settlement: settlement,
-                      isCompleted: true,
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -622,26 +634,30 @@ class _TopPanel extends StatelessWidget {
                         child: SizedBox(
                           width: 18.w,
                           height: 18.w,
-                          child: hasImage
-                              ? Image.network(
-                                  payer.imageUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          buildProfileAvatarPlaceholder(
-                                            nickname: payer.nickname,
-                                            size: 18.w,
-                                            backgroundColor:
-                                                const Color(0xffebebeb),
-                                            textColor: const Color(0xff8287ff),
-                                          ),
-                                )
-                              : buildProfileAvatarPlaceholder(
-                                  nickname: payer.nickname,
-                                  size: 18.w,
-                                  backgroundColor: const Color(0xffebebeb),
-                                  textColor: const Color(0xff8287ff),
-                                ),
+                          child:
+                              hasImage
+                                  ? Image.network(
+                                    payer.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            buildProfileAvatarPlaceholder(
+                                              nickname: payer.nickname,
+                                              size: 18.w,
+                                              backgroundColor: const Color(
+                                                0xffebebeb,
+                                              ),
+                                              textColor: const Color(
+                                                0xff8287ff,
+                                              ),
+                                            ),
+                                  )
+                                  : buildProfileAvatarPlaceholder(
+                                    nickname: payer.nickname,
+                                    size: 18.w,
+                                    backgroundColor: const Color(0xffebebeb),
+                                    textColor: const Color(0xff8287ff),
+                                  ),
                         ),
                       ),
                     );
