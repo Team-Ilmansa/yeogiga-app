@@ -136,4 +136,47 @@ class MatchedDayTripImageNotifier
 
     state = AsyncValue.data(updatedState);
   }
+
+  void updateFavorite(String imageId, bool favorite) {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    final updatedState = currentState.map((dayPlace) {
+      final updatedPlaceImagesList = dayPlace.placeImagesList.map((placeImages) {
+        if (placeImages == null) return null;
+
+        final updatedImages =
+            placeImages.placeImages.map((img) {
+              if (img.id == imageId) {
+                return MatchedImage(
+                  id: img.id,
+                  url: img.url,
+                  latitude: img.latitude,
+                  longitude: img.longitude,
+                  date: img.date,
+                  favorite: favorite,
+                );
+              }
+              return img;
+            }).toList();
+
+        return MatchedPlaceImage(
+          id: placeImages.id,
+          name: placeImages.name,
+          latitude: placeImages.latitude,
+          longitude: placeImages.longitude,
+          type: placeImages.type,
+          placeImages: updatedImages,
+        );
+      }).toList();
+
+      return MatchedDayTripPlaceImage(
+        tripDayPlaceId: dayPlace.tripDayPlaceId,
+        day: dayPlace.day,
+        placeImagesList: updatedPlaceImagesList,
+      );
+    }).toList();
+
+    state = AsyncValue.data(updatedState);
+  }
 }

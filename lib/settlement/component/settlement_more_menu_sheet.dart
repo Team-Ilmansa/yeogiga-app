@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/grey_bar.dart';
 import 'package:yeogiga/common/component/confirmation_dialog.dart';
+import 'package:yeogiga/common/component/menu_item.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/settlement/provider/settlement_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
@@ -41,8 +41,10 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
             children: [
               GreyBar(),
               // 정산 내역 수정하기
-              _SettlementMenuItem(
-                () {
+              MenuItem(
+                svgAsset: 'asset/icon/menu/title_edit.svg',
+                text: '정산 내역 수정하기',
+                onTap: () {
                   if (settlement == null) return;
 
                   ref.read(isSettlementUpdateModeProvider.notifier).state =
@@ -52,12 +54,12 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                   router.pop();
                   router.push('/settlementCreateScreen', extra: settlement);
                 },
-                title: '정산 내역 수정하기',
-                svgAsset: 'asset/icon/menu/title_edit.svg',
               ),
               // 정산 내역 삭제하기
-              _SettlementMenuItem(
-                () async {
+              MenuItem(
+                svgAsset: 'asset/icon/menu/delete_edit.svg',
+                text: '정산 내역 삭제하기',
+                onTap: () async {
                   if (settlement == null) return;
 
                   // 정산 삭제 확인 다이얼로그 표시 (커스텀 스타일)
@@ -119,56 +121,12 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                     }
                   }
                 },
-                title: '정산 내역 삭제하기',
-                svgAsset: 'asset/icon/menu/delete_edit.svg',
               ),
               // 정산 재공지하기
-              _SettlementMenuItem(
-                () {},
-                title: '정산 내역 재공지하기',
+              MenuItem(
                 svgAsset: 'asset/icon/menu/re_notice.svg',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SettlementMenuItem extends ConsumerWidget {
-  final String title;
-  final String svgAsset;
-  final GestureTapCallback? onTap;
-  const _SettlementMenuItem(
-    this.onTap, {
-    super.key,
-    required this.title,
-    required this.svgAsset,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: 64.h,
-          child: Row(
-            children: [
-              SizedBox(width: 20.w),
-              SvgPicture.asset(svgAsset, width: 24.w, height: 24.h),
-              SizedBox(width: 8.w),
-              Text(
-                title,
-                style: TextStyle(
-                  color: const Color(0xFF313131),
-                  fontSize: 16.sp,
-                  height: 1.40,
-                  letterSpacing: -0.48,
-                  fontWeight: FontWeight.w500,
-                ),
+                text: '정산 내역 재공지하기',
+                onTap: () {},
               ),
             ],
           ),

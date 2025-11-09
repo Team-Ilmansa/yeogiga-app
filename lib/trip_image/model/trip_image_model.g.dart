@@ -50,10 +50,18 @@ Map<String, dynamic> _$UnMatchedDayTripImageToJson(
 };
 
 UnMatchedImage _$UnMatchedImageFromJson(Map<String, dynamic> json) =>
-    UnMatchedImage(id: json['id'] as String, url: json['url'] as String);
+    UnMatchedImage(
+      id: json['id'] as String,
+      url: json['url'] as String,
+      favorite: json['favorite'] as bool? ?? false,
+    );
 
 Map<String, dynamic> _$UnMatchedImageToJson(UnMatchedImage instance) =>
-    <String, dynamic>{'id': instance.id, 'url': instance.url};
+    <String, dynamic>{
+      'id': instance.id,
+      'url': instance.url,
+      'favorite': instance.favorite,
+    };
 
 MatchedDayTripPlaceImage _$MatchedDayTripPlaceImageFromJson(
   Map<String, dynamic> json,

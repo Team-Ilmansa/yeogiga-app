@@ -16,11 +16,13 @@ import 'package:yeogiga/trip/component/detail_screen/top_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
 import 'package:yeogiga/notice/component/notice_panel.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/gallery_tab.dart';
+import 'package:yeogiga/trip/component/detail_screen/favorite_gallery/favorite_gallery_tab.dart';
 import 'package:yeogiga/trip/component/detail_screen/schedule_dashboard/schedule_dashboard_tab.dart';
 import 'package:yeogiga/trip/component/trip_more_menu_sheet.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
+import 'package:yeogiga/trip/utils/gallery_refresh_helper.dart';
 import 'package:yeogiga/trip/provider/gallery_selection_provider.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
@@ -185,99 +187,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     setState(() {
       isRefreshing = true;
     });
-    final trip = ref.read(tripProvider).valueOrNull;
-    final isCompleted = trip is CompletedTripModel;
-    int tripId = (trip is TripModel) ? trip.tripId : 0;
-    // invalidate 일정/이미지 provider
-    ref.invalidate(pendingDayTripImagesProvider);
-    ref.invalidate(unmatchedTripImagesProvider);
-    ref.invalidate(matchedTripImagesProvider);
-    // 일정 fetchAll
-    if (isCompleted) {
-      await ref.read(completedScheduleProvider.notifier).fetch(tripId);
-      final completed = ref.read(completedScheduleProvider).valueOrNull;
-      if (completed != null && completed.data.isNotEmpty) {
-        final pendingDayPlaceInfos =
-            completed.data
-                .map(
-                  (dayPlace) => PendingTripDayPlaceInfo(
-                    day: dayPlace.day,
-                    tripDayPlaceId: dayPlace.id,
-                  ),
-                )
-                .toList();
-        final unmatchedDayPlaceInfos =
-            completed.data
-                .map(
-                  (dayPlace) => UnMatchedTripDayPlaceInfo(
-                    day: dayPlace.day,
-                    tripDayPlaceId: dayPlace.id,
-                  ),
-                )
-                .toList();
-        final matchedDayPlaceInfos =
-            completed.data
-                .map(
-                  (dayPlace) => MatchedDayPlaceInfo(
-                    day: dayPlace.day,
-                    tripDayPlaceId: dayPlace.id,
-                    placeIds: dayPlace.places.map((e) => e.id).toList(),
-                  ),
-                )
-                .toList();
-        await ref
-            .read(pendingDayTripImagesProvider.notifier)
-            .fetchAll(tripId, pendingDayPlaceInfos);
-        await ref
-            .read(unmatchedTripImagesProvider.notifier)
-            .fetchAll(tripId, unmatchedDayPlaceInfos);
-        await ref
-            .read(matchedTripImagesProvider.notifier)
-            .fetchAll(tripId, matchedDayPlaceInfos);
-      }
-    } else {
-      await ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
-      final confirmed = ref.read(confirmScheduleProvider).valueOrNull;
-      if (confirmed != null && confirmed.schedules.isNotEmpty) {
-        final matchedDayPlaceInfos =
-            confirmed.schedules
-                .map(
-                  (schedule) => MatchedDayPlaceInfo(
-                    day: schedule.day,
-                    tripDayPlaceId: schedule.id,
-                    placeIds: schedule.places.map((e) => e.id).toList(),
-                  ),
-                )
-                .toList();
-        final unmatchedDayPlaceInfos =
-            confirmed.schedules
-                .map(
-                  (schedule) => UnMatchedTripDayPlaceInfo(
-                    day: schedule.day,
-                    tripDayPlaceId: schedule.id,
-                  ),
-                )
-                .toList();
-        final pendingDayPlaceInfos =
-            confirmed.schedules
-                .map(
-                  (schedule) => PendingTripDayPlaceInfo(
-                    day: schedule.day,
-                    tripDayPlaceId: schedule.id,
-                  ),
-                )
-                .toList();
-        await ref
-            .read(matchedTripImagesProvider.notifier)
-            .fetchAll(tripId, matchedDayPlaceInfos);
-        await ref
-            .read(unmatchedTripImagesProvider.notifier)
-            .fetchAll(tripId, unmatchedDayPlaceInfos);
-        await ref
-            .read(pendingDayTripImagesProvider.notifier)
-            .fetchAll(tripId, pendingDayPlaceInfos);
-      }
-    }
+    await GalleryRefreshHelper.refreshAll(ref);
     if (mounted) {
       setState(() {
         isRefreshing = false;
@@ -542,27 +452,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   },
                 ),
               ),
-              // 즐겨찾는 사진 탭
-              CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 401.h,
-                      child: Center(
-                        child: Text(
-                          '즐겨찾는 사진 탭\n구현 예정',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              FavoriteGalleryTab(),
             ],
           ),
         ),

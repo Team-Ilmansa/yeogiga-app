@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
@@ -17,6 +18,7 @@ import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/trip/model/trip_host_route_day.dart';
 import 'package:yeogiga/trip/provider/trip_host_route_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
@@ -451,6 +453,11 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   NPolylineOverlay? _polyline;
   NLocationOverlay? _locationOverlay;
   List<NMarker> _imageMarkers = [];
+  List<MatchedImage> _currentPlaceImages = [];
+  int _currentDay = 1;
+  String? _currentPlaceName;
+  String? _currentTripDayPlaceId;
+  String? _currentPlaceId;
 
   @override
   void didUpdateWidget(covariant _EndTripNaverMap oldWidget) {
@@ -731,6 +738,10 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
         for (final dayImage in matchedDayImages) {
           for (final placeImage in dayImage.placeImagesList) {
             if (placeImage?.id == placeId && placeImage != null) {
+              _currentDay = dayImage.day;
+              _currentPlaceName = placeImage.name;
+              _currentTripDayPlaceId = dayImage.tripDayPlaceId;
+              _currentPlaceId = placeImage.id;
               _showImageMarkersOnMap(placeImage.placeImages);
               return;
             }
@@ -747,6 +758,7 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
     if (mapController == null || !mounted) return;
 
     _imageMarkers.clear();
+    _currentPlaceImages = images;
 
     for (final image in images) {
       final iconWidget = Container(
@@ -798,42 +810,33 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
     }
   }
 
-  // 이미지 모달 표시
+  // 이미지 모달 표시 → TripImageView로 네비게이션
   void _showImageModal(MatchedImage image) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Align(
-                //   alignment: Alignment.topRight,
-                //   child: IconButton(
-                //     icon: Icon(Icons.close, color: Colors.white, size: 30.w),
-                //     onPressed: () => Navigator.of(context).pop(),
-                //   ),
-                // ),
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.7,
-                    maxWidth: MediaQuery.of(context).size.width * 0.9,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.r),
-                    child: Image.network(image.url, fit: BoxFit.contain),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  '촬영 시간: ${_formatDateTime(image.date)}',
-                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                ),
-              ],
-            ),
-          ),
-    );
+    final trip = ref.read(tripProvider).valueOrNull;
+    final tripId = trip is TripModel ? trip.tripId : 0;
+    // Convert MatchedImage list to GalleryImage list
+    final galleryImages = _currentPlaceImages.map((img) =>
+      GalleryImage(
+        id: img.id,
+        url: img.url,
+        day: _currentDay,
+        type: GalleryImageType.matched,
+        placeName: _currentPlaceName,
+        tripDayPlaceId: _currentTripDayPlaceId,
+        placeId: _currentPlaceId,
+        date: img.date,
+        favorite: img.favorite,
+      )
+    ).toList();
+
+    // Find the index of the tapped image
+    final initialIndex = _currentPlaceImages.indexWhere((img) => img.id == image.id);
+
+    context.push('/tripImageView', extra: {
+      'images': galleryImages,
+      'initialIndex': initialIndex >= 0 ? initialIndex : 0,
+      'tripId': tripId,
+    });
   }
 
   String _formatDateTime(DateTime dateTime) {

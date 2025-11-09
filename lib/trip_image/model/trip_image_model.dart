@@ -57,8 +57,13 @@ class UnMatchedDayTripImage {
 class UnMatchedImage {
   final String id;
   final String url;
+  final bool favorite;
 
-  UnMatchedImage({required this.id, required this.url});
+  UnMatchedImage({
+    required this.id,
+    required this.url,
+    this.favorite = false,
+  });
 
   factory UnMatchedImage.fromJson(Map<String, dynamic> json) =>
       _$UnMatchedImageFromJson(json);

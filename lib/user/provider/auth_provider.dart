@@ -10,6 +10,8 @@ import 'package:yeogiga/settlement/view/settlement_detail_screen.dart';
 import 'package:yeogiga/settlement/view/settlement_list_screen.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
+import 'package:yeogiga/trip_image/view/trip_image_view.dart';
+import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/w2m/view/trip_date_range_picker_screen.dart';
 import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 import 'package:yeogiga/user/view/login_screen.dart';
@@ -99,6 +101,18 @@ class AuthProvider extends ChangeNotifier {
       },
     ),
     GoRoute(
+      path: '/tripImageView',
+      name: TripImageView.routeName,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return TripImageView(
+          images: extra['images'] as List<GalleryImage>,
+          initialIndex: extra['initialIndex'] as int,
+          tripId: extra['tripId'] as int? ?? 0,
+        );
+      },
+    ),
+    GoRoute(
       path: '/invite/:tripId',
       name: 'tripInviteShortcut',
       builder: (context, state) {
@@ -172,7 +186,7 @@ class AuthProvider extends ChangeNotifier {
   String? redirectLogic(BuildContext context, GoRouterState state) {
     final UserModelBase? user = ref.read(userMeProvider);
 
-    if (state.location == '/markerPreview') {
+    if (state.location == '/tripImageView') {
       return null;
     }
 

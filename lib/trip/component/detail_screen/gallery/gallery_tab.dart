@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/trip/component/detail_screen/gallery/no_image.dart';
-import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/trip/provider/gallery_selection_provider.dart';
+import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/trip/model/trip_model.dart';
 
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -46,6 +47,8 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
 
     // ✅ 선택 상태를 provider로 관리
     final selectedIndices = ref.watch(gallerySelectionProvider);
+    final trip = ref.watch(tripProvider).valueOrNull;
+    final int? tripId = trip is TripModel ? trip.tripId : null;
 
     // selection mode가 꺼지면 선택 해제
     if (!selectionMode && selectedIndices.isNotEmpty) {
@@ -63,8 +66,6 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
           SliverToBoxAdapter(
             child: Builder(
               builder: (context) {
-                // tripProvider에서 trip 정보를 가져와 날짜 개수를 계산
-                final trip = ref.watch(tripProvider).valueOrNull;
                 int tripDayCount = 0;
                 if (trip is TripModel &&
                     trip.startedAt != null &&
@@ -191,99 +192,25 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                         .toggle(idx);
                                   }
                                   : () {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (_) => Dialog(
-                                            backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(30.w),
-                                            child: GestureDetector(
-                                              onTap:
-                                                  () =>
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop(),
-                                              child: Container(
-                                                color: Colors.transparent,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    // 텍스트 라벨 (위)
-                                                    Container(
-                                                      width: double.infinity,
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            vertical: 4.h,
-                                                            horizontal: 7.w,
-                                                          ),
-                                                      child: Text(
-                                                        image.type ==
-                                                                GalleryImageType
-                                                                    .matched
-                                                            ? (image.placeName ??
-                                                                "알 수 없음")
-                                                            : "기타",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6.h),
-                                                    // 이미지 (아래)
-                                                    ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadiusGeometry.circular(
-                                                            7.r,
-                                                          ),
-                                                      child: InteractiveViewer(
-                                                        child: Image.network(
-                                                          image.url,
-                                                          fit: BoxFit.contain,
-                                                          loadingBuilder:
-                                                              (
-                                                                context,
-                                                                child,
-                                                                progress,
-                                                              ) =>
-                                                                  progress ==
-                                                                          null
-                                                                      ? child
-                                                                      : Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) => Container(
-                                                                height: 119.h,
-                                                                color:
-                                                                    Colors
-                                                                        .grey[300],
-                                                                child: Center(
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .broken_image,
-                                                                    size: 14.sp,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                    if (tripId == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
                                           ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    context.push(
+                                      '/tripImageView',
+                                      extra: {
+                                        'images': allImages,
+                                        'initialIndex': idx,
+                                        'tripId': tripId,
+                                      },
                                     );
                                   },
                           child: AspectRatio(
@@ -301,12 +228,22 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(color: Colors.grey[300]),
                                   ),
                                 ),
+                                if (image.favorite)
+                                  Positioned(
+                                    top: 4.r,
+                                    right: 4.r,
+                                    child: SvgPicture.asset(
+                                      'asset/icon/favorite on.svg',
+                                      width: 16.w,
+                                      height: 16.h,
+                                    ),
+                                  ),
                                 // 타입별 표시 (오른쪽 위)
-                                Positioned(
-                                  top: 2.r,
-                                  right: 2.r,
-                                  child: _typeBadge(image.type),
-                                ),
+                                // Positioned(
+                                //   top: 2.r,
+                                //   right: 2.r,
+                                //   child: _typeBadge(image.type),
+                                // ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
                                 if (selectionMode && isSelected)
                                   Container(
@@ -382,92 +319,41 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                         .toggle(actualIndex);
                                   }
                                   : () {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (_) => Dialog(
-                                            backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(30.w),
-                                            child: GestureDetector(
-                                              onTap:
-                                                  () =>
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop(),
-                                              child: Container(
-                                                color: Colors.transparent,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Container(
-                                                      width: double.infinity,
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            vertical: 4.h,
-                                                            horizontal: 7.w,
-                                                          ),
-                                                      child: Text(
-                                                        "임시저장",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6.h),
-                                                    ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadiusGeometry.circular(
-                                                            7.r,
-                                                          ),
-                                                      child: InteractiveViewer(
-                                                        child: Image.network(
-                                                          image.url,
-                                                          fit: BoxFit.contain,
-                                                          loadingBuilder:
-                                                              (
-                                                                context,
-                                                                child,
-                                                                progress,
-                                                              ) =>
-                                                                  progress ==
-                                                                          null
-                                                                      ? child
-                                                                      : Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) => Container(
-                                                                height: 119.h,
-                                                                color:
-                                                                    Colors
-                                                                        .grey[300],
-                                                                child: Center(
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .broken_image,
-                                                                    size: 14.sp,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                    if (tripId == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
                                           ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    final pendingGalleryImages =
+                                        allPendingImages
+                                            .map(
+                                              (img) => GalleryImage(
+                                                id: img.id,
+                                                url: img.url,
+                                                day: img.day,
+                                                type: GalleryImageType.pending,
+                                                placeName: null,
+                                                tripDayPlaceId:
+                                                    img.tripDayPlaceId,
+                                                favorite: false,
+                                              ),
+                                            )
+                                            .toList();
+
+                                    context.push(
+                                      '/tripImageView',
+                                      extra: {
+                                        'images': pendingGalleryImages,
+                                        'initialIndex': idx,
+                                        'tripId': tripId,
+                                      },
                                     );
                                   },
                           child: AspectRatio(
@@ -485,12 +371,32 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(color: Colors.grey[300]),
                                   ),
                                 ),
+                                if (image.favorite)
+                                  Positioned(
+                                    top: 6.r,
+                                    right: 6.r,
+                                    child: SvgPicture.asset(
+                                      'asset/icon/favorite on.svg',
+                                      width: 16.w,
+                                      height: 16.h,
+                                    ),
+                                  ),
+                                if (image.favorite)
+                                  Positioned(
+                                    top: 4.r,
+                                    right: 4.r,
+                                    child: SvgPicture.asset(
+                                      'asset/icon/favorite on.svg',
+                                      width: 16.w,
+                                      height: 16.h,
+                                    ),
+                                  ),
                                 // 타입별 표시 (오른쪽 위)
-                                Positioned(
-                                  top: 2.r,
-                                  right: 2.r,
-                                  child: _typeBadge(image.type),
-                                ),
+                                // Positioned(
+                                //   top: 2.r,
+                                //   right: 2.r,
+                                //   child: _typeBadge(image.type),
+                                // ),
                                 // ✅ 셀렉션 모드 오버레이 (matched/unmatched와 동일)
                                 if (selectionMode && isSelected)
                                   Container(
@@ -524,7 +430,6 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                 // DaySelector
                 Builder(
                   builder: (context) {
-                    final trip = ref.watch(tripProvider).valueOrNull;
                     int tripDayCount = 0;
                     if (trip is TripModel &&
                         trip.startedAt != null &&
@@ -644,99 +549,25 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                         .toggle(idx);
                                   }
                                   : () {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (_) => Dialog(
-                                            backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(30.w),
-                                            child: GestureDetector(
-                                              onTap:
-                                                  () =>
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop(),
-                                              child: Container(
-                                                color: Colors.transparent,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    // 텍스트 라벨 (위)
-                                                    Container(
-                                                      width: double.infinity,
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            vertical: 4.h,
-                                                            horizontal: 7.w,
-                                                          ),
-                                                      child: Text(
-                                                        image.type ==
-                                                                GalleryImageType
-                                                                    .matched
-                                                            ? (image.placeName ??
-                                                                "알 수 없음")
-                                                            : "기타",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6.h),
-                                                    // 이미지 (아래)
-                                                    ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadiusGeometry.circular(
-                                                            7.r,
-                                                          ),
-                                                      child: InteractiveViewer(
-                                                        child: Image.network(
-                                                          image.url,
-                                                          fit: BoxFit.contain,
-                                                          loadingBuilder:
-                                                              (
-                                                                context,
-                                                                child,
-                                                                progress,
-                                                              ) =>
-                                                                  progress ==
-                                                                          null
-                                                                      ? child
-                                                                      : Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) => Container(
-                                                                height: 119.h,
-                                                                color:
-                                                                    Colors
-                                                                        .grey[300],
-                                                                child: Center(
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .broken_image,
-                                                                    size: 14.sp,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                    if (tripId == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
                                           ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    context.push(
+                                      '/tripImageView',
+                                      extra: {
+                                        'images': allImages,
+                                        'initialIndex': idx,
+                                        'tripId': tripId,
+                                      },
                                     );
                                   },
                           child: AspectRatio(
@@ -754,12 +585,22 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(color: Colors.grey[300]),
                                   ),
                                 ),
+                                if (image.favorite)
+                                  Positioned(
+                                    top: 4.r,
+                                    right: 4.r,
+                                    child: SvgPicture.asset(
+                                      'asset/icon/favorite on.svg',
+                                      width: 16.w,
+                                      height: 16.h,
+                                    ),
+                                  ),
                                 // 타입별 표시 (오른쪽 위)
-                                Positioned(
-                                  top: 2.r,
-                                  right: 2.r,
-                                  child: _typeBadge(image.type),
-                                ),
+                                // Positioned(
+                                //   top: 2.r,
+                                //   right: 2.r,
+                                //   child: _typeBadge(image.type),
+                                // ),
                                 // 셀렉션 모드 오버레이 (원래 스타일)
                                 if (selectionMode && isSelected)
                                   Container(
@@ -835,92 +676,41 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                         .toggle(actualIndex);
                                   }
                                   : () {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (_) => Dialog(
-                                            backgroundColor: Colors.transparent,
-                                            insetPadding: EdgeInsets.all(30.w),
-                                            child: GestureDetector(
-                                              onTap:
-                                                  () =>
-                                                      Navigator.of(
-                                                        context,
-                                                      ).pop(),
-                                              child: Container(
-                                                color: Colors.transparent,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Container(
-                                                      width: double.infinity,
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                            vertical: 4.h,
-                                                            horizontal: 7.w,
-                                                          ),
-                                                      child: Text(
-                                                        "임시저장",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 6.h),
-                                                    ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadiusGeometry.circular(
-                                                            7.r,
-                                                          ),
-                                                      child: InteractiveViewer(
-                                                        child: Image.network(
-                                                          image.url,
-                                                          fit: BoxFit.contain,
-                                                          loadingBuilder:
-                                                              (
-                                                                context,
-                                                                child,
-                                                                progress,
-                                                              ) =>
-                                                                  progress ==
-                                                                          null
-                                                                      ? child
-                                                                      : Center(
-                                                                        child:
-                                                                            CircularProgressIndicator(),
-                                                                      ),
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) => Container(
-                                                                height: 119.h,
-                                                                color:
-                                                                    Colors
-                                                                        .grey[300],
-                                                                child: Center(
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .broken_image,
-                                                                    size: 14.sp,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                    if (tripId == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
                                           ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    final pendingGalleryImages =
+                                        allPendingImages
+                                            .map(
+                                              (img) => GalleryImage(
+                                                id: img.id,
+                                                url: img.url,
+                                                day: img.day,
+                                                type: GalleryImageType.pending,
+                                                placeName: null,
+                                                tripDayPlaceId:
+                                                    img.tripDayPlaceId,
+                                                favorite: false,
+                                              ),
+                                            )
+                                            .toList();
+
+                                    context.push(
+                                      '/tripImageView',
+                                      extra: {
+                                        'images': pendingGalleryImages,
+                                        'initialIndex': idx,
+                                        'tripId': tripId,
+                                      },
                                     );
                                   },
                           child: AspectRatio(
@@ -938,12 +728,22 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                             Container(color: Colors.grey[300]),
                                   ),
                                 ),
+                                if (image.favorite)
+                                  Positioned(
+                                    top: 4.r,
+                                    right: 4.r,
+                                    child: SvgPicture.asset(
+                                      'asset/icon/favorite on.svg',
+                                      width: 16.w,
+                                      height: 16.h,
+                                    ),
+                                  ),
                                 // 타입별 표시 (오른쪽 위)
-                                Positioned(
-                                  top: 2.r,
-                                  right: 2.r,
-                                  child: _typeBadge(image.type),
-                                ),
+                                // Positioned(
+                                //   top: 2.r,
+                                //   right: 2.r,
+                                //   child: _typeBadge(image.type),
+                                // ),
                                 // ✅ 셀렉션 모드 오버레이 (matched/unmatched와 동일)
                                 if (selectionMode && isSelected)
                                   Container(
@@ -968,7 +768,6 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
   }
 }
 
-// TODO: 타입 뱃지 위젯 임시
 // TODO: 타입 뱃지 위젯 임시
 Widget _typeBadge(GalleryImageType type) {
   switch (type) {
