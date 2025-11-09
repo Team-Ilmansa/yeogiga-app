@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/user/component/login_loading_dialog.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
 import 'package:yeogiga/user/model/user_model.dart';
@@ -71,33 +72,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final uri = Uri.parse(location);
                         final redirect = uri.queryParameters['redirect'];
 
-                        //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
-                        final user = await ref
-                            .read(userMeProvider.notifier)
-                            .login(username: username, password: password);
+                        // 로딩 다이얼로그 표시
+                        showDialog(
+                          context: currentContext,
+                          barrierDismissible: false,
+                          builder: (context) => LoginLoadingDialog(),
+                        );
 
-                        // if (user is UserDeleteModel) {
-                        //   if (!mounted) return;
-                        //   context.go('/userRecovery');
-                        //   return;
-                        // }
+                        try {
+                          //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
+                          final user = await ref
+                              .read(userMeProvider.notifier)
+                              .login(username: username, password: password);
 
-                        if (!mounted) return;
+                          // if (user is UserDeleteModel) {
+                          //   if (!mounted) return;
+                          //   context.go('/userRecovery');
+                          //   return;
+                          // }
 
-                        // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
-                        if (user is UserResponseModel && user.code == 200) {
-                          if (redirect != null && redirect.isNotEmpty) {
-                            if (!mounted) return;
-                            GoRouter.of(
-                              currentContext,
-                            ).go(Uri.decodeComponent(redirect));
-                            return;
+                          // 로딩 다이얼로그 닫기
+                          if (!mounted) return;
+                          Navigator.of(currentContext).pop();
+
+                          if (!mounted) return;
+
+                          // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
+                          if (user is UserResponseModel && user.code == 200) {
+                            if (redirect != null && redirect.isNotEmpty) {
+                              if (!mounted) return;
+                              GoRouter.of(
+                                currentContext,
+                              ).go(Uri.decodeComponent(redirect));
+                              return;
+                            }
                           }
-                        }
 
-                        setState(() {
-                          loginFailed = user is UserModelError;
-                        });
+                          setState(() {
+                            loginFailed = user is UserModelError;
+                          });
+                        } catch (e) {
+                          // 에러 발생 시에도 로딩 다이얼로그 닫기
+                          if (!mounted) return;
+                          Navigator.of(currentContext).pop();
+                          setState(() {
+                            loginFailed = true;
+                          });
+                        }
                       },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xff8287ff),
@@ -296,6 +317,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       GestureDetector(
                         onTap: () async {
                           // TODO: 카카오 로그인 로직
+                          // Context를 미리 저장 (async gap 전에)
+                          final currentContext = context;
+
                           try {
                             // 휴대폰에 카카오톡이 깔려있는지 bool 값으로 반환해주는 함수
                             bool installed = await isKakaoTalkInstalled();
@@ -309,6 +333,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     : await UserApi.instance
                                         .loginWithKakaoAccount();
 
+                            // 로딩 다이얼로그 표시
+                            if (!mounted) return;
+                            showDialog(
+                              context: currentContext,
+                              barrierDismissible: false,
+                              builder: (context) => LoginLoadingDialog(),
+                            );
+
                             final user = await ref
                                 .read(userMeProvider.notifier)
                                 .socialLogin(
@@ -316,15 +348,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   token: token,
                                   platform: 'KAKAO',
                                 );
+
+                            // 로딩 다이얼로그 닫기
+                            if (!mounted) return;
+                            Navigator.of(currentContext).pop();
+
+                            if (!mounted) return;
                             setState(() {
                               loginFailed = user is UserModelError;
                             });
                           } on DioException catch (e) {
                             print('카카오톡 회원가입 실패: ${e.response}');
-                            loginFailed = true;
+                            // 로딩 다이얼로그 닫기
+                            if (!mounted) return;
+                            Navigator.of(currentContext).pop();
+                            if (!mounted) return;
+                            setState(() {
+                              loginFailed = true;
+                            });
                           } catch (i) {
                             print('카카오톡 회원가입 실패: ${i}');
-                            loginFailed = true;
+                            // 로딩 다이얼로그 닫기
+                            if (!mounted) return;
+                            Navigator.of(currentContext).pop();
+                            if (!mounted) return;
+                            setState(() {
+                              loginFailed = true;
+                            });
                           }
                         },
                         child: Center(

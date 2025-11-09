@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/user/repository/fcm_token_repository.dart';
 
 const _apnsPollInterval = Duration(milliseconds: 200);
-const _apnsMaxWait = Duration(seconds: 10);
+const _apnsMaxWait = Duration(seconds: 3);
 
 /// APNs 토큰이 준비될 때까지 대기한 뒤 FCM 토큰을 반환한다.
 Future<String?> fetchFcmTokenWithApnsWait() async {
   final isIos = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
   if (isIos) {
     final maxAttempts =
-        (_apnsMaxWait.inMilliseconds / _apnsPollInterval.inMilliseconds)
-            .ceil();
+        (_apnsMaxWait.inMilliseconds / _apnsPollInterval.inMilliseconds).ceil();
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
       final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       if (apnsToken != null && apnsToken.isNotEmpty) {
