@@ -66,238 +66,231 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: shouldUseSafeAreaBottom(context),
-      child: Container(
-        color: Color(0xfffafafa),
-        child: SingleChildScrollView(
-          physics: ClampingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Consumer(
-                builder: (context, ref, _) {
-                  final tripAsync = ref.watch(mainTripFutureProvider);
-                  return tripAsync.when(
-                    loading: () => const SizedBox.shrink(),
-                    error: (e, _) => const SizedBox.shrink(),
-                    data: (trip) {
-                      if (trip == null) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _HomeAppBar(trip: trip),
-                            SizedBox(height: 40.h),
-                          ],
-                        );
-                      }
+    return Container(
+      color: Color(0xfffafafa),
+      child: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Consumer(
+              builder: (context, ref, _) {
+                final tripAsync = ref.watch(mainTripFutureProvider);
+                return tripAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (e, _) => const SizedBox.shrink(),
+                  data: (trip) {
+                    if (trip == null) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _HomeAppBar(trip: trip),
-                          Transform.translate(
-                            offset: Offset(0, -40.h),
-                            child: ScheduleItemListMain(),
+                          SizedBox(height: 40.h),
+                        ],
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _HomeAppBar(trip: trip),
+                        Transform.translate(
+                          offset: Offset(0, -40.h),
+                          child: ScheduleItemListMain(),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+            Transform.translate(
+              offset: Offset(0, -62.h), // 40 + 22 해서 62임.
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final settingTrips = ref.watch(settingTripListProvider);
+                      if (settingTrips.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(14.w, 0, 0, 12.h),
+                            child: Text(
+                              '${settingTrips.length}개의 준비중인 여행',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                                height: 1.4,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
                           ),
+                          SettingTripCardList(
+                            trips: settingTrips,
+                            onTap: (tripId) {
+                              GoRouter.of(
+                                context,
+                              ).push('/tripDetailScreen/$tripId');
+                            },
+                          ),
+                          SizedBox(height: 27.h),
                         ],
                       );
                     },
-                  );
-                },
-              ),
-              Transform.translate(
-                offset: Offset(0, -62.h), // 40 + 22 해서 62임.
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final settingTrips = ref.watch(settingTripListProvider);
-                        if (settingTrips.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(14.w, 0, 0, 12.h),
-                              child: Text(
-                                '${settingTrips.length}개의 준비중인 여행',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20.sp,
-                                  height: 1.4,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ),
-                            SettingTripCardList(
-                              trips: settingTrips,
-                              onTap: (tripId) {
-                                GoRouter.of(
-                                  context,
-                                ).push('/tripDetailScreen/$tripId');
-                              },
-                            ),
-                            SizedBox(height: 27.h),
-                          ],
-                        );
-                      },
-                    ),
+                  ),
 
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final userState = ref.watch(userMeProvider);
-                        String nickname = '회원';
-                        if (userState is UserModel) {
-                          nickname = userState.nickname;
-                        } else if (userState is UserResponseModel &&
-                            userState.data != null) {
-                          nickname = userState.data!.nickname;
-                        }
-                        return SectionTitle("$nickname님께 딱 맞을 것 같은 스팟");
-                      },
-                    ),
-                    RecommendScheduleCardList(),
-                    SizedBox(height: 27.h),
-                    SectionTitle("인기급상승 여행스팟"),
-                    HotScheduleCardGridList(),
-                    SizedBox(height: 27.h),
-
-                    SectionTitle("지난여행 돌아보기"),
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final tripsAsync = ref.watch(pastTripListProvider);
-                        return tripsAsync.when(
-                          loading:
-                              () => SizedBox(
-                                height: 321.h,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                          error:
-                              (e, _) => SizedBox(
-                                height: 321.h,
-                                child: Center(
-                                  child: Text(
-                                    '여행 목록을 불러올 수 없습니다.',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: Colors.grey,
-                                    ),
+                  // Consumer(
+                  //   builder: (context, ref, _) {
+                  //     final userState = ref.watch(userMeProvider);
+                  //     String nickname = '회원';
+                  //     if (userState is UserModel) {
+                  //       nickname = userState.nickname;
+                  //     } else if (userState is UserResponseModel &&
+                  //         userState.data != null) {
+                  //       nickname = userState.data!.nickname;
+                  //     }
+                  //     return SectionTitle("$nickname님께 딱 맞을 것 같은 스팟");
+                  //   },
+                  // ),
+                  // RecommendScheduleCardList(),
+                  // SizedBox(height: 27.h),
+                  // SectionTitle("인기급상승 여행스팟"),
+                  // HotScheduleCardGridList(),
+                  // SizedBox(height: 27.h),
+                  SectionTitle("지난여행 돌아보기"),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final tripsAsync = ref.watch(pastTripListProvider);
+                      return tripsAsync.when(
+                        loading:
+                            () => SizedBox(
+                              height: 321.h,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                        error:
+                            (e, _) => SizedBox(
+                              height: 321.h,
+                              child: Center(
+                                child: Text(
+                                  '여행 목록을 불러올 수 없습니다.',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey,
                                   ),
                                 ),
                               ),
-                          data:
-                              (trips) => TripCardList(
-                                trips: trips,
-                                onTap: (tripId) async {
-                                  await ref
-                                      .read(tripProvider.notifier)
-                                      .getTrip(tripId: tripId);
-                                  if (context.mounted) {
-                                    GoRouter.of(
-                                      context,
-                                    ).push('/tripDetailScreen/$tripId');
-                                  }
-                                },
-                              ),
-                        );
-                      },
-                    ),
-                    //TODO: 디버그시?
-                    Column(
-                      children: [
-                        SizedBox(height: 20.h),
-                        // ✅ FCM 테스트 버튼
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 14.w),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              print('[FCM Test] 버튼 클릭');
-                              try {
-                                // Firebase에서 직접 FCM 토큰 가져오기 (APNs 토큰 대기 포함)
-                                final fcmToken =
-                                    await fetchFcmTokenWithApnsWait();
-
-                                if (fcmToken == null || fcmToken.isEmpty) {
-                                  print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('FCM 토큰을 가져올 수 없습니다.'),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                print('[FCM Test] FCM Token: $fcmToken');
-                                print(
-                                  '[FCM Test] 토큰 앞부분: ${fcmToken.substring(0, 20)}...',
-                                );
-
-                                // API 호출
-                                final dio = ref.watch(dioProvider);
-                                final response = await dio.get(
-                                  'https://api.yeogiga.com/fcm-test',
-                                  queryParameters: {'token': fcmToken},
-                                );
-
-                                print(
-                                  '[FCM Test] API 응답: ${response.statusCode}',
-                                );
-                                print('[FCM Test] 응답 데이터: ${response.data}');
-
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
-                                      ),
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                }
-                              } catch (e, st) {
-                                print('[FCM Test] 오류 발생: $e');
-                                print('[FCM Test] Stack trace: $st');
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('오류: $e'),
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF8287FF),
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              elevation: 0,
                             ),
-                            child: Text(
-                              'FCM 테스트',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
+                        data:
+                            (trips) => TripCardList(
+                              trips: trips,
+                              onTap: (tripId) async {
+                                await ref
+                                    .read(tripProvider.notifier)
+                                    .getTrip(tripId: tripId);
+                                if (context.mounted) {
+                                  GoRouter.of(
+                                    context,
+                                  ).push('/tripDetailScreen/$tripId');
+                                }
+                              },
+                            ),
+                      );
+                    },
+                  ),
+                  //TODO: 디버그시?
+                  Column(
+                    children: [
+                      SizedBox(height: 20.h),
+                      // ✅ FCM 테스트 버튼
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            print('[FCM Test] 버튼 클릭');
+                            try {
+                              // Firebase에서 직접 FCM 토큰 가져오기 (APNs 토큰 대기 포함)
+                              final fcmToken =
+                                  await fetchFcmTokenWithApnsWait();
+
+                              if (fcmToken == null || fcmToken.isEmpty) {
+                                print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('FCM 토큰을 가져올 수 없습니다.'),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              print('[FCM Test] FCM Token: $fcmToken');
+                              print(
+                                '[FCM Test] 토큰 앞부분: ${fcmToken.substring(0, 20)}...',
+                              );
+
+                              // API 호출
+                              final dio = ref.watch(dioProvider);
+                              final response = await dio.get(
+                                'https://api.yeogiga.com/fcm-test',
+                                queryParameters: {'token': fcmToken},
+                              );
+
+                              print(
+                                '[FCM Test] API 응답: ${response.statusCode}',
+                              );
+                              print('[FCM Test] 응답 데이터: ${response.data}');
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
+                                    ),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            } catch (e, st) {
+                              print('[FCM Test] 오류 발생: $e');
+                              print('[FCM Test] Stack trace: $st');
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('오류: $e'),
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF8287FF),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'FCM 테스트',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      SizedBox(height: 40.h),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -313,7 +306,7 @@ class _HomeAppBar extends ConsumerWidget {
     final weatherAsync = ref.watch(weatherProvider);
     final userMe = ref.read(userMeProvider);
     return SizedBox(
-      height: 238.h,
+      height: 240.h,
       child: weatherAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Stack(children: [Center(child: Text(e.toString()))]),
@@ -346,77 +339,82 @@ class _HomeAppBar extends ConsumerWidget {
                 ),
               ),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 15.h),
-                  AppBarTop(
-                    trip: trip,
-                    weatherMain: weatherMain,
-                    temp: temp,
-                    isWhiteTheme:
-                        weatherMain.toLowerCase() == 'rain' ||
-                        weatherMain.toLowerCase() == 'thunderstorm',
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      top: 14.h,
-                      left: 14.w,
-                      right: 14.w,
-                    ),
-                    child: Builder(
-                      builder: (context) {
-                        if (trip != null) {
-                          final now = DateTime.now();
-                          final start = trip.staredAt;
-                          final title = trip.title;
-                          final diff = start.difference(now).inDays;
+              SafeArea(
+                bottom: false,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: 15.h),
+                      AppBarTop(
+                        trip: trip,
+                        weatherMain: weatherMain,
+                        temp: temp,
+                        isWhiteTheme:
+                            weatherMain.toLowerCase() == 'rain' ||
+                            weatherMain.toLowerCase() == 'thunderstorm',
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 14.h,
+                          left: 14.w,
+                          right: 14.w,
+                        ),
+                        child: Builder(
+                          builder: (context) {
+                            if (trip != null) {
+                              final now = DateTime.now();
+                              final start = trip.staredAt;
+                              final title = trip.title;
+                              final diff = start.difference(now).inDays;
 
-                          if (now.isBefore(start)) {
-                            // 여행 시작 전
-                            return Text(
-                              '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
-                              style: TextStyle(
-                                color: Color(0xff313131),
-                                fontSize: 25.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.1,
-                                height: 1.4,
-                              ),
-                            );
-                          } else {
-                            // 여행 진행 중 or 이후
-                            final day = now.difference(start).inDays + 1;
-                            return Text(
-                              '오늘은\n$title ${day}일차에요!',
-                              style: TextStyle(
-                                color: Color(0xff313131),
-                                fontSize: 25.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.1,
-                                height: 1.4,
-                              ),
-                            );
-                          }
-                        } else {
-                          if (userMe is UserResponseModel) {
-                            return Text(
-                              '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
-                              style: TextStyle(
-                                color: Color(0xff313131),
-                                fontSize: 25.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.1,
-                                height: 1.4,
-                              ),
-                            );
-                          }
-                          return Container();
-                        }
-                      },
-                    ),
+                              if (now.isBefore(start)) {
+                                // 여행 시작 전
+                                return Text(
+                                  '오늘은\n$title까지 ${diff.abs() + 1}일 남았어요~',
+                                  style: TextStyle(
+                                    color: Color(0xff313131),
+                                    fontSize: 25.sp,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.1,
+                                    height: 1.4,
+                                  ),
+                                );
+                              } else {
+                                // 여행 진행 중 or 이후
+                                final day = now.difference(start).inDays + 1;
+                                return Text(
+                                  '오늘은\n$title ${day}일차에요!',
+                                  style: TextStyle(
+                                    color: Color(0xff313131),
+                                    fontSize: 25.sp,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.1,
+                                    height: 1.4,
+                                  ),
+                                );
+                              }
+                            } else {
+                              if (userMe is UserResponseModel) {
+                                return Text(
+                                  '${userMe.data!.nickname}님,\n여행 계획 있으신가요?',
+                                  style: TextStyle(
+                                    color: Color(0xff313131),
+                                    fontSize: 25.sp,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.1,
+                                    height: 1.4,
+                                  ),
+                                );
+                              }
+                              return Container();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
 
               // Positioned(child: SizedBox(height: 6)),

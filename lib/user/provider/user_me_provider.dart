@@ -109,9 +109,6 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       );
       await storage.write(key: ACCESS_TOKEN_KEY, value: loginData.accessToken);
 
-      // 로그인 성공 시 FCM 토큰 등록
-      await registerFcmToken(ref);
-
       print('start get me');
       final userResp = await repository.getMe();
       state = userResp;
@@ -208,8 +205,6 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       //shouldSignup이 false이면 그대로 로그인로직 실행.
       await storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
       await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
-
-      await registerFcmToken(ref);
 
       final userResp = await repository.getMe();
       state = userResp;

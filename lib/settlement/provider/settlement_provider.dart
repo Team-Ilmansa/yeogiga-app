@@ -194,6 +194,23 @@ class SettlementNotifier extends StateNotifier<AsyncValue<SettlementModel?>> {
     state = AsyncValue.data(settlement);
   }
 
+  /// 로딩 상태 없이 조용히 단일 정산 새로고침
+  Future<void> silentRefreshSettlement({
+    required int tripId,
+    required int settlementId,
+  }) async {
+    try {
+      final result = await repo.getSettlement(
+        tripId: tripId,
+        settlementId: settlementId,
+      );
+      state = AsyncValue.data(result);
+    } catch (e) {
+      // 실패 시 기존 state 유지, 로그만 남김
+      print('[Silent Settlement Refresh Failed] $e');
+    }
+  }
+
   /// 정산 완료 여부 갱신
   Future<Map<String, dynamic>> updateSettlementCompletion({
     required int tripId,

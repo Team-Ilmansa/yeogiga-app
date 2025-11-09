@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
+import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 
 class SettlementPayerItem extends StatelessWidget {
   final String name;
@@ -41,18 +42,25 @@ class SettlementPayerItem extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(36.r),
               border: isMe ? Border.all(width: 0.889.sp, color: Color(0xff8287ff)) : null,
-              image:
-                  profileImageUrl != null && profileImageUrl!.isNotEmpty
-                      ? DecorationImage(
-                        image: NetworkImage(profileImageUrl!),
-                        fit: BoxFit.cover,
-                      )
-                      : null,
             ),
             child:
-                profileImageUrl == null || profileImageUrl!.isEmpty
-                    ? Icon(Icons.person, size: 16.sp, color: Color(0xff8287ff))
-                    : null,
+                profileImageUrl != null && profileImageUrl!.isNotEmpty
+                    ? ClipRRect(
+                      borderRadius: BorderRadius.circular(36.r),
+                      child: Image.network(
+                        profileImageUrl!,
+                        fit: BoxFit.cover,
+                        width: 28.sp,
+                        height: 28.sp,
+                      ),
+                    )
+                    : ClipRRect(
+                      borderRadius: BorderRadius.circular(36.r),
+                      child: buildProfileAvatarPlaceholder(
+                        nickname: name,
+                        size: 28.sp,
+                      ),
+                    ),
           ),
           SizedBox(width: 8.w),
           Text(

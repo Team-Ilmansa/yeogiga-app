@@ -521,17 +521,17 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
               LiquidPullToRefresh(
                 onRefresh: refreshSchedule,
                 animSpeedFactor: 7.0,
-                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
-                backgroundColor: Color(0xfff0f0f0), // 배경색
-                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+                color: const Color(0xfffafafa),
+                backgroundColor: const Color(0xff8287ff),
+                showChildOpacityTransition: true, // child 투명도 트랜지션 사용 여부
                 child: ScheduleDashboardTab(),
               ),
               LiquidPullToRefresh(
                 onRefresh: refreshAll,
                 animSpeedFactor: 7.0,
-                color: Color(0xff8287ff), // 물방울 색상 (원하는 색상으로)
-                backgroundColor: Color(0xfff0f0f0), // 배경색
-                showChildOpacityTransition: false, // child 투명도 트랜지션 사용 여부
+                color: const Color(0xfffafafa),
+                backgroundColor: const Color(0xff8287ff),
+                showChildOpacityTransition: true, // child 투명도 트랜지션 사용 여부
                 child: GalleryTab(
                   sliverMode: true,
                   selectedDayIndex: _selectedDayIndex,

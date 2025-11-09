@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/route_observer.dart';
@@ -28,6 +29,7 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
     with RouteAware {
   int _selectedIndex = 0; // 0: 미정산내역, 1: 여행전체, 2: 기타, 3~: Day 1, Day 2, ...
   bool _isSubscribedToRouteObserver = false;
+  bool _showOnlyMySettlements = false; // 내 정산만 보기 토글 상태
 
   @override
   void initState() {
@@ -192,15 +194,44 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
             SizedBox(height: 14.h),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 14.w),
-              child: Text(
-                headerMessage,
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w700,
-                  height: 1.4,
-                  letterSpacing: -0.84,
-                  color: Color(0xff313131),
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    headerMessage,
+                    style: TextStyle(
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
+                      letterSpacing: -0.84,
+                      color: Color(0xff313131),
+                    ),
+                  ),
+                  Material(
+                    color: Color(0xfffafafa),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(7.r),
+                      onTap: () {
+                        setState(() {
+                          _showOnlyMySettlements = !_showOnlyMySettlements;
+                        });
+                      },
+                      enableFeedback: true,
+                      child: Text(
+                        _showOnlyMySettlements ? '전체 정산 보기' : '내 정산만 보기',
+                        style: TextStyle(
+                          color: const Color(0xFFC6C6C6),
+                          fontSize: 12.sp,
+                          fontFamily: 'Pretendard',
+                          height: 1.5,
+                          letterSpacing: -0.36,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 17.h),
@@ -222,7 +253,16 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
             ),
 
             // TODO: 선택된 인덱스에 따라 필터링된 정산 내역 표시
-            Expanded(child: _buildSettlementList()),
+            Expanded(
+              child: LiquidPullToRefresh(
+                onRefresh: _refreshSettlements,
+                animSpeedFactor: 7.0,
+                color: const Color(0xfffafafa),
+                backgroundColor: const Color(0xff8287ff),
+                showChildOpacityTransition: true,
+                child: _buildSettlementList(),
+              ),
+            ),
           ],
         ),
       ),
@@ -233,15 +273,21 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
     final settlements = ref.watch(settlementListProvider).valueOrNull;
 
     if (settlements == null || settlements.isEmpty) {
-      return Center(
-        child: Text(
-          '등록된 정산 내역이 없습니다.',
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: const Color(0xffc6c6c6),
-            fontWeight: FontWeight.w500,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.only(top: 60.h),
+        children: [
+          Center(
+            child: Text(
+              '등록된 정산 내역이 없습니다.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: const Color(0xffc6c6c6),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
 
@@ -262,9 +308,10 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
     Map<String, dynamic> filteredData = {};
 
     if (_selectedIndex == 0) {
-      // 미정산 내역: 내가 포함되어 있고, 내가 완료하지 않은 정산만
-      if (currentUserNickname != null) {
-        for (var entry in sortedEntries) {
+      // 미정산 내역
+      for (var entry in sortedEntries) {
+        if (_showOnlyMySettlements && currentUserNickname != null) {
+          // 내 정산만 보기: 내가 포함되어 있고, 내가 완료하지 않은 정산만
           final myUnpaidSettlements =
               entry.value.where((s) {
                 // 내가 정산 참여자에 포함되어 있는지 확인
@@ -280,11 +327,35 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
           if (myUnpaidSettlements.isNotEmpty) {
             filteredData[entry.key] = myUnpaidSettlements;
           }
+        } else {
+          // 전체 정산 보기: 모든 미정산 (완료되지 않은 정산 전체)
+          final allUnpaidSettlements =
+              entry.value.where((s) => !s.isCompleted).toList();
+          if (allUnpaidSettlements.isNotEmpty) {
+            filteredData[entry.key] = allUnpaidSettlements;
+          }
         }
       }
     } else if (_selectedIndex == 1) {
       // 여행 전체: 모든 정산 내역
-      filteredData = Map.from(settlements);
+      if (_showOnlyMySettlements && currentUserNickname != null) {
+        // 내 정산만 보기가 활성화된 경우: 내가 포함된 정산만 필터링
+        for (var entry in sortedEntries) {
+          final mySettlements =
+              entry.value
+                  .where(
+                    (s) =>
+                        s.payers.any((p) => p.nickname == currentUserNickname),
+                  )
+                  .toList();
+          if (mySettlements.isNotEmpty) {
+            filteredData[entry.key] = mySettlements;
+          }
+        }
+      } else {
+        // 전체 정산 보기
+        filteredData = Map.from(settlements);
+      }
     } else if (_selectedIndex == 2) {
       // 기타: 여행 기간 외의 정산 내역
       final tripState = ref.watch(tripProvider).valueOrNull;
@@ -298,12 +369,43 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
           final date = DateTime.parse(entry.key);
           // 여행 기간 외의 날짜만 필터링
           if (date.isBefore(start) || date.isAfter(end)) {
-            filteredData[entry.key] = entry.value;
+            if (_showOnlyMySettlements && currentUserNickname != null) {
+              // 내 정산만 보기가 활성화된 경우
+              final mySettlements =
+                  entry.value
+                      .where(
+                        (s) => s.payers.any(
+                          (p) => p.nickname == currentUserNickname,
+                        ),
+                      )
+                      .toList();
+              if (mySettlements.isNotEmpty) {
+                filteredData[entry.key] = mySettlements;
+              }
+            } else {
+              filteredData[entry.key] = entry.value;
+            }
           }
         }
       } else {
         // 여행 정보가 없으면 모든 정산을 기타로 표시
-        filteredData = Map.from(settlements);
+        if (_showOnlyMySettlements && currentUserNickname != null) {
+          for (var entry in sortedEntries) {
+            final mySettlements =
+                entry.value
+                    .where(
+                      (s) => s.payers.any(
+                        (p) => p.nickname == currentUserNickname,
+                      ),
+                    )
+                    .toList();
+            if (mySettlements.isNotEmpty) {
+              filteredData[entry.key] = mySettlements;
+            }
+          }
+        } else {
+          filteredData = Map.from(settlements);
+        }
       }
     } else {
       // Day별: 특정 일차의 정산 내역만
@@ -319,21 +421,42 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
 
         // 해당 날짜의 정산만 필터링
         if (settlements.containsKey(dateKey)) {
-          filteredData[dateKey] = settlements[dateKey]!;
+          if (_showOnlyMySettlements && currentUserNickname != null) {
+            // 내 정산만 보기가 활성화된 경우
+            final mySettlements =
+                settlements[dateKey]!
+                    .where(
+                      (s) => s.payers.any(
+                        (p) => p.nickname == currentUserNickname,
+                      ),
+                    )
+                    .toList();
+            if (mySettlements.isNotEmpty) {
+              filteredData[dateKey] = mySettlements;
+            }
+          } else {
+            filteredData[dateKey] = settlements[dateKey]!;
+          }
         }
       }
     }
 
     if (filteredData.isEmpty) {
-      return Center(
-        child: Text(
-          '등록된 정산 내역이 없습니다.',
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: const Color(0xffc6c6c6),
-            fontWeight: FontWeight.w500,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.only(top: 60.h),
+        children: [
+          Center(
+            child: Text(
+              '등록된 정산 내역이 없습니다.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: const Color(0xffc6c6c6),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
+        ],
       );
     }
 
@@ -357,8 +480,6 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
         blendMode: BlendMode.dstIn,
         child: ListView.builder(
           padding: EdgeInsets.fromLTRB(14.w, 15.h, 14.w, 0),
-
-          /// ㅡㅡㅡㅡㅡㅡㅡ 여기까지 ㅡㅡㅡㅡㅡㅡㅡ
           itemCount: sortedFilteredEntries.length,
           itemBuilder: (context, index) {
             final entry = sortedFilteredEntries[index];
@@ -397,6 +518,15 @@ class _SettlementListScreenState extends ConsumerState<SettlementListScreen>
       return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateKey;
+    }
+  }
+
+  Future<void> _refreshSettlements() async {
+    final tripState = ref.read(tripProvider).valueOrNull;
+    if (tripState is TripModel) {
+      await ref
+          .read(settlementListProvider.notifier)
+          .silentRefreshSettlements(tripId: tripState.tripId);
     }
   }
 }

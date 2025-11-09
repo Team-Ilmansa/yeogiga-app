@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
@@ -249,50 +250,64 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   // 미정산 탭
-                  ListView.separated(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 20.h,
+                  LiquidPullToRefresh(
+                    onRefresh: _refreshSettlementDetail,
+                    animSpeedFactor: 7.0,
+                    color: const Color(0xfffafafa),
+                    backgroundColor: const Color(0xff8287ff),
+                    showChildOpacityTransition: true,
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 20.h,
+                      ),
+                      itemCount:
+                          settlement.payers.where((p) => !p.isCompleted).length,
+                      separatorBuilder:
+                          (context, index) => SizedBox(height: 20.h),
+                      itemBuilder: (context, index) {
+                        final unpaidPayers =
+                            settlement.payers
+                                .where((p) => !p.isCompleted)
+                                .toList();
+                        final payer = unpaidPayers[index];
+                        return getPayerCard(
+                          payer: payer,
+                          settlement: settlement,
+                          isCompleted: false,
+                        );
+                      },
                     ),
-                    itemCount:
-                        settlement.payers.where((p) => !p.isCompleted).length,
-                    separatorBuilder:
-                        (context, index) => SizedBox(height: 20.h),
-                    itemBuilder: (context, index) {
-                      final unpaidPayers =
-                          settlement.payers
-                              .where((p) => !p.isCompleted)
-                              .toList();
-                      final payer = unpaidPayers[index];
-                      return getPayerCard(
-                        payer: payer,
-                        settlement: settlement,
-                        isCompleted: false,
-                      );
-                    },
                   ),
                   // 정산 완료 탭
-                  ListView.separated(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 20.h,
+                  LiquidPullToRefresh(
+                    onRefresh: _refreshSettlementDetail,
+                    animSpeedFactor: 7.0,
+                    color: const Color(0xfffafafa),
+                    backgroundColor: const Color(0xff8287ff),
+                    showChildOpacityTransition: true,
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 20.h,
+                      ),
+                      itemCount:
+                          settlement.payers.where((p) => p.isCompleted).length,
+                      separatorBuilder:
+                          (context, index) => SizedBox(height: 20.h),
+                      itemBuilder: (context, index) {
+                        final completedPayers =
+                            settlement.payers
+                                .where((p) => p.isCompleted)
+                                .toList();
+                        final payer = completedPayers[index];
+                        return getPayerCard(
+                          payer: payer,
+                          settlement: settlement,
+                          isCompleted: true,
+                        );
+                      },
                     ),
-                    itemCount:
-                        settlement.payers.where((p) => p.isCompleted).length,
-                    separatorBuilder:
-                        (context, index) => SizedBox(height: 20.h),
-                    itemBuilder: (context, index) {
-                      final completedPayers =
-                          settlement.payers
-                              .where((p) => p.isCompleted)
-                              .toList();
-                      final payer = completedPayers[index];
-                      return getPayerCard(
-                        payer: payer,
-                        settlement: settlement,
-                        isCompleted: true,
-                      );
-                    },
                   ),
                 ],
               ),
@@ -331,27 +346,29 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
         Container(
           width: 40.sp,
           height: 40.sp,
-          clipBehavior: Clip.antiAlias,
-          decoration: ShapeDecoration(
-            image:
-                payer.imageUrl != null && payer.imageUrl!.isNotEmpty
-                    ? DecorationImage(
-                      image: NetworkImage(payer.imageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                    : null,
-            shape: RoundedRectangleBorder(
-              side:
-                  isMe
-                      ? BorderSide(width: 1.sp, color: Color(0xff8287ff))
-                      : BorderSide.none,
-              borderRadius: BorderRadius.circular(24.r),
-            ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.r),
+            border:
+                isMe ? Border.all(width: 1.sp, color: Color(0xff8287ff)) : null,
           ),
           child:
-              payer.imageUrl == null || payer.imageUrl!.isEmpty
-                  ? Icon(Icons.person, size: 20.sp, color: Color(0xff8287ff))
-                  : null,
+              payer.imageUrl != null && payer.imageUrl!.isNotEmpty
+                  ? ClipRRect(
+                    borderRadius: BorderRadius.circular(24.r),
+                    child: Image.network(
+                      payer.imageUrl!,
+                      fit: BoxFit.cover,
+                      width: 40.sp,
+                      height: 40.sp,
+                    ),
+                  )
+                  : ClipRRect(
+                    borderRadius: BorderRadius.circular(24.r),
+                    child: buildProfileAvatarPlaceholder(
+                      nickname: payer.nickname,
+                      size: 40.sp,
+                    ),
+                  ),
         ),
         SizedBox(width: 8.w),
         Text(
@@ -533,6 +550,22 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
             : Container(),
       ],
     );
+  }
+
+  Future<void> _refreshSettlementDetail() async {
+    final tripState = ref.read(tripProvider).valueOrNull;
+    final settlement = ref.read(settlementProvider).valueOrNull;
+    if (tripState is TripModel && settlement != null) {
+      await ref
+          .read(settlementProvider.notifier)
+          .silentRefreshSettlement(
+            tripId: tripState.tripId,
+            settlementId: settlement.id,
+          );
+      await ref
+          .read(settlementListProvider.notifier)
+          .silentRefreshSettlements(tripId: tripState.tripId);
+    }
   }
 }
 

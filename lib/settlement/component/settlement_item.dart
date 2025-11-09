@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/utils/category_icon_util.dart';
 import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/settlement/model/settlement_model.dart';
+import 'package:yeogiga/settlement/model/settlement_payer_model.dart';
+import 'package:yeogiga/user/model/user_model.dart';
+import 'package:yeogiga/user/provider/user_me_provider.dart';
 
-class SettlementItem extends StatelessWidget {
+class SettlementItem extends ConsumerWidget {
   final SettlementModel settlement;
 
   const SettlementItem({super.key, required this.settlement});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // 카테고리에 따라 아이콘 경로 결정
     final categoryIcon = CategoryIconUtil.getCategoryIconByEnglish(
       settlement.type,
@@ -26,6 +30,40 @@ class SettlementItem extends StatelessWidget {
     // 완료 여부에 따른 투명도 설정
     final isCompleted = settlement.isCompleted;
     final opacity = isCompleted ? 0.4 : 1.0;
+
+    final userState = ref.watch(userMeProvider);
+    String? myNickname;
+    if (userState is UserResponseModel && userState.data != null) {
+      myNickname = userState.data!.nickname;
+    }
+    SettlementPayerModel? myPayer;
+    if (myNickname != null) {
+      for (final payer in settlement.payers) {
+        if (payer.nickname == myNickname) {
+          myPayer = payer;
+          break;
+        }
+      }
+    }
+    final bool isMySettlement =
+        myPayer != null && myPayer.userId == settlement.payerId;
+    final bool showCompletedText =
+        isMySettlement
+            ? settlement.isCompleted
+            : (myPayer?.isCompleted ?? false);
+    final Color badgeColor;
+    if (isMySettlement) {
+      badgeColor =
+          showCompletedText
+              ? const Color(0xFFC6C6C6).withOpacity(0.4)
+              : const Color(0xff8287ff);
+    } else {
+      if (showCompletedText) {
+        badgeColor = const Color(0xFFC6C6C6).withOpacity(0.4);
+      } else {
+        badgeColor = Colors.white;
+      }
+    }
 
     return GestureDetector(
       onTap: () {
@@ -107,34 +145,41 @@ class SettlementItem extends StatelessWidget {
                                     child: SizedBox(
                                       width: 16.w,
                                       height: 16.h,
-                                      child: hasImage
-                                          ? Image.network(
-                                              payer.imageUrl!,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) =>
-                                                      buildProfileAvatarPlaceholder(
-                                                        nickname:
-                                                            payer.nickname,
-                                                        size: 16.w,
-                                                        backgroundColor:
-                                                            const Color(
-                                                              0xffebebeb,
-                                                            ),
-                                                        textColor:
-                                                            const Color(
-                                                              0xff8287ff,
-                                                            ),
-                                                      ),
-                                            )
-                                          : buildProfileAvatarPlaceholder(
-                                              nickname: payer.nickname,
-                                              size: 16.w,
-                                              backgroundColor:
-                                                  const Color(0xffebebeb),
-                                              textColor:
-                                                  const Color(0xff8287ff),
-                                            ),
+                                      child:
+                                          hasImage
+                                              ? Image.network(
+                                                payer.imageUrl!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) =>
+                                                        buildProfileAvatarPlaceholder(
+                                                          nickname:
+                                                              payer.nickname,
+                                                          size: 16.w,
+                                                          backgroundColor:
+                                                              const Color(
+                                                                0xffebebeb,
+                                                              ),
+                                                          textColor:
+                                                              const Color(
+                                                                0xff8287ff,
+                                                              ),
+                                                        ),
+                                              )
+                                              : buildProfileAvatarPlaceholder(
+                                                nickname: payer.nickname,
+                                                size: 16.w,
+                                                backgroundColor: const Color(
+                                                  0xffebebeb,
+                                                ),
+                                                textColor: const Color(
+                                                  0xff8287ff,
+                                                ),
+                                              ),
                                     ),
                                   ),
                                 ),
@@ -149,8 +194,7 @@ class SettlementItem extends StatelessWidget {
                       width: 41.w,
                       height: 28.h,
                       decoration: BoxDecoration(
-                        color:
-                            isCompleted ? Color(0xFFC6C6C6) : Color(0xff8287ff),
+                        color: badgeColor,
                         borderRadius: BorderRadius.circular(18.r),
                         boxShadow: [
                           BoxShadow(
@@ -163,9 +207,14 @@ class SettlementItem extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          isCompleted ? '완료' : '$completedPayers/$totalPayers',
+                          showCompletedText
+                              ? '완료'
+                              : '$completedPayers/$totalPayers',
                           style: TextStyle(
-                            color: Colors.white,
+                            color:
+                                (!isMySettlement && !showCompletedText)
+                                    ? const Color(0xff7d7d7d)
+                                    : Colors.white,
                             fontSize: 14.sp,
                             height: 1.4,
                             letterSpacing: -0.42,
