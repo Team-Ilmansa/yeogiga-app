@@ -13,7 +13,10 @@ class GalleryImage {
   final int day;
   final GalleryImageType type;
   final String? placeName;
-  final String? tripDayPlaceId; // pending 이미지 삭제 시 필요
+  final String? tripDayPlaceId; // pending/즐겨찾기 등에 필요
+  final String? placeId;
+  final DateTime? date; // matched 이미지의 촬영 날짜
+  final bool favorite;
 
   GalleryImage({
     required this.id,
@@ -22,7 +25,34 @@ class GalleryImage {
     required this.type,
     this.placeName,
     this.tripDayPlaceId,
+    this.placeId,
+    this.date,
+    this.favorite = false,
   });
+
+  GalleryImage copyWith({
+    String? id,
+    String? url,
+    int? day,
+    GalleryImageType? type,
+    String? placeName,
+    String? tripDayPlaceId,
+    String? placeId,
+    DateTime? date,
+    bool? favorite,
+  }) {
+    return GalleryImage(
+      id: id ?? this.id,
+      url: url ?? this.url,
+      day: day ?? this.day,
+      type: type ?? this.type,
+      placeName: placeName ?? this.placeName,
+      tripDayPlaceId: tripDayPlaceId ?? this.tripDayPlaceId,
+      placeId: placeId ?? this.placeId,
+      date: date ?? this.date,
+      favorite: favorite ?? this.favorite,
+    );
+  }
 }
 
 /// 필터링된 갤러리 이미지 (matched + unmatched)
@@ -49,6 +79,10 @@ final filteredGalleryImagesProvider =
                 day: dayPlace.day,
                 type: GalleryImageType.matched,
                 placeName: place.name,
+                tripDayPlaceId: dayPlace.tripDayPlaceId,
+                placeId: place.id,
+                date: img.date,
+                favorite: img.favorite,
               ),
             );
           }
@@ -64,6 +98,9 @@ final filteredGalleryImagesProvider =
             url: img.url,
             day: dayPlace.day,
             type: GalleryImageType.unmatched,
+            tripDayPlaceId: dayPlace.tripDayPlaceId,
+            date: null,
+            favorite: img.favorite,
           ),
         );
       }
@@ -83,6 +120,10 @@ final filteredGalleryImagesProvider =
                   day: dayPlace.day,
                   type: GalleryImageType.matched,
                   placeName: place.name,
+                  tripDayPlaceId: dayPlace.tripDayPlaceId,
+                  placeId: place.id,
+                  date: img.date,
+                  favorite: img.favorite,
                 ),
               );
             }
@@ -100,6 +141,9 @@ final filteredGalleryImagesProvider =
               url: img.url,
               day: dayPlace.day,
               type: GalleryImageType.unmatched,
+              tripDayPlaceId: dayPlace.tripDayPlaceId,
+              date: null,
+              favorite: img.favorite,
             ),
           );
         }
@@ -108,6 +152,54 @@ final filteredGalleryImagesProvider =
   }
 
   return allImages;
+});
+
+/// 즐겨찾는 이미지 (matched/unmatched에서 favorite == true만 필터)
+final favoriteGalleryImagesProvider = Provider<List<GalleryImage>>((ref) {
+  final matchedImages = ref.watch(matchedTripImagesProvider).valueOrNull ?? [];
+  final unmatchedImages = ref.watch(unmatchedTripImagesProvider).valueOrNull ?? [];
+
+  final List<GalleryImage> favorites = [];
+
+  for (final dayPlace in matchedImages) {
+    for (final place in dayPlace.placeImagesList) {
+      if (place == null) continue;
+      for (final img in place.placeImages) {
+        if (!img.favorite) continue;
+        favorites.add(
+          GalleryImage(
+            id: img.id,
+            url: img.url,
+            day: dayPlace.day,
+            type: GalleryImageType.matched,
+            placeName: place.name,
+            tripDayPlaceId: dayPlace.tripDayPlaceId,
+            placeId: place.id,
+            date: img.date,
+            favorite: true,
+          ),
+        );
+      }
+    }
+  }
+
+  for (final dayPlace in unmatchedImages) {
+    for (final img in dayPlace.unmatchedImages) {
+      if (!img.favorite) continue;
+      favorites.add(
+        GalleryImage(
+          id: img.id,
+          url: img.url,
+          day: dayPlace.day,
+          type: GalleryImageType.unmatched,
+          tripDayPlaceId: dayPlace.tripDayPlaceId,
+          favorite: true,
+        ),
+      );
+    }
+  }
+
+  return favorites;
 });
 
 /// 필터링된 pending 이미지
@@ -145,6 +237,7 @@ final filteredPendingImagesProvider =
               url: img.url,
               day: dayPlace.day,
               type: GalleryImageType.pending,
+              tripDayPlaceId: dayPlace.tripDayPlaceId,
             ),
           );
         }

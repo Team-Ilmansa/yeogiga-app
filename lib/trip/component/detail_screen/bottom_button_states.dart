@@ -23,9 +23,12 @@ import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/pending_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart';
+import 'package:yeogiga/trip_image/repository/trip_image_repository.dart';
 import 'package:yeogiga/trip/provider/gallery_selection_provider.dart';
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/common/component/confirmation_dialog.dart';
+import 'package:yeogiga/common/component/simple_loading_dialog.dart';
+import 'package:yeogiga/trip/utils/gallery_refresh_helper.dart';
 import '../../../schedule/provider/confirm_schedule_provider.dart';
 
 Future<bool> requestImagePermission() async {
@@ -37,6 +40,18 @@ Future<bool> requestImagePermission() async {
     return true;
   }
   return false;
+}
+
+void _showBlockingLoadingDialog(
+  BuildContext context, {
+  String message = '잠시만 기다려주세요',
+}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black.withOpacity(0.1),
+    builder: (_) => SimpleLoadingDialog(message: message),
+  );
 }
 
 class AddNoticeState extends ConsumerWidget {
@@ -542,6 +557,11 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                     final notifier = ref.read(
                       pendingDayTripImagesProvider.notifier,
                     );
+                    bool dialogOpened = false;
+                    if (context.mounted) {
+                      dialogOpened = true;
+                      _showBlockingLoadingDialog(context);
+                    }
                     try {
                       final success = await notifier.assignImages(
                         tripId: tripId,
@@ -549,6 +569,10 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       );
 
                       if (success) {
+                        await GalleryRefreshHelper.refreshAll(ref);
+                        if (dialogOpened && context.mounted) {
+                          Navigator.of(context, rootNavigator: true).pop();
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('사진 매핑 완료!'),
@@ -561,25 +585,20 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                           ),
                         );
                       } else {
+                        if (dialogOpened && context.mounted) {
+                          Navigator.of(context, rootNavigator: true).pop();
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('사진 매핑 실패. 다시 시도해 주세요.')),
                         );
                       }
                     } catch (e, st) {
                       print('사진 매핑 중 예외 발생: $e\n$st');
-                      // ScaffoldMessenger.of(
-                      //   context,
-                      // ).showSnackBar(SnackBar(content: Text('$e')));
+                      if (dialogOpened && context.mounted) {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('사진 매핑 완료!'),
-                          backgroundColor: const Color.fromARGB(
-                            212,
-                            56,
-                            212,
-                            121,
-                          ),
-                        ),
+                        SnackBar(content: Text('사진 매핑 실패. 다시 시도해 주세요.')),
                       );
                     }
                   },
@@ -642,6 +661,12 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       matchedTripImagesProvider.notifier,
                     );
 
+                    bool dialogOpened = false;
+                    if (context.mounted) {
+                      dialogOpened = true;
+                      _showBlockingLoadingDialog(context);
+                    }
+
                     try {
                       final success = await notifier.reassignImagesToPlaces(
                         tripId: tripId,
@@ -649,6 +674,10 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       );
 
                       if (success) {
+                        await GalleryRefreshHelper.refreshAll(ref);
+                        if (dialogOpened && context.mounted) {
+                          Navigator.of(context, rootNavigator: true).pop();
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('사진 리매핑 완료!'),
@@ -661,12 +690,18 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                           ),
                         );
                       } else {
+                        if (dialogOpened && context.mounted) {
+                          Navigator.of(context, rootNavigator: true).pop();
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('사진 리매핑 실패. 다시 시도해 주세요.')),
                         );
                       }
                     } catch (e, st) {
                       print('사진 리매핑 중 예외 발생: $e\n$st');
+                      if (dialogOpened && context.mounted) {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text('$e')));
@@ -902,7 +937,11 @@ class PictureOptionState extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset('asset/icon/delete.svg'),
+                  SvgPicture.asset(
+                    'asset/icon/delete.svg',
+                    height: 32.h,
+                    width: 32.w,
+                  ),
                   SizedBox(height: 2.h),
                   Text(
                     '삭제',
@@ -926,17 +965,125 @@ class PictureOptionState extends ConsumerWidget {
                 ),
               ),
               onPressed: () async {
+                final tripState = ref.read(tripProvider).valueOrNull;
+                if (tripState is! TripModel) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('여행 정보를 불러오는 중입니다. 다시 시도해주세요.'),
+                    ),
+                  );
+                  return;
+                }
+
+                if (matchedOrUnmatched.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('즐겨찾기할 사진을 선택하세요.')),
+                  );
+                  return;
+                }
+
+                final repo = ref.read(tripImageRepositoryProvider);
+                bool hasError = false;
+
+                for (final image in matchedOrUnmatched) {
+                  final tripDayPlaceId = image.tripDayPlaceId;
+                  if (tripDayPlaceId == null) {
+                    continue;
+                  }
+                  final newFavorite = !image.favorite;
+
+                  if (image.type == GalleryImageType.matched) {
+                    ref
+                        .read(matchedTripImagesProvider.notifier)
+                        .updateFavorite(image.id, newFavorite);
+                  } else {
+                    ref
+                        .read(unmatchedTripImagesProvider.notifier)
+                        .updateFavorite(image.id, newFavorite);
+                  }
+
+                  try {
+                    await repo.updateFavorite(
+                      tripId: tripState.tripId,
+                      tripDayPlaceId: tripDayPlaceId,
+                      imageId: image.id,
+                      placeId: image.placeId,
+                      favorite: newFavorite,
+                    );
+                  } catch (e) {
+                    hasError = true;
+                    break;
+                  }
+                }
+
+                if (hasError) {
+                  ref.invalidate(matchedTripImagesProvider);
+                  ref.invalidate(unmatchedTripImagesProvider);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('즐겨찾기 변경에 실패했습니다. 다시 시도해주세요.'),
+                      backgroundColor: Color.fromARGB(229, 226, 81, 65),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('즐겨찾기 상태가 변경되었습니다.'),
+                      backgroundColor: Color.fromARGB(212, 56, 212, 121),
+                    ),
+                  );
+                }
+                ref.read(selectionModeProvider.notifier).state = false;
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    'asset/icon/favorite.svg',
+                    height: 32.h,
+                    width: 32.w,
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    '즐겨찾기',
+                    style: TextStyle(
+                      color: const Color(0xffc6c6c6),
+                      fontSize: 11.sp,
+                      letterSpacing: -0.1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xffc6c6c6),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(9.r),
+                ),
+              ),
+              onPressed: () async {
                 final urls = [...matchedUrls, ...pendingUrls];
+                if (!context.mounted) return;
+
                 // URL만 공유하려면:
-                await shareImageUrls(urls);
+                // await shareImageUrls(urls);
 
                 // 실제 파일 공유하려면:
-                await shareImageFiles(urls);
+                await shareImageFiles(urls, context, anchorContext: context);
+                ref.read(selectionModeProvider.notifier).state = false;
               }, // 공유 액션
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset('asset/icon/share.svg'),
+                  SvgPicture.asset(
+                    'asset/icon/share.svg',
+                    height: 32.h,
+                    width: 32.w,
+                  ),
                   SizedBox(height: 2.h),
                   Text(
                     '공유',
@@ -963,11 +1110,16 @@ class PictureOptionState extends ConsumerWidget {
                 // matchedOrUnmatched["urls"]와 pending["urls"]를 합침
                 final urls = [...matchedUrls, ...pendingUrls];
                 await saveImagesToGallery(urls, context);
+                ref.read(selectionModeProvider.notifier).state = false;
               }, // 저장 액션
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset('asset/icon/download.svg'),
+                  SvgPicture.asset(
+                    'asset/icon/download.svg',
+                    height: 32.h,
+                    width: 32.w,
+                  ),
                   SizedBox(height: 2.h),
                   Text(
                     '내 갤러리에 저장',
@@ -1269,6 +1421,13 @@ Future<void> saveImagesToGallery(
     ).showSnackBar(SnackBar(content: Text('저장할 이미지를 선택하세요.')));
     return;
   }
+
+  bool dialogOpened = false;
+  if (context.mounted) {
+    dialogOpened = true;
+    _showBlockingLoadingDialog(context);
+  }
+
   int successCount = 0;
   for (final url in urls) {
     try {
@@ -1289,12 +1448,19 @@ Future<void> saveImagesToGallery(
       }
     } catch (_) {}
   }
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('$successCount개의 사진이 갤러리에 저장되었습니다.'),
-      backgroundColor: const Color.fromARGB(212, 56, 212, 121),
-    ),
-  );
+
+  if (dialogOpened && context.mounted) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$successCount개의 사진이 갤러리에 저장되었습니다.'),
+        backgroundColor: const Color.fromARGB(212, 56, 212, 121),
+      ),
+    );
+  }
 }
 
 // TODO: 사진 공유하는 함수 (url을 텍스트로 공유)
@@ -1306,29 +1472,91 @@ Future<void> shareImageUrls(List<String> urls) async {
 
 // TODO: 사진 공유하는 함수 (이미지를 공유)
 
-Future<void> shareImageFiles(List<String> urls) async {
+Future<void> shareImageFiles(
+  List<String> urls,
+  BuildContext context, {
+  BuildContext? anchorContext,
+}) async {
   if (urls.isEmpty) return;
-  final tempDir = await getTemporaryDirectory();
-  List<XFile> files = [];
 
-  for (final url in urls) {
-    try {
-      final response = await Dio().get(
-        url,
-        options: Options(responseType: ResponseType.bytes),
+  bool dialogOpened = false;
+  if (context.mounted) {
+    dialogOpened = true;
+    _showBlockingLoadingDialog(context);
+  }
+
+  try {
+    final tempDir = await getTemporaryDirectory();
+    List<XFile> files = [];
+
+    for (final url in urls) {
+      try {
+        final response = await Dio().get(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        final fileName = url.split('/').last;
+        final file = File('${tempDir.path}/$fileName');
+        await file.writeAsBytes(response.data);
+        files.add(XFile(file.path));
+      } catch (e) {
+        print('이미지 다운로드 실패: $e');
+      }
+    }
+
+    if (dialogOpened && context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    if (files.isNotEmpty) {
+      final origin = _resolveShareOrigin(
+        anchorContext ?? context,
+        fallbackContext: context,
       );
-      final fileName = url.split('/').last;
-      final file = File('${tempDir.path}/$fileName');
-      await file.writeAsBytes(response.data);
-      files.add(XFile(file.path));
-    } catch (e) {
-      print('이미지 다운로드 실패: $e');
+      await Share.shareXFiles(
+        files,
+        text: '여행 사진 공유',
+        sharePositionOrigin: origin,
+      );
+    }
+  } catch (e) {
+    if (dialogOpened && context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
     }
   }
+}
 
-  if (files.isNotEmpty) {
-    await Share.shareXFiles(files, text: '여행 사진 공유');
+Rect _resolveShareOrigin(
+  BuildContext context, {
+  BuildContext? fallbackContext,
+}) {
+  RenderBox? box;
+  try {
+    box = context.findRenderObject() as RenderBox?;
+  } catch (_) {}
+
+  if (box != null && box.hasSize) {
+    return box.localToGlobal(Offset.zero) & box.size;
   }
+
+  try {
+    final overlayBox =
+        Overlay.of(context, rootOverlay: true)?.context.findRenderObject()
+            as RenderBox?;
+    if (overlayBox != null && overlayBox.hasSize) {
+      return overlayBox.localToGlobal(Offset.zero) & overlayBox.size;
+    }
+  } catch (_) {}
+
+  if (fallbackContext != null && fallbackContext != context) {
+    return _resolveShareOrigin(fallbackContext);
+  }
+
+  final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  final logicalSize = view.physicalSize / view.devicePixelRatio;
+  final double width = logicalSize.width > 0 ? logicalSize.width : 1;
+  final double height = logicalSize.height > 0 ? logicalSize.height : 1;
+  return Rect.fromLTWH(0, 0, width, height);
 }
 
 void _showAddNoticeModal(BuildContext context, WidgetRef ref) {

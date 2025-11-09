@@ -89,4 +89,31 @@ class UnmatchedDayTripImageNotifier
 
     state = AsyncValue.data(updatedState);
   }
+
+  void updateFavorite(String imageId, bool favorite) {
+    final currentState = state.valueOrNull;
+    if (currentState == null) return;
+
+    final updatedState = currentState.map((dayPlace) {
+      final updatedImages =
+          dayPlace.unmatchedImages.map((img) {
+            if (img.id == imageId) {
+              return UnMatchedImage(
+                id: img.id,
+                url: img.url,
+                favorite: favorite,
+              );
+            }
+            return img;
+          }).toList();
+
+      return UnMatchedDayTripImage(
+        tripDayPlaceId: dayPlace.tripDayPlaceId,
+        day: dayPlace.day,
+        unmatchedImages: updatedImages,
+      );
+    }).toList();
+
+    state = AsyncValue.data(updatedState);
+  }
 }

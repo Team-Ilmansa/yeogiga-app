@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yeogiga/common/component/confirmation_dialog.dart';
 import 'package:yeogiga/common/component/custom_text_form_field.dart';
 import 'package:yeogiga/common/component/grey_bar.dart';
+import 'package:yeogiga/common/component/menu_item.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:intl/intl.dart';
@@ -94,8 +94,8 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
               // ),
 
               // 여행 이름 수정하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/title_edit.svg',
+              MenuItem(
+                svgAsset: 'asset/icon/menu/title_edit.svg',
                 text: '여행 개요 수정하기',
                 onTap: () async {
                   final controller = TextEditingController();
@@ -241,8 +241,8 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
               ),
               // 날짜 수정하기 (SETTING 상태일 때만 표시)
               if (trip?.status == TripStatus.SETTING)
-                _TripMenuItem(
-                  svgUrl: 'asset/icon/menu/calendar_edit.svg',
+                MenuItem(
+                  svgAsset: 'asset/icon/menu/calendar_edit.svg',
                   text: '일정 수정하기',
                   onTap: () {
                     GoRouter.of(context).pop();
@@ -251,8 +251,8 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   },
                 ),
               // 여행 삭제하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/delete_edit.svg',
+              MenuItem(
+                svgAsset: 'asset/icon/menu/delete_edit.svg',
                 text: '여행 삭제하기',
                 onTap: () async {
                   final confirm = await showDialog<bool>(
@@ -342,8 +342,8 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                 },
               ),
               // 링크공유로 초대하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/share_edit.svg',
+              MenuItem(
+                svgAsset: 'asset/icon/menu/share_edit.svg',
                 text: '링크공유로 초대하기',
                 onTap: () async {
                   GoRouter.of(context).pop();
@@ -523,8 +523,8 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
               // ),
 
               // 여행 탈퇴하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/delete_edit.svg',
+              MenuItem(
+                svgAsset: 'asset/icon/menu/delete_edit.svg',
                 text: '여행 탈퇴하기',
                 onTap: () async {
                   final confirm = await showDialog<bool>(
@@ -713,8 +713,8 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                 },
               ),
               // 링크공유로 초대하기
-              _TripMenuItem(
-                svgUrl: 'asset/icon/menu/share_edit.svg',
+              MenuItem(
+                svgAsset: 'asset/icon/menu/share_edit.svg',
                 text: '링크공유로 초대하기',
                 onTap: () async {
                   GoRouter.of(context).pop();
@@ -806,50 +806,6 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                     );
                   }
                 },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TripMenuItem extends StatelessWidget {
-  // final IconData icon;
-  final String svgUrl;
-  final String text;
-  final VoidCallback onTap;
-  const _TripMenuItem({
-    // required this.icon,
-    required this.svgUrl,
-    required this.text,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: 64.h,
-          child: Row(
-            children: [
-              SizedBox(width: 20.w),
-              SvgPicture.asset(svgUrl, width: 24.w, height: 24.h),
-              SizedBox(width: 8.w),
-              Text(
-                text,
-                style: TextStyle(
-                  color: const Color(0xFF313131),
-                  fontSize: 16.sp,
-                  height: 1.40,
-                  letterSpacing: -0.48,
-                  fontWeight: FontWeight.w500,
-                ),
               ),
             ],
           ),
