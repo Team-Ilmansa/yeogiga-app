@@ -31,13 +31,11 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showMoveOption =
         currentImage.type != GalleryImageType.pending &&
-        (
-          (currentImage.type == GalleryImageType.matched &&
-              currentImage.tripDayPlaceId != null &&
-              currentImage.placeId != null) ||
-          (currentImage.type == GalleryImageType.unmatched &&
-              currentImage.tripDayPlaceId != null)
-        );
+        ((currentImage.type == GalleryImageType.matched &&
+                currentImage.tripDayPlaceId != null &&
+                currentImage.placeId != null) ||
+            (currentImage.type == GalleryImageType.unmatched &&
+                currentImage.tripDayPlaceId != null));
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -46,7 +44,7 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: showMoveOption ? 329.h : 284.h,
+          height: showMoveOption ? 329.h : 265.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -185,15 +183,16 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
                           ref.invalidate(matchedTripImagesProvider);
                           ref.invalidate(unmatchedTripImagesProvider);
                         }
-                      } else if (
-                          currentImage.type == GalleryImageType.pending) {
+                      } else if (currentImage.type ==
+                          GalleryImageType.pending) {
                         final tripDayPlaceId = currentImage.tripDayPlaceId;
                         if (tripDayPlaceId == null) {
                           throw Exception('임시 저장 이미지 정보가 올바르지 않습니다.');
                         }
 
-                        final pendingNotifier =
-                            ref.read(pendingDayTripImagesProvider.notifier);
+                        final pendingNotifier = ref.read(
+                          pendingDayTripImagesProvider.notifier,
+                        );
                         pendingNotifier.optimisticRemove([imageId]);
 
                         success = await pendingNotifier.deleteImages(
