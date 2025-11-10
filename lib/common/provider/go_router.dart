@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +11,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     routes: _wrapRoutesWithAnimation(provider.routes),
-    initialLocation: kDebugMode ? '/markerPreview' : '/splash',
+    initialLocation: '/splash',
     refreshListenable: provider,
     redirect: provider.redirectLogic,
     observers: [

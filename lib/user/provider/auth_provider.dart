@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
@@ -10,6 +10,7 @@ import 'package:yeogiga/settlement/view/settlement_detail_screen.dart';
 import 'package:yeogiga/settlement/view/settlement_list_screen.dart';
 import 'package:yeogiga/trip/trip_map/end/end_trip_map.dart';
 import 'package:yeogiga/trip/trip_map/ing/ing_trip_map.dart';
+import 'package:yeogiga/trip_image/view/move_trip_image_view.dart';
 import 'package:yeogiga/trip_image/view/trip_image_view.dart';
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/w2m/view/trip_date_range_picker_screen.dart';
@@ -113,6 +114,19 @@ class AuthProvider extends ChangeNotifier {
       },
     ),
     GoRoute(
+      path: '/moveTripImageView',
+      name: MoveTripImageView.routeName,
+      builder: (context, state) {
+        final extra = state.extra;
+        if (extra is MoveTripImageArgs) {
+          return MoveTripImageView(args: extra);
+        }
+        return const Scaffold(
+          body: Center(child: Text('잘못된 접근입니다.')),
+        );
+      },
+    ),
+    GoRoute(
       path: '/invite/:tripId',
       name: 'tripInviteShortcut',
       builder: (context, state) {
@@ -186,9 +200,9 @@ class AuthProvider extends ChangeNotifier {
   String? redirectLogic(BuildContext context, GoRouterState state) {
     final UserModelBase? user = ref.read(userMeProvider);
 
-    if (state.location == '/tripImageView') {
-      return null;
-    }
+    // if (state.location == '/moveTripImageView') {
+    //   return null;
+    // }
 
     final loggingInOrRegister =
         state.location == '/login' || state.location == '/register';

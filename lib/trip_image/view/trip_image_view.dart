@@ -5,10 +5,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
-import 'package:yeogiga/trip_image/view/trip_image_more_menu_sheet.dart';
 import 'package:yeogiga/trip_image/repository/trip_image_repository.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
+import 'package:yeogiga/trip_image/view/move_trip_image_view.dart';
+import 'package:yeogiga/trip_image/view/trip_image_more_menu_sheet.dart';
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 
 class TripImageView extends ConsumerStatefulWidget {
@@ -99,15 +100,13 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
       );
 
       if (current.type == GalleryImageType.matched) {
-        ref.read(matchedTripImagesProvider.notifier).updateFavorite(
-          current.id,
-          newValue,
-        );
+        ref
+            .read(matchedTripImagesProvider.notifier)
+            .updateFavorite(current.id, newValue);
       } else if (current.type == GalleryImageType.unmatched) {
-        ref.read(unmatchedTripImagesProvider.notifier).updateFavorite(
-          current.id,
-          newValue,
-        );
+        ref
+            .read(unmatchedTripImagesProvider.notifier)
+            .updateFavorite(current.id, newValue);
       }
     } catch (e) {
       if (!mounted) return;
@@ -116,9 +115,7 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '즐겨찾기 변경에 실패했습니다. 다시 시도해주세요. (${e.toString()})',
-          ),
+          content: Text('즐겨찾기 변경에 실패했습니다. 다시 시도해주세요. (${e.toString()})'),
         ),
       );
     } finally {
@@ -126,6 +123,28 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
       setState(() {
         _isFavoriteUpdating = false;
       });
+    }
+  }
+
+  Future<void> _handleMoveImage(GalleryImage image) async {
+    final result = await context.push<GalleryImage?>(
+      '/moveTripImageView',
+      extra: MoveTripImageArgs(image: image),
+    );
+
+    if (!mounted || result == null) return;
+
+    final targetIndex = _images.indexWhere((img) => img.id == result.id);
+    if (targetIndex == -1) return;
+
+    setState(() {
+      _images[targetIndex] = result;
+      _currentIndex = targetIndex;
+    });
+
+    if (_pageController.hasClients &&
+        _pageController.page?.round() != targetIndex) {
+      _pageController.jumpToPage(targetIndex);
     }
   }
 
@@ -267,9 +286,11 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
                       if (_images.isEmpty) {
                         return const SizedBox.shrink();
                       }
+                      final selectedImage = _images[_currentIndex];
                       return TripImageMoreMenuSheet(
-                        currentImage: _images[_currentIndex],
+                        currentImage: selectedImage,
                         onImageDeleted: _handleImageDelete,
+                        onMoveImageTap: () => _handleMoveImage(selectedImage),
                       );
                     },
                   );

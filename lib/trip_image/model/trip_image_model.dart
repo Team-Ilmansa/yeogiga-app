@@ -131,7 +131,7 @@ class MatchedImage {
   final String url;
   final double latitude;
   final double longitude;
-  final DateTime date;
+  final DateTime? date;
   final bool favorite;
 
   MatchedImage({
@@ -139,11 +139,30 @@ class MatchedImage {
     required this.url,
     required this.latitude,
     required this.longitude,
-    required this.date,
+    this.date,
     required this.favorite,
   });
 
-  factory MatchedImage.fromJson(Map<String, dynamic> json) =>
-      _$MatchedImageFromJson(json);
-  Map<String, dynamic> toJson() => _$MatchedImageToJson(this);
+  factory MatchedImage.fromJson(Map<String, dynamic> json) {
+    final rawDate = json['date'] as String?;
+    return MatchedImage(
+      id: json['id'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      date: rawDate == null || rawDate.isEmpty ? null : DateTime.tryParse(rawDate),
+      favorite: json['favorite'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'url': url,
+      'latitude': latitude,
+      'longitude': longitude,
+      'date': date?.toIso8601String(),
+      'favorite': favorite,
+    };
+  }
 }
