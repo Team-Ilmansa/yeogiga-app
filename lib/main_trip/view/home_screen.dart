@@ -22,6 +22,7 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -218,10 +219,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
                               if (fcmToken == null || fcmToken.isEmpty) {
                                 print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('FCM 토큰을 가져올 수 없습니다.'),
-                                  ),
+                                showAppSnackBar(
+                                  context,
+                                  'FCM 토큰을 가져올 수 없습니다.',
+                                  isError: true,
                                 );
                                 return;
                               }
@@ -244,24 +245,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                               print('[FCM Test] 응답 데이터: ${response.data}');
 
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
-                                    ),
-                                    duration: Duration(seconds: 3),
-                                  ),
+                                showAppSnackBar(
+                                  context,
+                                  'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
+                                  duration: const Duration(seconds: 3),
                                 );
                               }
                             } catch (e, st) {
                               print('[FCM Test] 오류 발생: $e');
                               print('[FCM Test] Stack trace: $st');
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('오류: $e'),
-                                    duration: Duration(seconds: 3),
-                                  ),
+                                showAppSnackBar(
+                                  context,
+                                  '오류: $e',
+                                  isError: true,
+                                  duration: const Duration(seconds: 3),
                                 );
                               }
                             }

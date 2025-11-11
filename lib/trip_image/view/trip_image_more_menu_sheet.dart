@@ -13,6 +13,7 @@ import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class TripImageMoreMenuSheet extends ConsumerWidget {
   final GalleryImage currentImage;
@@ -171,82 +172,24 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
                       }
 
                       if (!success) {
-                        scaffoldMessenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '사진 삭제에 실패했습니다. 다시 시도해주세요.',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            backgroundColor: const Color(0xFFE25141),
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.all(5.w),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            elevation: 0,
-                            duration: const Duration(seconds: 2),
-                          ),
+                        scaffoldMessenger.showAppSnack(
+                          '사진 삭제에 실패했습니다. 다시 시도해주세요.',
+                          isError: true,
                         );
                         return;
                       }
 
                       onImageDeleted();
 
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '사진이 삭제되었습니다.',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor: const Color.fromARGB(
-                            212,
-                            56,
-                            212,
-                            121,
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                      scaffoldMessenger.showAppSnack('사진이 삭제되었습니다.');
                     } catch (e) {
                       ref.invalidate(matchedTripImagesProvider);
                       ref.invalidate(unmatchedTripImagesProvider);
                       ref.invalidate(pendingDayTripImagesProvider);
 
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '사진 삭제에 실패했습니다.',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor: const Color.fromARGB(
-                            229,
-                            226,
-                            81,
-                            65,
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      scaffoldMessenger.showAppSnack(
+                        '사진 삭제에 실패했습니다.',
+                        isError: true,
                       );
                     }
                   }

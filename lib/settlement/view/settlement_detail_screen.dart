@@ -18,6 +18,7 @@ import 'package:yeogiga/common/utils/data_utils.dart';
 import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/model/user_model.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class SettlementDetailScreen extends ConsumerStatefulWidget {
   static String get routeName => 'settlementDetailScreen';
@@ -478,29 +479,10 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                           .setOptimisticSettlement(settlement);
 
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            result['message'] ?? '알 수 없는 오류가 발생했습니다.',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor: const Color.fromARGB(
-                            229,
-                            226,
-                            81,
-                            65,
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 6,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showAppSnackBar(
+                        context,
+                        result['message'] ?? '알 수 없는 오류가 발생했습니다.',
+                        isError: true,
                       );
                     }
 

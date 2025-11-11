@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'dart:async';
+import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -290,4 +293,148 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       return false;
     }
   }
+
+  // 프로필 이미지 수정 (optimistic UI)
+  Future<String?> updateProfileImage(File image) async {
+    try {
+      final previousUrl = _currentImageUrl;
+      final response = await repository.updateProfileImage(image: image);
+      if (_isSuccessCode(response.code)) {
+        _evictImageCache(previousUrl);
+        await _waitAndRefreshUser();
+        return null;
+      }
+      return response.message;
+    } on DioException catch (e) {
+      return _extractErrorMessage(
+        e,
+        fallback: '프로필 사진을 수정할 수 없습니다.',
+      );
+    } catch (_) {
+      return '프로필 사진을 수정할 수 없습니다.';
+    }
+  }
+
+  // 닉네임 수정 (optimistic UI)
+  Future<String?> updateNickname(String nickname) async {
+    try {
+      final trimmed = nickname.trim();
+      final response = await repository.updateNickname(
+        body: {'nickname': trimmed},
+      );
+
+      if (_isSuccessCode(response.code)) {
+        await _refreshUser();
+        return null;
+      }
+      return response.message;
+    } on DioException catch (e) {
+      return _extractErrorMessage(
+        e,
+        fallback: '닉네임을 수정할 수 없습니다.',
+      );
+    } catch (_) {
+      return '닉네임을 수정할 수 없습니다.';
+    }
+  }
+
+  bool _isSuccessCode(dynamic code) => code.toString() == '200';
+
+  String? get _currentImageUrl {
+    final currentState = state;
+    if (currentState is UserResponseModel) {
+      return currentState.data?.imageUrl;
+    } else if (currentState is UserModel) {
+      return currentState.imageUrl;
+    }
+    return null;
+  }
+
+  void _evictImageCache(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return;
+    PaintingBinding.instance.imageCache
+        .evict(NetworkImage(imageUrl));
+  }
+
+  Future<void> _waitAndRefreshUser() async {
+    await _refreshUser(attempts: 3);
+  }
+
+  Future<void> _refreshUser({int attempts = 1}) async {
+    try {
+      final refreshed = await repository.getMe();
+      final imageUrl = refreshed.data?.imageUrl;
+      final isReady = await _waitForImageAvailability(imageUrl);
+      if (!isReady && attempts > 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        return _refreshUser(attempts: attempts - 1);
+      }
+      if (isReady) {
+        _evictImageCache(imageUrl);
+      }
+      state = refreshed;
+    } catch (_) {
+      // ignore - keep previous state on failure
+    }
+  }
+
+  Future<bool> _waitForImageAvailability(String? url) async {
+    if (url == null || url.isEmpty) {
+      return true;
+    }
+
+    const maxAttempts = 5;
+    const delay = Duration(milliseconds: 400);
+    final client = HttpClient();
+
+    try {
+      for (int attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          final request = await client.headUrl(Uri.parse(url));
+          final response = await request.close();
+          await response.drain();
+          if (response.statusCode == 200) {
+            return true;
+          }
+        } catch (_) {
+          // swallow and retry
+        }
+        await Future.delayed(delay);
+      }
+    } finally {
+      client.close(force: true);
+    }
+
+    return false;
+  }
+
+  String _extractErrorMessage(
+    DioException exception, {
+    required String fallback,
+  }) {
+    final data = exception.response?.data;
+    if (data is Map<String, dynamic>) {
+      final message = data['message'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+
+      final errors = data['errors'];
+      if (errors is Map<String, dynamic>) {
+        for (final value in errors.values) {
+          if (value is String && value.isNotEmpty) {
+            return value;
+          }
+          if (value is List && value.isNotEmpty) {
+            final first = value.first;
+            if (first is String && first.isNotEmpty) {
+              return first;
+            }
+          }
+        }
+      }
+    }
+    return fallback;
+  }
+
 }

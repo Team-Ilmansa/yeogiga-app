@@ -9,6 +9,7 @@ import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class TripDateRangePickerScreen extends ConsumerStatefulWidget {
   static String get routeName => 'dateRangePicker';
@@ -33,9 +34,7 @@ class _TripDateRangePickerScreenState
       if (!mounted) return;
 
       if (_error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_error!), backgroundColor: Colors.red),
-        );
+        showAppSnackBar(context, _error!, isError: true);
         setState(() {
           _error = null;
         });
