@@ -6,6 +6,7 @@ import 'package:yeogiga/trip/component/detail_screen/favorite_gallery/no_favorit
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class FavoriteGalleryTab extends ConsumerWidget {
   const FavoriteGalleryTab({super.key});
@@ -64,10 +65,10 @@ class FavoriteGalleryTab extends ConsumerWidget {
               return GestureDetector(
                 onTap: () {
                   if (tripId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('여행 정보를 불러오는 중입니다. 다시 시도해주세요.'),
-                      ),
+                    showAppSnackBar(
+                      context,
+                      '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                      isError: true,
                     );
                     return;
                   }

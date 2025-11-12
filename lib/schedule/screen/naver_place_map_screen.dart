@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:yeogiga/common/utils/location_helper.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 import 'package:yeogiga/naver/provider/naver_place_search_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -273,29 +274,12 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                 );
 
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    result['success']
-                        ? '집결지가 성공적으로 설정되었습니다!'
-                        : result['message'],
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  backgroundColor:
-                      result['success']
-                          ? const Color.fromARGB(212, 56, 212, 121)
-                          : const Color.fromARGB(229, 226, 81, 65),
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.all(5.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  elevation: 0,
-                  duration: const Duration(seconds: 2),
-                ),
+              showAppSnackBar(
+                context,
+                result['success']
+                    ? '집결지가 성공적으로 설정되었습니다!'
+                    : result['message'],
+                isError: !(result['success'] as bool),
               );
 
               if (result['success']) {
@@ -398,29 +382,12 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
 
             // 수정: async gap 이후 context 사용 시 mounted 체크 추가
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    success
-                        ? '일정에 성공적으로 추가되었습니다!'
-                        : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  backgroundColor:
-                      success
-                          ? const Color.fromARGB(212, 56, 212, 121)
-                          : const Color.fromARGB(229, 226, 81, 65),
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.all(5.w),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  elevation: 0, // 그림자 제거
-                  duration: const Duration(seconds: 2),
-                ),
+              showAppSnackBar(
+                context,
+                success
+                    ? '일정에 성공적으로 추가되었습니다!'
+                    : '일정 추가에 실패했습니다${errorMsg != null ? "\n$errorMsg" : ""}',
+                isError: !success,
               );
             }
           }

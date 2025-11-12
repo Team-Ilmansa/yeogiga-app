@@ -6,6 +6,7 @@ import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 // 필요시: import 'package:yeogiga/user/provider/user_me_provider.dart';
 
 class W2MOverlapCalendarScreen extends ConsumerStatefulWidget {
@@ -179,80 +180,27 @@ class _W2MOverlapCalendarScreenState
                                     end: _endDate!,
                                   );
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '여행 일정이 저장되었습니다.',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    backgroundColor: const Color.fromARGB(
-                                      212,
-                                      56,
-                                      212,
-                                      121,
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(5.w),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14.r),
-                                    ),
-                                    elevation: 0,
-                                    duration: const Duration(seconds: 2),
-                                  ),
+                                showAppSnackBar(
+                                  context,
+                                  '여행 일정이 저장되었습니다.',
                                 );
                                 GoRouter.of(context).pop();
                               }
                             } catch (e) {
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      e.toString(),
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    backgroundColor: const Color.fromARGB(
-                                      229,
-                                      226,
-                                      81,
-                                      65,
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    margin: EdgeInsets.all(5.w),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14.r),
-                                    ),
-                                    elevation: 0,
-                                    duration: const Duration(seconds: 2),
-                                  ),
+                                showAppSnackBar(
+                                  context,
+                                  e.toString(),
+                                  isError: true,
                                 );
                               }
                             }
                           } else {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '시작/종료 날짜를 선택해주세요.',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  backgroundColor: Colors.red,
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: EdgeInsets.all(5.w),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14.r),
-                                  ),
-                                  elevation: 0,
-                                  duration: const Duration(seconds: 2),
-                                ),
+                              showAppSnackBar(
+                                context,
+                                '시작/종료 날짜를 선택해주세요.',
+                                isError: true,
                               );
                             }
                           }

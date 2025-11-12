@@ -9,6 +9,7 @@ import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/settlement/provider/settlement_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class SettlementMoreMenuSheet extends ConsumerWidget {
   const SettlementMoreMenuSheet({super.key});
@@ -96,27 +97,9 @@ class SettlementMoreMenuSheet extends ConsumerWidget {
                           );
 
                       // 결과를 스낵바로 표시 (저장된 scaffoldMessenger 사용)
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            result['message'] ?? '알 수 없는 오류가 발생했습니다.',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor:
-                              result['success']
-                                  ? const Color.fromARGB(212, 56, 212, 121)
-                                  : const Color.fromARGB(229, 226, 81, 65),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 6,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      scaffoldMessenger.showAppSnack(
+                        result['message'] ?? '알 수 없는 오류가 발생했습니다.',
+                        isError: !(result['success'] as bool),
                       );
                     }
                   }

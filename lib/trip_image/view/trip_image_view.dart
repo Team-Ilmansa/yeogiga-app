@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/trip_image/view/trip_image_more_menu_sheet.dart';
 import 'package:yeogiga/trip_image/repository/trip_image_repository.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 import 'package:yeogiga/trip_image/provider/matched_trip_image_provider.dart';
 import 'package:yeogiga/trip_image/provider/unmatched_trip_image_provider.dart';
 import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
@@ -76,8 +77,10 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
     final current = _images[_currentIndex];
     final tripDayPlaceId = current.tripDayPlaceId;
     if (tripDayPlaceId == null || widget.tripId == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('여행 정보를 불러오는 중입니다. 다시 시도해주세요.')),
+      showAppSnackBar(
+        context,
+        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+        isError: true,
       );
       return;
     }
@@ -114,12 +117,10 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
       setState(() {
         _images[_currentIndex] = current;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '즐겨찾기 변경에 실패했습니다. 다시 시도해주세요. (${e.toString()})',
-          ),
-        ),
+      showAppSnackBar(
+        context,
+        '즐겨찾기 변경에 실패했습니다. 다시 시도해주세요. (${e.toString()})',
+        isError: true,
       );
     } finally {
       if (!mounted) return;

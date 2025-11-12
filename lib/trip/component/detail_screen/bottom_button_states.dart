@@ -29,6 +29,7 @@ import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/common/component/confirmation_dialog.dart';
 import 'package:yeogiga/common/component/simple_loading_dialog.dart';
 import 'package:yeogiga/trip/utils/gallery_refresh_helper.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 import '../../../schedule/provider/confirm_schedule_provider.dart';
 
 Future<bool> requestImagePermission() async {
@@ -324,9 +325,11 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                     print('[사진 업로드] 버튼 클릭');
                     if (widget.selectedDayIndex == 0) {
                       print('[사진 업로드] 날짜 미선택');
-                      ScaffoldMessenger.of(
+                      showAppSnackBar(
                         context,
-                      ).showSnackBar(SnackBar(content: Text('날짜를 선택해주세요')));
+                        '날짜를 선택해주세요',
+                        isError: true,
+                      );
                       return;
                     }
 
@@ -370,17 +373,16 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                     print('[사진 업로드] 권한 체크 결과: $hasPermission');
 
                     if (!hasPermission) {
-                      // 수정: async gap 이후 context 사용 시 mounted 체크 추가
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('권한을 설정해주세요'),
-                          action: SnackBarAction(
-                            label: '설정으로 이동',
-                            onPressed: () {
-                              openAppSettings();
-                            },
-                          ),
+                      showAppSnackBar(
+                        context,
+                        '권한을 설정해주세요',
+                        isError: true,
+                        action: SnackBarAction(
+                          label: '설정으로 이동',
+                          onPressed: () {
+                            openAppSettings();
+                          },
                         ),
                       );
                       return;
@@ -395,10 +397,11 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         );
 
                     if (result == null || result.files.isEmpty) {
-                      // 수정: async gap 이후 context 사용 시 mounted 체크 추가
                       if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('사진을 선택하지 않았습니다.')),
+                      showAppSnackBar(
+                        context,
+                        '사진을 선택하지 않았습니다.',
+                        isError: true,
                       );
                       return;
                     }
@@ -464,24 +467,16 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       if (!mounted) return;
                       Navigator.of(context).pop();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('사진 업로드 완료!'),
-                          backgroundColor: const Color.fromARGB(
-                            212,
-                            56,
-                            212,
-                            121,
-                          ),
-                        ),
-                      );
+                      showAppSnackBar(context, '사진 업로드 완료!');
                     } else {
                       // 로딩 모달 닫기
                       if (!mounted) return;
                       Navigator.of(context).pop();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('사진 업로드 실패. 다시 시도해 주세요.')),
+                      showAppSnackBar(
+                        context,
+                        '사진 업로드 실패. 다시 시도해 주세요.',
+                        isError: true,
                       );
                     }
                   },
@@ -573,23 +568,15 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         if (dialogOpened && context.mounted) {
                           Navigator.of(context, rootNavigator: true).pop();
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('사진 매핑 완료!'),
-                            backgroundColor: const Color.fromARGB(
-                              212,
-                              56,
-                              212,
-                              121,
-                            ),
-                          ),
-                        );
+                        showAppSnackBar(context, '사진 매핑 완료!');
                       } else {
                         if (dialogOpened && context.mounted) {
                           Navigator.of(context, rootNavigator: true).pop();
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('사진 매핑 실패. 다시 시도해 주세요.')),
+                        showAppSnackBar(
+                          context,
+                          '사진 매핑 실패. 다시 시도해 주세요.',
+                          isError: true,
                         );
                       }
                     } catch (e, st) {
@@ -597,8 +584,10 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       if (dialogOpened && context.mounted) {
                         Navigator.of(context, rootNavigator: true).pop();
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('사진 매핑 실패. 다시 시도해 주세요.')),
+                      showAppSnackBar(
+                        context,
+                        '사진 매핑 실패. 다시 시도해 주세요.',
+                        isError: true,
                       );
                     }
                   },
@@ -678,23 +667,15 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                         if (dialogOpened && context.mounted) {
                           Navigator.of(context, rootNavigator: true).pop();
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('사진 리매핑 완료!'),
-                            backgroundColor: const Color.fromARGB(
-                              212,
-                              56,
-                              212,
-                              121,
-                            ),
-                          ),
-                        );
+                        showAppSnackBar(context, '사진 리매핑 완료!');
                       } else {
                         if (dialogOpened && context.mounted) {
                           Navigator.of(context, rootNavigator: true).pop();
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('사진 리매핑 실패. 다시 시도해 주세요.')),
+                        showAppSnackBar(
+                          context,
+                          '사진 리매핑 실패. 다시 시도해 주세요.',
+                          isError: true,
                         );
                       }
                     } catch (e, st) {
@@ -702,9 +683,11 @@ class _AddPictureState extends ConsumerState<AddPictureState> {
                       if (dialogOpened && context.mounted) {
                         Navigator.of(context, rootNavigator: true).pop();
                       }
-                      ScaffoldMessenger.of(
+                      showAppSnackBar(
                         context,
-                      ).showSnackBar(SnackBar(content: Text('$e')));
+                        '$e',
+                        isError: true,
+                      );
                     }
                   },
                   child: Row(
@@ -803,9 +786,11 @@ class PictureOptionState extends ConsumerWidget {
                 // 선택된 이미지가 하나도 없으면
                 if (matchedImageIds.isEmpty && pendingImageIds.isEmpty) {
                   print('[PictureOption] 선택된 이미지 없음');
-                  ScaffoldMessenger.of(
+                  showAppSnackBar(
                     context,
-                  ).showSnackBar(SnackBar(content: Text('삭제할 사진을 선택하세요.')));
+                    '삭제할 사진을 선택하세요.',
+                    isError: true,
+                  );
                   return;
                 }
 
@@ -859,12 +844,7 @@ class PictureOptionState extends ConsumerWidget {
                 ref.read(selectionModeProvider.notifier).state = false;
 
                 // 4. 성공 메시지 표시
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('사진이 삭제되었습니다.'),
-                    backgroundColor: const Color.fromARGB(212, 56, 212, 121),
-                  ),
-                );
+                showAppSnackBar(context, '사진이 삭제되었습니다.');
 
                 // 5. 백그라운드에서 실제 삭제 API 호출
                 try {
@@ -918,8 +898,10 @@ class PictureOptionState extends ConsumerWidget {
                     ref.invalidate(unmatchedTripImagesProvider);
                     ref.invalidate(pendingDayTripImagesProvider);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('사진 삭제에 실패했습니다. 다시 시도해주세요.')),
+                    showAppSnackBar(
+                      context,
+                      '사진 삭제에 실패했습니다. 다시 시도해주세요.',
+                      isError: true,
                     );
                   }
                 } catch (e, st) {
@@ -929,9 +911,11 @@ class PictureOptionState extends ConsumerWidget {
                   ref.invalidate(unmatchedTripImagesProvider);
                   ref.invalidate(pendingDayTripImagesProvider);
 
-                  ScaffoldMessenger.of(
+                  showAppSnackBar(
                     context,
-                  ).showSnackBar(SnackBar(content: Text('오류: $e')));
+                    '오류: $e',
+                    isError: true,
+                  );
                 }
               }, // 삭제 액션
               child: Column(
@@ -967,17 +951,19 @@ class PictureOptionState extends ConsumerWidget {
               onPressed: () async {
                 final tripState = ref.read(tripProvider).valueOrNull;
                 if (tripState is! TripModel) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('여행 정보를 불러오는 중입니다. 다시 시도해주세요.'),
-                    ),
+                  showAppSnackBar(
+                    context,
+                    '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                    isError: true,
                   );
                   return;
                 }
 
                 if (matchedOrUnmatched.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('즐겨찾기할 사진을 선택하세요.')),
+                  showAppSnackBar(
+                    context,
+                    '즐겨찾기할 사진을 선택하세요.',
+                    isError: true,
                   );
                   return;
                 }
@@ -1019,19 +1005,13 @@ class PictureOptionState extends ConsumerWidget {
                 if (hasError) {
                   ref.invalidate(matchedTripImagesProvider);
                   ref.invalidate(unmatchedTripImagesProvider);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('즐겨찾기 변경에 실패했습니다. 다시 시도해주세요.'),
-                      backgroundColor: Color.fromARGB(229, 226, 81, 65),
-                    ),
+                  showAppSnackBar(
+                    context,
+                    '즐겨찾기 변경에 실패했습니다. 다시 시도해주세요.',
+                    isError: true,
                   );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('즐겨찾기 상태가 변경되었습니다.'),
-                      backgroundColor: Color.fromARGB(212, 56, 212, 121),
-                    ),
-                  );
+                  showAppSnackBar(context, '즐겨찾기 상태가 변경되었습니다.');
                 }
                 ref.read(selectionModeProvider.notifier).state = false;
               },
@@ -1416,9 +1396,11 @@ Future<void> saveImagesToGallery(
   BuildContext context,
 ) async {
   if (urls.isEmpty) {
-    ScaffoldMessenger.of(
+    showAppSnackBar(
       context,
-    ).showSnackBar(SnackBar(content: Text('저장할 이미지를 선택하세요.')));
+      '저장할 이미지를 선택하세요.',
+      isError: true,
+    );
     return;
   }
 
@@ -1454,11 +1436,9 @@ Future<void> saveImagesToGallery(
   }
 
   if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$successCount개의 사진이 갤러리에 저장되었습니다.'),
-        backgroundColor: const Color.fromARGB(212, 56, 212, 121),
-      ),
+    showAppSnackBar(
+      context,
+      '$successCount개의 사진이 갤러리에 저장되었습니다.',
     );
   }
 }
@@ -1729,24 +1709,15 @@ void _showAddNoticeModal(BuildContext context, WidgetRef ref) {
                                             );
 
                                         if (result['success']) {
-                                          ScaffoldMessenger.of(
+                                          showAppSnackBar(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                '공지사항이 성공적으로 등록되었습니다.',
-                                              ),
-                                              backgroundColor: Colors.green,
-                                            ),
+                                            '공지사항이 성공적으로 등록되었습니다.',
                                           );
                                         } else {
-                                          ScaffoldMessenger.of(
+                                          showAppSnackBar(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text('공지사항 등록에 실패했습니다.'),
-                                              backgroundColor: Colors.red,
-                                            ),
+                                            '공지사항 등록에 실패했습니다.',
+                                            isError: true,
                                           );
                                         }
                                         GoRouter.of(context).pop();

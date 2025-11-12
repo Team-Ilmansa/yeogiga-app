@@ -8,6 +8,7 @@ import 'package:yeogiga/notice/model/ping_model.dart';
 import 'package:yeogiga/notice/provider/ping_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class LeaderPingCard extends ConsumerWidget {
   final PingModel ping;
@@ -54,11 +55,10 @@ class LeaderPingCard extends ConsumerWidget {
 
                       if (!result['success']) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('핑 삭제에 실패했습니다.'),
-                              backgroundColor: Colors.red,
-                            ),
+                          showAppSnackBar(
+                            context,
+                            '핑 삭제에 실패했습니다.',
+                            isError: true,
                           );
                         }
                       }

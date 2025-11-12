@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart' hide Headers;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:yeogiga/common/const/data.dart';
 import 'package:yeogiga/common/dio/dio.dart';
+import 'package:yeogiga/common/model/basic_response.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 
 part 'user_me_repository.g.dart';
@@ -21,4 +24,19 @@ abstract class UserMeRepository {
   @GET('/users/my')
   @Headers({'accessToken': 'true'})
   Future<UserResponseModel> getMe();
+
+  // 프로필 이미지 수정
+  @MultiPart()
+  @PUT('/users/profile')
+  @Headers({'accessToken': 'true'})
+  Future<BasicResponse> updateProfileImage({
+    @Part(name: 'image') required File image,
+  });
+
+  // 닉네임 수정
+  @PUT('/users')
+  @Headers({'accessToken': 'true'})
+  Future<BasicResponse> updateNickname({
+    @Body() required Map<String, dynamic> body,
+  });
 }

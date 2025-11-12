@@ -10,6 +10,7 @@ import 'package:yeogiga/trip/provider/gallery_images_provider.dart';
 import 'package:yeogiga/trip/provider/gallery_selection_provider.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
 //ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -193,14 +194,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   }
                                   : () {
                                     if (tripId == null) {
-                                      ScaffoldMessenger.of(
+                                      showAppSnackBar(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
-                                          ),
-                                        ),
+                                        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                                        isError: true,
                                       );
                                       return;
                                     }
@@ -320,14 +317,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   }
                                   : () {
                                     if (tripId == null) {
-                                      ScaffoldMessenger.of(
+                                      showAppSnackBar(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
-                                          ),
-                                        ),
+                                        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                                        isError: true,
                                       );
                                       return;
                                     }
@@ -550,14 +543,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   }
                                   : () {
                                     if (tripId == null) {
-                                      ScaffoldMessenger.of(
+                                      showAppSnackBar(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
-                                          ),
-                                        ),
+                                        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                                        isError: true,
                                       );
                                       return;
                                     }
@@ -677,14 +666,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
                                   }
                                   : () {
                                     if (tripId == null) {
-                                      ScaffoldMessenger.of(
+                                      showAppSnackBar(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
-                                          ),
-                                        ),
+                                        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
+                                        isError: true,
                                       );
                                       return;
                                     }
