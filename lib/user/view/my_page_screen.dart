@@ -12,6 +12,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/user/component/profile_card.dart';
+import 'package:yeogiga/user/component/profile_manage_dialog.dart';
 import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/user/repository/register_repository.dart';
@@ -55,6 +56,14 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
     });
   }
 
+  void _openProfileManageDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const ProfileManageDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userMeProvider);
@@ -81,7 +90,7 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  ProfileCard(), //프로필 카드 부분
+                  ProfileCard(onManageProfile: _openProfileManageDialog), //프로필 카드 부분
                   ///TODO: 아래 즐겨찾기한 사진 리스트 주석은 지우지 말 것
                   // SizedBox(height: 60.h),
                   // Row(

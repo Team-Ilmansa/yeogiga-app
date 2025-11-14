@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 /// 딥링크로 여행 초대 링크를 클릭했을 때 처리하는 화면
 /// 자동으로 joinTrip() API를 호출하고 결과에 따라 화면 이동
@@ -46,20 +47,7 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
 
         router.go('/tripDetailScreen/${widget.tripId}');
 
-        // 성공 메시지 표시
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('여행에 참가했습니다!'),
-            backgroundColor: Color(0xFF38D479),
-            duration: Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.all(5.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            elevation: 0,
-          ),
-        );
+        showAppSnackBar(context, '여행에 참가했습니다!');
       } else {
         // 실패
         _showErrorAndGoHome('여행 참가에 실패했습니다.');
@@ -84,19 +72,7 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
 
           router.go('/tripDetailScreen/${widget.tripId}');
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('이미 참가 중인 여행입니다.'),
-              backgroundColor: Color(0xFF8287FF),
-              duration: Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.all(5.w),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              elevation: 0,
-            ),
-          );
+          showAppSnackBar(context, '이미 참가 중인 여행입니다.');
           return;
         }
       } else if (errorStr.contains('존재하지')) {
@@ -113,19 +89,11 @@ class _TripInviteHandlerState extends ConsumerState<TripInviteHandler> {
   void _showErrorAndGoHome(String message) {
     if (!mounted) return;
 
-    // 에러 스낵바 표시
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Color(0xFFE25141),
-        duration: Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.all(5.w),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14.r),
-        ),
-        elevation: 0,
-      ),
+    showAppSnackBar(
+      context,
+      message,
+      isError: true,
+      duration: const Duration(seconds: 3),
     );
 
     // 1초 후 홈으로 이동

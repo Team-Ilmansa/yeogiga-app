@@ -10,6 +10,7 @@ import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 // 방장 전용 메뉴
 class TripMoreMenuSheetLeader extends ConsumerWidget {
@@ -187,23 +188,12 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                           .read(tripProvider.notifier)
                           .updateTripTitle(title: result);
                       // 수정: async gap 이후 context 사용 시 null 체크 추가 (StatelessWidget)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success ? '여행 이름이 수정되었습니다.' : '여행 이름 수정에 실패했습니다.',
-                          ),
-                          backgroundColor:
-                              success
-                                  ? const Color.fromARGB(212, 56, 212, 121)
-                                  : const Color.fromARGB(229, 226, 81, 65),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showAppSnackBar(
+                        context,
+                        success
+                            ? '여행 이름이 수정되었습니다.'
+                            : '여행 이름 수정에 실패했습니다.',
+                        isError: !success,
                       );
                       GoRouter.of(context).pop();
                     } catch (e) {
@@ -215,24 +205,10 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                       } else {
                         errorMsg = e.toString();
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '여행 이름 수정에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showAppSnackBar(
+                        context,
+                        '여행 이름 수정에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
+                        isError: true,
                       );
                       GoRouter.of(context).pop();
                     }
@@ -287,27 +263,11 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     }
 
                     // 스낵바 표시
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success ? '여행이 삭제되었습니다.' : '여행 삭제에 실패했습니다.',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        backgroundColor:
-                            success
-                                ? const Color.fromARGB(212, 56, 212, 121)
-                                : const Color.fromARGB(229, 226, 81, 65),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                        duration: const Duration(seconds: 2),
-                      ),
+                    scaffoldMessenger.showAppSnack(
+                      success
+                          ? '여행이 삭제되었습니다.'
+                          : '여행 삭제에 실패했습니다.',
+                      isError: !success,
                     );
                   } catch (e) {
                     String errorMsg = '';
@@ -319,24 +279,9 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                     }
 
                     // 스낵바 표시
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '여행 삭제에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                        duration: const Duration(seconds: 2),
-                      ),
+                    scaffoldMessenger.showAppSnack(
+                      '여행 삭제에 실패했습니다${errorMsg.isNotEmpty ? "\n$errorMsg" : ""}',
+                      isError: true,
                     );
                   }
                 },
@@ -351,18 +296,10 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   // 여행 정보 가져오기
                   final tripState = ref.read(tripProvider).valueOrNull;
                   if (tripState is! TripModel) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('여행 정보를 불러올 수 없습니다.'),
-                        backgroundColor: Color(0xFFE25141),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
+                    showAppSnackBar(
+                      context,
+                      '여행 정보를 불러올 수 없습니다.',
+                      isError: true,
                     );
                     return;
                   }
@@ -420,18 +357,10 @@ class TripMoreMenuSheetLeader extends ConsumerWidget {
                   } catch (error) {
                     print('카카오톡 공유 실패: $error');
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('공유에 실패했습니다.'),
-                        backgroundColor: Color(0xFFE25141),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
+                    showAppSnackBar(
+                      context,
+                      '공유에 실패했습니다.',
+                      isError: true,
                     );
                   }
                 },
@@ -651,27 +580,11 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                       }
 
                       // 스낵바 표시
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success ? '여행에서 탈퇴했습니다.' : '탈퇴에 실패했습니다.',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor:
-                              success
-                                  ? const Color.fromARGB(212, 56, 212, 121)
-                                  : const Color.fromARGB(229, 226, 81, 65),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      scaffoldMessenger.showAppSnack(
+                        success
+                            ? '여행에서 탈퇴했습니다.'
+                            : '탈퇴에 실패했습니다.',
+                        isError: !success,
                       );
                     } catch (e) {
                       String errorMsg = '';
@@ -684,29 +597,9 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                       }
 
                       // 스낵바 표시
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            errorMsg,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          backgroundColor: const Color.fromARGB(
-                            229,
-                            226,
-                            81,
-                            65,
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          margin: EdgeInsets.all(5.w),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          elevation: 0,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      scaffoldMessenger.showAppSnack(
+                        errorMsg,
+                        isError: true,
                       );
                     }
                   }
@@ -722,18 +615,10 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                   // 여행 정보 가져오기
                   final tripState = ref.read(tripProvider).valueOrNull;
                   if (tripState is! TripModel) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('여행 정보를 불러올 수 없습니다.'),
-                        backgroundColor: Color(0xFFE25141),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
+                    showAppSnackBar(
+                      context,
+                      '여행 정보를 불러올 수 없습니다.',
+                      isError: true,
                     );
                     return;
                   }
@@ -791,18 +676,10 @@ class TripMoreMenuSheetMember extends ConsumerWidget {
                   } catch (error) {
                     print('카카오톡 공유 실패: $error');
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('공유에 실패했습니다.'),
-                        backgroundColor: Color(0xFFE25141),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.all(5.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                        ),
-                        elevation: 0,
-                      ),
+                    showAppSnackBar(
+                      context,
+                      '공유에 실패했습니다.',
+                      isError: true,
                     );
                   }
                 },

@@ -644,6 +644,8 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
           leading:
               currentStep > 0
                   ? Padding(

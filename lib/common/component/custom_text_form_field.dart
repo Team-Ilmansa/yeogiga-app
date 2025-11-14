@@ -111,7 +111,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         contentPadding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
         hintText: widget.hintText,
         errorText: widget.errorText,
-        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
+        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14.sp),
         fillColor: Colors.grey[200],
         filled: true,
         border: baseBorder,

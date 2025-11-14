@@ -140,15 +140,15 @@ class TripCard extends StatelessWidget {
                   children: [
                     SvgPicture.asset(
                       'asset/icon/user-02.svg',
-                      width: 15.w,
-                      height: 15.h,
+                      width: 18.w,
+                      height: 18.h,
                       color: Colors.white,
                     ),
-                    SizedBox(width: 4.w),
+                    SizedBox(width: 8.w),
                     if (members.isEmpty)
                       Icon(
                         Icons.person_outline,
-                        size: 16.sp,
+                        size: 18.sp,
                         color: Colors.white,
                       )
                     else ...[
@@ -157,11 +157,11 @@ class TripCard extends StatelessWidget {
                             member.imageUrl != null &&
                             member.imageUrl!.isNotEmpty;
                         return Padding(
-                          padding: EdgeInsets.only(right: 3.w),
+                          padding: EdgeInsets.only(right: 4.w),
                           child: ClipOval(
                             child: SizedBox(
-                              width: 16.w,
-                              height: 16.w,
+                              width: 18.w,
+                              height: 18.w,
                               child:
                                   hasImage
                                       ? Image.network(
