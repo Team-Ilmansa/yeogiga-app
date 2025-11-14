@@ -115,7 +115,7 @@ MatchedImage _$MatchedImageFromJson(Map<String, dynamic> json) => MatchedImage(
   url: json['url'] as String,
   latitude: (json['latitude'] as num).toDouble(),
   longitude: (json['longitude'] as num).toDouble(),
-  date: DateTime.parse(json['date'] as String),
+  date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
   favorite: json['favorite'] as bool,
 );
 
@@ -125,6 +125,6 @@ Map<String, dynamic> _$MatchedImageToJson(MatchedImage instance) =>
       'url': instance.url,
       'latitude': instance.latitude,
       'longitude': instance.longitude,
-      'date': instance.date.toIso8601String(),
+      'date': instance.date?.toIso8601String(),
       'favorite': instance.favorite,
     };

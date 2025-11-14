@@ -13,20 +13,31 @@ import 'package:yeogiga/trip_image/repository/matched_trip_image_repository.dart
 import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/component/detail_screen/bottom_button_states.dart';
+import 'package:yeogiga/trip_image/view/move_trip_image_view.dart';
 import 'package:yeogiga/common/utils/snackbar_helper.dart';
 
 class TripImageMoreMenuSheet extends ConsumerWidget {
   final GalleryImage currentImage;
   final VoidCallback onImageDeleted;
+  final Future<void> Function()? onMoveImageTap;
 
   const TripImageMoreMenuSheet({
     super.key,
     required this.currentImage,
     required this.onImageDeleted,
+    this.onMoveImageTap,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final showMoveOption =
+        currentImage.type != GalleryImageType.pending &&
+        ((currentImage.type == GalleryImageType.matched &&
+                currentImage.tripDayPlaceId != null &&
+                currentImage.placeId != null) ||
+            (currentImage.type == GalleryImageType.unmatched &&
+                currentImage.tripDayPlaceId != null));
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => GoRouter.of(context).pop(),
@@ -34,7 +45,7 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          height: 329.h,
+          height: showMoveOption ? 329.h : 265.h,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -84,13 +95,38 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
                   }
                 },
               ),
-              MenuItem(
-                svgAsset: 'asset/icon/menu/spot_black.svg',
-                text: '위치 옮기기',
-                onTap: () {
-                  GoRouter.of(context).pop();
-                },
-              ),
+              if (showMoveOption)
+                MenuItem(
+                  svgAsset: 'asset/icon/menu/spot_black.svg',
+                  text: '위치 옮기기',
+                  onTap: () async {
+                    if (currentImage.type == GalleryImageType.matched &&
+                        (currentImage.placeId == null ||
+                            currentImage.tripDayPlaceId == null)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('이미지 정보가 올바르지 않습니다.')),
+                      );
+                      return;
+                    }
+                    if (currentImage.type == GalleryImageType.unmatched &&
+                        currentImage.tripDayPlaceId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('이미지 정보가 올바르지 않습니다.')),
+                      );
+                      return;
+                    }
+                    GoRouter.of(context).pop();
+                    if (onMoveImageTap != null) {
+                      await onMoveImageTap!();
+                    } else {
+                      if (!context.mounted) return;
+                      await context.push(
+                        '/moveTripImageView',
+                        extra: MoveTripImageArgs(image: currentImage),
+                      );
+                    }
+                  },
+                ),
               MenuItem(
                 svgAsset: 'asset/icon/menu/delete_edit.svg',
                 text: '삭제하기',
@@ -148,15 +184,16 @@ class TripImageMoreMenuSheet extends ConsumerWidget {
                           ref.invalidate(matchedTripImagesProvider);
                           ref.invalidate(unmatchedTripImagesProvider);
                         }
-                      } else if (
-                          currentImage.type == GalleryImageType.pending) {
+                      } else if (currentImage.type ==
+                          GalleryImageType.pending) {
                         final tripDayPlaceId = currentImage.tripDayPlaceId;
                         if (tripDayPlaceId == null) {
                           throw Exception('임시 저장 이미지 정보가 올바르지 않습니다.');
                         }
 
-                        final pendingNotifier =
-                            ref.read(pendingDayTripImagesProvider.notifier);
+                        final pendingNotifier = ref.read(
+                          pendingDayTripImagesProvider.notifier,
+                        );
                         pendingNotifier.optimisticRemove([imageId]);
 
                         success = await pendingNotifier.deleteImages(

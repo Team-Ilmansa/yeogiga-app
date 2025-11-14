@@ -458,6 +458,8 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   String? _currentPlaceName;
   String? _currentTripDayPlaceId;
   String? _currentPlaceId;
+  ProviderSubscription<AsyncValue<List<MatchedDayTripPlaceImage>>>?
+      _matchedImagesSubscription;
 
   @override
   void didUpdateWidget(covariant _EndTripNaverMap oldWidget) {
@@ -499,6 +501,28 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
         }
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _matchedImagesSubscription =
+        ref.listenManual<AsyncValue<List<MatchedDayTripPlaceImage>>>(
+      matchedTripImagesProvider,
+      (previous, next) {
+        final placeId = _currentPlaceId;
+        if (!mounted || placeId == null || !widget.isImageMode) return;
+        if (next is AsyncData<List<MatchedDayTripPlaceImage>>) {
+          _showImageMarkers(placeId);
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _matchedImagesSubscription?.close();
+    super.dispose();
   }
 
   // 특정 day의 마커 업데이트

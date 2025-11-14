@@ -13,6 +13,8 @@ class CategoryIconUtil {
         return 'asset/icon/category transport.svg';
       case '기타':
         return 'asset/icon/category etc.svg';
+      case '매칭해제':
+        return 'asset/icon/category real etc.svg';
       default:
         return 'asset/icon/category icon.svg'; // 기본값
     }

@@ -90,4 +90,93 @@ class MatchedTripImageRepository {
       return false;
     }
   }
+
+  // matched -> 다른 날짜 목적지의 matched
+  Future<void> moveMatchedImageToDifferentDay({
+    required int tripId,
+    required String fromTripDayPlaceId,
+    required String fromPlaceId,
+    required String toTripDayPlaceId,
+    required String toPlaceId,
+    required String imageId,
+  }) async {
+    try {
+      await dio.patch(
+        '$baseUrl/trip/$tripId/images/move',
+        data: {
+          'fromTripDayPlaceId': fromTripDayPlaceId,
+          'fromPlaceId': fromPlaceId,
+          'toTripDayPlaceId': toTripDayPlaceId,
+          'toPlaceId': toPlaceId,
+          'imageId': imageId,
+        },
+        options: Options(headers: {'accessToken': 'true'}),
+      );
+    } on DioError catch (e) {
+      final msg = e.response?.data['message'] ?? e.message;
+      throw msg;
+    }
+  }
+
+  // matched -> 같은 날짜 목적지의 matched
+  Future<void> moveMatchedImageSameDay({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String fromPlaceId,
+    required String toPlaceId,
+    required String imageId,
+  }) async {
+    try {
+      await dio.patch(
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images/move',
+        data: {
+          'fromPlaceId': fromPlaceId,
+          'toPlaceId': toPlaceId,
+          'imageId': imageId,
+        },
+        options: Options(headers: {'accessToken': 'true'}),
+      );
+    } on DioError catch (e) {
+      final msg = e.response?.data['message'] ?? e.message;
+      throw msg;
+    }
+  }
+
+  // matched -> 같은 날짜의 unmatched
+  Future<void> moveMatchedImageToUnmatched({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String placeId,
+    required String imageId,
+  }) async {
+    try {
+      await dio.patch(
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images/unmatch',
+        data: {'placeId': placeId, 'imageId': imageId},
+        options: Options(headers: {'accessToken': 'true'}),
+      );
+    } on DioError catch (e) {
+      final msg = e.response?.data['message'] ?? e.message;
+      throw msg;
+    }
+  }
+
+  // unmatched -> 같은 날짜 목적지의 matched
+  Future<void> moveUnmatchedImageToMatched({
+    required int tripId,
+    required String tripDayPlaceId,
+    required String placeId,
+    required String imageId,
+  }) async {
+    try {
+      await dio.patch(
+        '$baseUrl/trip/$tripId/day-place/$tripDayPlaceId/images/rematch',
+        data: {'placeId': placeId, 'imageId': imageId},
+        options: Options(headers: {'accessToken': 'true'}),
+      );
+    } on DioError catch (e) {
+      final msg = e.response?.data['message'] ?? e.message;
+      throw msg;
+    }
+  }
 }
