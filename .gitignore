@@ -57,6 +57,7 @@ app.*.map.json
 # 기타 비밀 정보
 .env
 *.pem
+/lib/firebase_options.dart
 
 CLAUDE.md
 AGENTS.md

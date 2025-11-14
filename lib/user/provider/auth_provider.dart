@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/common/provider/permission_provider.dart';
+import 'package:yeogiga/common/view/permission_request_screen.dart';
 import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/notice/view/notice_list_screen.dart';
 import 'package:yeogiga/schedule/screen/naver_place_map_screen.dart';
@@ -38,6 +40,11 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+    ref.listen<AsyncValue<bool>>(permissionStatusProvider, (previous, next) {
+      if (previous != next) {
+        notifyListeners();
+      }
+    });
   }
 
   List<GoRoute> get routes => [
@@ -56,6 +63,11 @@ class AuthProvider extends ChangeNotifier {
       path: '/splash',
       name: SplashScreen.routeName,
       builder: (_, __) => SplashScreen(),
+    ),
+    GoRoute(
+      path: '/permissions',
+      name: PermissionRequestScreen.routeName,
+      builder: (_, __) => const PermissionRequestScreen(),
     ),
     GoRoute(
       path: '/login',
@@ -185,6 +197,33 @@ class AuthProvider extends ChangeNotifier {
   // 홈 스크린으로 보내줄지 확인하는 과정이 필요하다.
   String? redirectLogic(BuildContext context, GoRouterState state) {
     final UserModelBase? user = ref.read(userMeProvider);
+    final permissionStatus = ref.read(permissionStatusProvider);
+    final bool? permissionGranted = permissionStatus.maybeWhen(
+      data: (value) => value,
+      orElse: () => null,
+    );
+    final bool isPermissionError = permissionStatus is AsyncError;
+    final bool onPermissionScreen = state.matchedLocation == '/permissions';
+    final bool onSplash = state.matchedLocation == '/splash';
+
+    if (isPermissionError || permissionGranted == false) {
+      if (onPermissionScreen) {
+        ref.invalidate(permissionStatusProvider);
+        return null;
+      }
+      return '/permissions';
+    }
+
+    if (permissionGranted == null) {
+      if (!onSplash && !onPermissionScreen) {
+        return '/splash';
+      }
+      return null;
+    }
+
+    if (permissionGranted && onPermissionScreen) {
+      return '/login';
+    }
 
     if (state.location == '/tripImageView') {
       return null;

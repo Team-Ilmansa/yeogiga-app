@@ -1,14 +1,19 @@
+import 'dart:async';
+import 'dart:math'; // Added dart:math import for asin function
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yeogiga/common/provider/permission_provider.dart';
+import 'package:yeogiga/common/service/fcm_background_handler.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
-import 'dart:math'; // Added dart:math import for asin function
+import 'package:yeogiga/common/view/permission_request_screen.dart';
+import 'package:yeogiga/common/view/splash_screen.dart';
 import 'package:yeogiga/main_trip/view/home_screen.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 import 'package:yeogiga/trip/provider/trip_provider.dart';
-import 'package:yeogiga/user/view/my_page.dart';
 import 'package:yeogiga/trip/component/create_trip/create_trip_dialog.dart';
 import 'package:yeogiga/trip_list/provider/trip_list_provider.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
@@ -27,14 +32,19 @@ class ScreenWrapper extends ConsumerStatefulWidget {
   ConsumerState<ScreenWrapper> createState() => _ScreenWrapperState();
 }
 
-class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
+class _ScreenWrapperState extends ConsumerState<ScreenWrapper>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   late final PageController _pageController;
+  Timer? _locationSyncTimer;
+  ProviderSubscription<AsyncValue<bool>>? _permissionSubscription;
+  bool _hasPermission = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // ScreenWrapper 진입 시, 로그인/유저정보(mainTripFutureProvider, userMeProvider) 제외 모든 provider refresh
     Future.microtask(() {
       ref.refresh(tripProvider);
@@ -48,10 +58,153 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper> {
     });
 
     _pageController = PageController(initialPage: _selectedIndex);
+
+    _permissionSubscription = ref.listenManual<AsyncValue<bool>>(
+      permissionStatusProvider,
+      (previous, next) {
+        final granted = next.valueOrNull ?? false;
+        _hasPermission = granted;
+        if (granted) {
+          _startForegroundLocationSync();
+        } else {
+          _stopForegroundLocationSync();
+        }
+      },
+      fireImmediately: true,
+    );
+  }
+
+  void _startForegroundLocationSync() {
+    if (!_hasPermission) return;
+    _locationSyncTimer?.cancel();
+    _syncLocationOnce();
+    _locationSyncTimer = Timer.periodic(
+      const Duration(minutes: 5),
+      (_) => _syncLocationOnce(),
+    );
+  }
+
+  void _stopForegroundLocationSync() {
+    _locationSyncTimer?.cancel();
+    _locationSyncTimer = null;
+  }
+
+  Future<void> _syncLocationOnce() async {
+    if (!mounted || !_hasPermission) return;
+    try {
+      final container = ProviderScope.containerOf(context, listen: false);
+      await syncTripLocations(container);
+    } catch (e) {
+      debugPrint('[LocationSync] Foreground sync 실패: $e');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      if (_hasPermission) {
+        _startForegroundLocationSync();
+      }
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      _stopForegroundLocationSync();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopForegroundLocationSync();
+    _permissionSubscription?.close();
+    _permissionSubscription = null;
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final permissionStatus = ref.watch(permissionStatusProvider);
+
+    return permissionStatus.when(
+      loading:
+          () => const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (error, _) => PermissionRequestScreen(
+            initialError: '권한 상태를 확인할 수 없습니다. 다시 시도해주세요.',
+          ),
+      data: (granted) {
+        if (!granted) {
+          return const PermissionRequestScreen();
+        }
+
+        final mainTripState = ref.watch(mainTripFutureProvider);
+        return mainTripState.when(
+          loading: () => const SplashScreen(),
+          error: (error, stackTrace) =>
+              _buildInitialErrorView(error, stackTrace),
+          data: (_) => _buildMainScaffold(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildInitialErrorView(Object error, StackTrace stackTrace) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '홈 정보를 불러오지 못했습니다.\n네트워크 상태를 확인한 뒤 다시 시도해주세요.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  color: const Color(0xff5f5f5f),
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 18.h),
+              ElevatedButton(
+                onPressed: () => ref.refresh(mainTripFutureProvider),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff8287ff),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 12.h,
+                  ),
+                  child: Text(
+                    '다시 시도',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainScaffold(BuildContext context) {
     return SafeArea(
       top: false,
       bottom: shouldUseSafeAreaBottom(context),
