@@ -202,89 +202,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                       );
                     },
                   ),
+                  SizedBox(height: 60.h),
                   //TODO: 디버그시?
-                  Column(
-                    children: [
-                      SizedBox(height: 20.h),
-                      // ✅ FCM 테스트 버튼
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            print('[FCM Test] 버튼 클릭');
-                            try {
-                              // Firebase에서 직접 FCM 토큰 가져오기 (APNs 토큰 대기 포함)
-                              final fcmToken =
-                                  await fetchFcmTokenWithApnsWait();
+                  // Column(
+                  //   children: [
+                  //     SizedBox(height: 20.h),
+                  //     // ✅ FCM 테스트 버튼
+                  //     Padding(
+                  //       padding: EdgeInsets.symmetric(horizontal: 14.w),
+                  //       child: ElevatedButton(
+                  //         onPressed: () async {
+                  //           print('[FCM Test] 버튼 클릭');
+                  //           try {
+                  //             // Firebase에서 직접 FCM 토큰 가져오기 (APNs 토큰 대기 포함)
+                  //             final fcmToken =
+                  //                 await fetchFcmTokenWithApnsWait();
 
-                              if (fcmToken == null || fcmToken.isEmpty) {
-                                print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
-                                showAppSnackBar(
-                                  context,
-                                  'FCM 토큰을 가져올 수 없습니다.',
-                                  isError: true,
-                                );
-                                return;
-                              }
+                  //             if (fcmToken == null || fcmToken.isEmpty) {
+                  //               print('[FCM Test] FCM 토큰을 가져올 수 없습니다.');
+                  //               showAppSnackBar(
+                  //                 context,
+                  //                 'FCM 토큰을 가져올 수 없습니다.',
+                  //                 isError: true,
+                  //               );
+                  //               return;
+                  //             }
 
-                              print('[FCM Test] FCM Token: $fcmToken');
-                              print(
-                                '[FCM Test] 토큰 앞부분: ${fcmToken.substring(0, 20)}...',
-                              );
+                  //             print('[FCM Test] FCM Token: $fcmToken');
+                  //             print(
+                  //               '[FCM Test] 토큰 앞부분: ${fcmToken.substring(0, 20)}...',
+                  //             );
 
-                              // API 호출
-                              final dio = ref.watch(dioProvider);
-                              final response = await dio.get(
-                                'https://api.yeogiga.com/fcm-test',
-                                queryParameters: {'token': fcmToken},
-                              );
+                  //             // API 호출
+                  //             final dio = ref.watch(dioProvider);
+                  //             final response = await dio.get(
+                  //               'https://api.yeogiga.com/fcm-test',
+                  //               queryParameters: {'token': fcmToken},
+                  //             );
 
-                              print(
-                                '[FCM Test] API 응답: ${response.statusCode}',
-                              );
-                              print('[FCM Test] 응답 데이터: ${response.data}');
+                  //             print(
+                  //               '[FCM Test] API 응답: ${response.statusCode}',
+                  //             );
+                  //             print('[FCM Test] 응답 데이터: ${response.data}');
 
-                              if (context.mounted) {
-                                showAppSnackBar(
-                                  context,
-                                  'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
-                                  duration: const Duration(seconds: 3),
-                                );
-                              }
-                            } catch (e, st) {
-                              print('[FCM Test] 오류 발생: $e');
-                              print('[FCM Test] Stack trace: $st');
-                              if (context.mounted) {
-                                showAppSnackBar(
-                                  context,
-                                  '오류: $e',
-                                  isError: true,
-                                  duration: const Duration(seconds: 3),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF8287FF),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'FCM 테스트',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 40.h),
-                    ],
-                  ),
+                  //             if (context.mounted) {
+                  //               showAppSnackBar(
+                  //                 context,
+                  //                 'FCM 테스트 전송 완료!\n토큰: ${fcmToken.substring(0, 20)}...',
+                  //                 duration: const Duration(seconds: 3),
+                  //               );
+                  //             }
+                  //           } catch (e, st) {
+                  //             print('[FCM Test] 오류 발생: $e');
+                  //             print('[FCM Test] Stack trace: $st');
+                  //             if (context.mounted) {
+                  //               showAppSnackBar(
+                  //                 context,
+                  //                 '오류: $e',
+                  //                 isError: true,
+                  //                 duration: const Duration(seconds: 3),
+                  //               );
+                  //             }
+                  //           }
+                  //         },
+                  //         style: ElevatedButton.styleFrom(
+                  //           backgroundColor: Color(0xFF8287FF),
+                  //           foregroundColor: Colors.white,
+                  //           padding: EdgeInsets.symmetric(vertical: 16.h),
+                  //           shape: RoundedRectangleBorder(
+                  //             borderRadius: BorderRadius.circular(12.r),
+                  //           ),
+                  //           elevation: 0,
+                  //         ),
+                  //         child: Text(
+                  //           'FCM 테스트',
+                  //           style: TextStyle(
+                  //             fontSize: 16.sp,
+                  //             fontWeight: FontWeight.w600,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //
+                  //   ],
+                  // ),
                 ],
               ),
             ),
