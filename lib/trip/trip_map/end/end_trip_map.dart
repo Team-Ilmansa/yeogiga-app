@@ -40,7 +40,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   final GlobalKey<_EndTripNaverMapState> _mapKey =
       GlobalKey<_EndTripNaverMapState>();
   static const List<double> _sheetSnapPoints = [0.2, 0.4, 0.8];
-  static const double _midSnapPoint = 0.2;
+  static const double _midSnapPoint = 0.8;
 
   // Optimistic UI: 이미지 마커 즉시 제거 (외부에서 호출 가능)
   Future<void> removeImageMarkers(List<String> imageIds) async {
@@ -350,6 +350,10 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                   builder: (context, scrollController) {
                     return EndTripBottomSheet(
                       scrollController: scrollController,
+                      sheetController: _sheetController,
+                      snapSizes: _sheetSnapPoints,
+                      minChildSize: _sheetSnapPoints.first,
+                      maxChildSize: _sheetSnapPoints.last,
                       days: days,
                       selectedDayIndex: selectedDayIndex,
                       focusedPlaceId: _selectedPlaceId,
@@ -1118,6 +1122,10 @@ Widget? _getPictureOptionBar(WidgetRef ref, int selectedDayIndex) {
 
 class EndTripBottomSheet extends ConsumerStatefulWidget {
   final ScrollController scrollController;
+  final DraggableScrollableController sheetController;
+  final List<double> snapSizes;
+  final double minChildSize;
+  final double maxChildSize;
   final List<String> days;
   final int selectedDayIndex;
   final String? focusedPlaceId;
@@ -1130,6 +1138,10 @@ class EndTripBottomSheet extends ConsumerStatefulWidget {
   const EndTripBottomSheet({
     Key? key,
     required this.scrollController,
+    required this.sheetController,
+    required this.snapSizes,
+    required this.minChildSize,
+    required this.maxChildSize,
     required this.days,
     required this.selectedDayIndex,
     this.focusedPlaceId,
@@ -1160,8 +1172,67 @@ class _EndTripBottomSheetState extends ConsumerState<EndTripBottomSheet> {
     }
   }
 
+  void _onHandleDragUpdate(DragUpdateDetails details) {
+    if (!widget.sheetController.isAttached) return;
+    final delta = details.primaryDelta;
+    if (delta == null) return;
+    final parentHeight = widget.sheetController.sizeToPixels(1);
+    if (parentHeight == 0) return;
+    final deltaSize = delta / parentHeight;
+    final target = (widget.sheetController.size - deltaSize)
+        .clamp(widget.minChildSize, widget.maxChildSize);
+    widget.sheetController.jumpTo(target);
+  }
+
+  void _onHandleDragEnd(DragEndDetails details) {
+    if (!widget.sheetController.isAttached) return;
+    final currentSize = widget.sheetController.size;
+    final target = _resolveSnapTarget(
+      currentSize,
+      details.primaryVelocity,
+    );
+    widget.sheetController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
+  double _resolveSnapTarget(double currentSize, double? velocity) {
+    if (widget.snapSizes.isEmpty) {
+      return currentSize.clamp(widget.minChildSize, widget.maxChildSize);
+    }
+    if (velocity != null) {
+      if (velocity < -200) {
+        // Dragging up → go to next larger snap
+        for (final snap in widget.snapSizes) {
+          if (snap > currentSize) return snap;
+        }
+        return widget.snapSizes.last;
+      } else if (velocity > 200) {
+        // Dragging down → go to next smaller snap
+        for (final snap in widget.snapSizes.reversed) {
+          if (snap < currentSize) return snap;
+        }
+        return widget.snapSizes.first;
+      }
+    }
+    double closest = widget.snapSizes.first;
+    double minDiff = (currentSize - closest).abs();
+    for (final snap in widget.snapSizes) {
+      final diff = (currentSize - snap).abs();
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = snap;
+      }
+    }
+    return closest;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final placeListSection = widget.buildPlaceList?.call();
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1170,54 +1241,62 @@ class _EndTripBottomSheetState extends ConsumerState<EndTripBottomSheet> {
           BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 3),
         ],
       ),
-      child: ListView(
-        controller: widget.scrollController,
-        physics: const ClampingScrollPhysics(),
-        padding: EdgeInsets.zero,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
         children: [
-          Column(
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
-                  child: Container(
-                    width: 99.w,
-                    height: 5.h,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffe1e1e1),
-                      borderRadius: BorderRadius.circular(2.r),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: _onHandleDragUpdate,
+            onVerticalDragEnd: _onHandleDragEnd,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 9.h, bottom: 12.h),
+                    child: Container(
+                      width: 99.w,
+                      height: 5.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffe1e1e1),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              DaySelector(
-                itemCount: widget.days.length + 1,
-                selectedIndex: _selectedDayIndex,
-                onChanged: (index) {
-                  if (mounted) {
-                    setState(() {
-                      _selectedDayIndex = index;
-                    });
-                  }
-                  widget.onDayChanged(index);
-                },
-              ),
-              if (widget.buildPlaceList != null) widget.buildPlaceList!(),
-              GalleryTab(
-                sliverMode: false,
-                showDaySelector: false,
-                selectedDayIndex: _selectedDayIndex,
-                focusedPlaceId: widget.focusedPlaceId,
-                onDayIndexChanged: (index) {
-                  if (mounted) {
-                    setState(() {
-                      _selectedDayIndex = index;
-                    });
-                  }
-                  widget.onDayChanged(index);
-                },
-              ),
-            ],
+                DaySelector(
+                  itemCount: widget.days.length + 1,
+                  selectedIndex: _selectedDayIndex,
+                  onChanged: (index) {
+                    if (mounted) {
+                      setState(() {
+                        _selectedDayIndex = index;
+                      });
+                    }
+                    widget.onDayChanged(index);
+                  },
+                ),
+                if (placeListSection != null) placeListSection,
+              ],
+            ),
+          ),
+          Expanded(
+            child: GalleryTab(
+              sliverMode: false,
+              showDaySelector: false,
+              selectedDayIndex: _selectedDayIndex,
+              focusedPlaceId: widget.focusedPlaceId,
+              scrollController: widget.scrollController,
+              scrollPhysics: const ClampingScrollPhysics(),
+              onDayIndexChanged: (index) {
+                if (mounted) {
+                  setState(() {
+                    _selectedDayIndex = index;
+                  });
+                }
+                widget.onDayChanged(index);
+              },
+            ),
           ),
         ],
       ),
