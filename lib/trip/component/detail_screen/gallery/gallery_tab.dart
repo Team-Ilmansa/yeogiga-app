@@ -21,6 +21,9 @@ class GalleryTab extends ConsumerStatefulWidget {
   final bool showDaySelector;
   final int selectedDayIndex;
   final ValueChanged<int> onDayIndexChanged;
+  final String? focusedPlaceId;
+  final ScrollController? scrollController;
+  final ScrollPhysics? scrollPhysics;
 
   GalleryTab({
     super.key,
@@ -28,12 +31,14 @@ class GalleryTab extends ConsumerStatefulWidget {
     this.showDaySelector = true,
     required this.selectedDayIndex,
     required this.onDayIndexChanged,
+    this.focusedPlaceId,
+    this.scrollController,
+    this.scrollPhysics,
   });
 
   @override
   ConsumerState<GalleryTab> createState() => _GalleryTabState();
 }
-
 class _GalleryTabState extends ConsumerState<GalleryTab> {
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,11 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     final selectedDay = widget.selectedDayIndex;
 
     // ✅ 새로운 computed provider 사용 - 이미지 분류 로직이 자동 캐싱됨
-    final allImages = ref.watch(filteredGalleryImagesProvider(selectedDay));
+    final galleryFilter = GalleryFilter(
+      selectedDay: selectedDay,
+      placeId: widget.focusedPlaceId,
+    );
+    final allImages = ref.watch(filteredGalleryImagesProvider(galleryFilter));
     final allPendingImages = ref.watch(
       filteredPendingImagesProvider(selectedDay),
     );
@@ -415,6 +424,10 @@ class _GalleryTabState extends ConsumerState<GalleryTab> {
     // end trip map에서 보여줄거 (일반버전기반)
     else {
       return SingleChildScrollView(
+        controller: widget.scrollController,
+        primary: widget.scrollController == null,
+        physics:
+            widget.scrollPhysics ?? const BouncingScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.only(top: 14.h, bottom: 18.h),
           child: Column(

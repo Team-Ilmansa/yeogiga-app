@@ -725,7 +725,9 @@ class PictureOptionState extends ConsumerWidget {
     // ✅ provider에서 직접 선택된 이미지 정보 가져오기
     final selectedIndices = ref.watch(gallerySelectionProvider);
     final allImages = ref.watch(
-      filteredGalleryImagesProvider(selectedDayIndex),
+      filteredGalleryImagesProvider(
+        GalleryFilter(selectedDay: selectedDayIndex),
+      ),
     );
     final allPendingImages = ref.watch(
       filteredPendingImagesProvider(selectedDayIndex),

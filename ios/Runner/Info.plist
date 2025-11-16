@@ -6,7 +6,9 @@
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>이 앱이 현재 위치 정보를 사용하도록 허용해주세요.</string>
 		<key>NSLocationAlwaysUsageDescription</key>
-		<string>이 앱이 항상 위치 정보를 사용하도록 허용해주세요.</string>
+		<string>여행 중 팀원들과 위치를 공유하기 위해 항상 허용이 필요해요.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>여행 중 팀원들과 위치를 공유하기 위해 항상 허용이 필요해요.</string>
 		<key>NSLocalNetworkUsageDescription</key>
 		<string>이 앱은 개발 및 디버깅을 위해 로컬 네트워크에 접근합니다.</string>
 		<key>NSCameraUsageDescription</key>
@@ -53,6 +55,10 @@
 			<string>UIInterfaceOrientationPortraitUpsideDown</string>
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>location</string>
 		</array>
 		<key>CFBundleURLTypes</key>
 		<array>
