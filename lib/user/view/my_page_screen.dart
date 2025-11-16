@@ -90,7 +90,9 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  ProfileCard(onManageProfile: _openProfileManageDialog), //프로필 카드 부분
+                  ProfileCard(
+                    onManageProfile: _openProfileManageDialog,
+                  ), //프로필 카드 부분
                   ///TODO: 아래 즐겨찾기한 사진 리스트 주석은 지우지 말 것
                   // SizedBox(height: 60.h),
                   // Row(
@@ -214,25 +216,25 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
               color: Color(0xfff0f0f0),
             ),
             SizedBox(height: 20.h),
-            SizedBox(
-              width: double.infinity,
-              height: 66.h,
-              child: Padding(
-                padding: EdgeInsetsGeometry.symmetric(horizontal: 13.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '문의하기',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      height: 1.4,
-                      letterSpacing: -0.3,
-                      color: Color(0xff313131),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: 66.h,
+            //   child: Padding(
+            //     padding: EdgeInsetsGeometry.symmetric(horizontal: 13.w),
+            //     child: Align(
+            //       alignment: Alignment.centerLeft,
+            //       child: Text(
+            //         '문의하기',
+            //         style: TextStyle(
+            //           fontSize: 16.sp,
+            //           height: 1.4,
+            //           letterSpacing: -0.3,
+            //           color: Color(0xff313131),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             GestureDetector(
               onTap: () async {
                 final confirmed = await showDialog<bool>(

@@ -5,6 +5,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
+import 'package:yeogiga/common/component/info_dialog.dart';
 import 'package:yeogiga/common/component/day_selector.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
@@ -38,10 +39,21 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   // _EndTripNaverMap의 GlobalKey
   final GlobalKey<_EndTripNaverMapState> _mapKey =
       GlobalKey<_EndTripNaverMapState>();
+  static const List<double> _sheetSnapPoints = [0.2, 0.4, 0.8];
+  static const double _midSnapPoint = 0.2;
 
   // Optimistic UI: 이미지 마커 즉시 제거 (외부에서 호출 가능)
   Future<void> removeImageMarkers(List<String> imageIds) async {
     await _mapKey.currentState?.removeImageMarkers(imageIds);
+  }
+
+  void _collapseSheet() {
+    if (!_sheetController.isAttached) return;
+    _sheetController.animateTo(
+      _midSnapPoint,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
   }
 
   // 갤러리탭 리프레쉬
@@ -165,11 +177,16 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+  bool _sheetAtMax = false;
 
   // UI 상태만 관리 (지도 관련 상태는 _EndTripNaverMap으로 이동)
   int selectedDayIndex = 0;
   bool _isImageMode = false;
   String? _selectedPlaceId;
+  final PageController _placePageController = PageController(
+    viewportFraction: 0.95,
+  );
+  int? _lastFocusedPlaceIndex;
 
   Map<String, List<String>> matchedOrUnmatchedPayload = {};
   Map<String, List<String>> pendingPayload = {};
@@ -219,6 +236,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
 
   @override
   void dispose() {
+    _placePageController.dispose();
     _sheetController.dispose();
     super.dispose();
   }
@@ -247,12 +265,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
           return true; // true를 리턴하면 실제로 pop이 일어남
         },
         child: Scaffold(
-          bottomNavigationBar: _getPictureOptionBar(
-            ref,
-            selectedDayIndex,
-            matchedOrUnmatchedPayload,
-            pendingPayload,
-          ),
+          bottomNavigationBar: _getPictureOptionBar(ref, selectedDayIndex),
           backgroundColor: Colors.white,
           body: Stack(
             children: [
@@ -268,13 +281,16 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                       _isImageMode = true;
                       _selectedPlaceId = place.id;
                     });
+                    _collapseSheet();
                   },
                   onImageModeExit: () {
                     setState(() {
                       _isImageMode = false;
                       _selectedPlaceId = null;
                     });
+                    _collapseSheet();
                   },
+                  onMapInteraction: _collapseSheet,
                 )
               else
                 const Center(child: CircularProgressIndicator()),
@@ -304,117 +320,174 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                 controller: _sheetController,
                 onTap: () {
                   _mapKey.currentState?.moveToMyLocation();
+                  _collapseSheet();
                 },
               ),
               // TODO: 하단 슬라이더 위젯
-              DraggableScrollableSheet(
-                controller: _sheetController,
-                initialChildSize: 0.215,
-                minChildSize: 0.08,
-                maxChildSize: 0.9,
-                builder: (context, scrollController) {
-                  return EndTripBottomSheet(
-                    scrollController: scrollController,
-                    days: days,
-                    selectedDayIndex: selectedDayIndex,
-                    onDayChanged: (index) {
-                      // selectedDayIndex만 변경하면 _EndTripNaverMap의 didUpdateWidget에서 자동으로 마커 업데이트
-                      if (mounted) {
-                        setState(() {
-                          selectedDayIndex = index;
-                          // Day 변경 시 이미지 모드 해제
-                          _isImageMode = false;
-                          _selectedPlaceId = null;
-                        });
-                      }
-                    },
-                    buildPlaceList: () {
-                      final completedAsync =
-                          ref.watch(completedScheduleProvider).valueOrNull;
-                      final tripState = ref.watch(tripProvider).valueOrNull;
+              NotificationListener<DraggableScrollableNotification>(
+                onNotification: (notification) {
+                  final isMax =
+                      notification.extent >= _sheetSnapPoints.last - 0.01;
+                  if (_sheetAtMax != isMax) {
+                    if (mounted) {
+                      setState(() {
+                        _sheetAtMax = isMax;
+                      });
+                    } else {
+                      _sheetAtMax = isMax;
+                    }
+                  }
+                  return false;
+                },
+                child: DraggableScrollableSheet(
+                  controller: _sheetController,
+                  initialChildSize: _midSnapPoint,
+                  minChildSize: _sheetSnapPoints.first,
+                  maxChildSize: _sheetSnapPoints.last,
+                  snap: true,
+                  snapSizes: _sheetSnapPoints,
+                  snapAnimationDuration: const Duration(milliseconds: 80),
+                  builder: (context, scrollController) {
+                    return EndTripBottomSheet(
+                      scrollController: scrollController,
+                      days: days,
+                      selectedDayIndex: selectedDayIndex,
+                      focusedPlaceId: _selectedPlaceId,
+                      isSheetAtMax: _sheetAtMax,
+                      onDayChanged: (index) {
+                        if (mounted) {
+                          setState(() {
+                            selectedDayIndex = index;
+                            _isImageMode = false;
+                            _selectedPlaceId = null;
+                          });
+                        }
+                      },
+                      buildPlaceList: () {
+                        final completedAsync =
+                            ref.watch(completedScheduleProvider).valueOrNull;
+                        final tripState = ref.watch(tripProvider).valueOrNull;
 
-                      if (completedAsync == null) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final schedules = completedAsync.data;
-                      List<CompletedTripPlaceModel> placeList = [];
-                      if (selectedDayIndex == 0) {
-                        placeList =
-                            [for (final day in schedules) ...day.places]
-                                .where(
-                                  (p) =>
-                                      p.latitude != null && p.longitude != null,
-                                )
-                                .toList();
-                      } else {
-                        final daySchedule = schedules.firstWhere(
-                          (s) => s.day == selectedDayIndex,
-                          orElse:
-                              () => CompletedTripDayPlaceModel(
-                                day: selectedDayIndex,
-                                places: [],
-                                id: '',
-                                unmatchedImage: null,
-                              ),
-                        );
-                        placeList =
-                            daySchedule.places
-                                .where(
-                                  (p) =>
-                                      p.latitude != null && p.longitude != null,
-                                )
-                                .toList();
-                      }
-                      final hasPlaces = placeList.isNotEmpty;
-                      return SizedBox(
-                        height: 92.h,
-                        child:
-                            hasPlaces
-                                ? PageView.builder(
-                                  itemCount: placeList.length,
-                                  controller: PageController(
-                                    viewportFraction: 0.95,
-                                  ),
-                                  itemBuilder: (context, idx) {
-                                    final place = placeList[idx];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        // 카메라 이동 기능은 향후 추가 가능
-                                        // 현재는 _EndTripNaverMap 내부에서 처리
-                                      },
-                                      child: ScheduleItem(
-                                        key: ValueKey(place.id),
-                                        title: place.name,
-                                        category: place.type,
-                                        time: null,
-                                        done: true,
+                        if (completedAsync == null) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        final schedules = completedAsync.data;
+                        List<CompletedTripPlaceModel> placeList = [];
+                        if (selectedDayIndex == 0) {
+                          placeList =
+                              [for (final day in schedules) ...day.places]
+                                  .where(
+                                    (p) =>
+                                        p.latitude != null &&
+                                        p.longitude != null,
+                                  )
+                                  .toList();
+                        } else {
+                          final daySchedule = schedules.firstWhere(
+                            (s) => s.day == selectedDayIndex,
+                            orElse:
+                                () => CompletedTripDayPlaceModel(
+                                  day: selectedDayIndex,
+                                  places: [],
+                                  id: '',
+                                  unmatchedImage: null,
+                                ),
+                          );
+                          placeList =
+                              daySchedule.places
+                                  .where(
+                                    (p) =>
+                                        p.latitude != null &&
+                                        p.longitude != null,
+                                  )
+                                  .toList();
+                        }
+                        final hasPlaces = placeList.isNotEmpty;
+                        final selectedPlaceId = _selectedPlaceId;
+
+                        if (selectedPlaceId == null) {
+                          _lastFocusedPlaceIndex = null;
+                        } else {
+                          final targetIndex = placeList.indexWhere(
+                            (place) => place.id == selectedPlaceId,
+                          );
+                          if (targetIndex != -1 &&
+                              targetIndex != _lastFocusedPlaceIndex) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!_placePageController.hasClients) return;
+                              _placePageController.animateToPage(
+                                targetIndex,
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOut,
+                              );
+                            });
+                            _lastFocusedPlaceIndex = targetIndex;
+                          }
+                        }
+
+                        return SizedBox(
+                          height: 92.h,
+                          child:
+                              hasPlaces
+                                  ? PageView.builder(
+                                    itemCount: placeList.length,
+                                    controller: _placePageController,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemBuilder: (context, idx) {
+                                      final place = placeList[idx];
+
+                                      return AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 4.w,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            20.r,
+                                          ),
+                                        ),
+                                        child: GestureDetector(
+                                          onTap: () {},
+                                          child: ScheduleItem(
+                                            key: ValueKey(place.id),
+                                            title: place.name,
+                                            category: place.type,
+                                            time: null,
+                                            done: true,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                  : Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '등록된 일정이 없습니다.',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: const Color(0xffc6c6c6),
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                    );
-                                  },
-                                )
-                                : Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '등록된 일정이 없습니다.',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: const Color(0xffc6c6c6),
-                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                ),
-                      );
-                    },
-                    onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
-                      if (mounted) {
-                        setState(() {
-                          matchedOrUnmatchedPayload = matchedOrUnmatched;
-                          pendingPayload = pending;
-                        });
-                      }
-                    },
-                  );
-                },
+                        );
+                      },
+                      onSelectionPayloadChanged: (matchedOrUnmatched, pending) {
+                        if (mounted) {
+                          setState(() {
+                            matchedOrUnmatchedPayload = matchedOrUnmatched;
+                            pendingPayload = pending;
+                          });
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -433,6 +506,7 @@ class _EndTripNaverMap extends ConsumerStatefulWidget {
   final String? selectedPlaceId;
   final Function(CompletedTripPlaceModel) onPlaceMarkerTapped;
   final VoidCallback onImageModeExit;
+  final VoidCallback onMapInteraction;
 
   const _EndTripNaverMap({
     Key? key,
@@ -441,6 +515,7 @@ class _EndTripNaverMap extends ConsumerStatefulWidget {
     required this.selectedPlaceId,
     required this.onPlaceMarkerTapped,
     required this.onImageModeExit,
+    required this.onMapInteraction,
   }) : super(key: key);
 
   @override
@@ -458,8 +533,9 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   String? _currentPlaceName;
   String? _currentTripDayPlaceId;
   String? _currentPlaceId;
+  bool _showingNoImageDialog = false;
   ProviderSubscription<AsyncValue<List<MatchedDayTripPlaceImage>>>?
-      _matchedImagesSubscription;
+  _matchedImagesSubscription;
 
   @override
   void didUpdateWidget(covariant _EndTripNaverMap oldWidget) {
@@ -496,6 +572,7 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
       },
       onMapTapped: (point, latLng) {
         FocusScope.of(context).unfocus();
+        widget.onMapInteraction();
         if (widget.isImageMode) {
           widget.onImageModeExit();
         }
@@ -506,17 +583,17 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   @override
   void initState() {
     super.initState();
-    _matchedImagesSubscription =
-        ref.listenManual<AsyncValue<List<MatchedDayTripPlaceImage>>>(
-      matchedTripImagesProvider,
-      (previous, next) {
-        final placeId = _currentPlaceId;
-        if (!mounted || placeId == null || !widget.isImageMode) return;
-        if (next is AsyncData<List<MatchedDayTripPlaceImage>>) {
-          _showImageMarkers(placeId);
-        }
-      },
-    );
+    _matchedImagesSubscription = ref
+        .listenManual<AsyncValue<List<MatchedDayTripPlaceImage>>>(
+          matchedTripImagesProvider,
+          (previous, next) {
+            final placeId = _currentPlaceId;
+            if (!mounted || placeId == null || !widget.isImageMode) return;
+            if (next is AsyncData<List<MatchedDayTripPlaceImage>>) {
+              _showImageMarkers(placeId);
+            }
+          },
+        );
   }
 
   @override
@@ -635,6 +712,7 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
       );
 
       marker.setOnTapListener((tappedMarker) {
+        widget.onMapInteraction();
         widget.onPlaceMarkerTapped(place);
       });
 
@@ -766,6 +844,12 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
               _currentPlaceName = placeImage.name;
               _currentTripDayPlaceId = dayImage.tripDayPlaceId;
               _currentPlaceId = placeImage.id;
+              if (placeImage.placeImages.isEmpty) {
+                _currentPlaceImages = [];
+                _imageMarkers.clear();
+                _showNoImageDialog();
+                return;
+              }
               _showImageMarkersOnMap(placeImage.placeImages);
               return;
             }
@@ -822,7 +906,8 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
       );
 
       marker.setOnTapListener((tappedMarker) {
-        _showImageModal(image);
+        widget.onMapInteraction();
+        _showImageView(image);
       });
 
       _imageMarkers.add(marker);
@@ -835,32 +920,40 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   }
 
   // 이미지 모달 표시 → TripImageView로 네비게이션
-  void _showImageModal(MatchedImage image) {
+  void _showImageView(MatchedImage image) {
     final trip = ref.read(tripProvider).valueOrNull;
     final tripId = trip is TripModel ? trip.tripId : 0;
     // Convert MatchedImage list to GalleryImage list
-    final galleryImages = _currentPlaceImages.map((img) =>
-      GalleryImage(
-        id: img.id,
-        url: img.url,
-        day: _currentDay,
-        type: GalleryImageType.matched,
-        placeName: _currentPlaceName,
-        tripDayPlaceId: _currentTripDayPlaceId,
-        placeId: _currentPlaceId,
-        date: img.date,
-        favorite: img.favorite,
-      )
-    ).toList();
+    final galleryImages =
+        _currentPlaceImages
+            .map(
+              (img) => GalleryImage(
+                id: img.id,
+                url: img.url,
+                day: _currentDay,
+                type: GalleryImageType.matched,
+                placeName: _currentPlaceName,
+                tripDayPlaceId: _currentTripDayPlaceId,
+                placeId: _currentPlaceId,
+                date: img.date,
+                favorite: img.favorite,
+              ),
+            )
+            .toList();
 
     // Find the index of the tapped image
-    final initialIndex = _currentPlaceImages.indexWhere((img) => img.id == image.id);
+    final initialIndex = _currentPlaceImages.indexWhere(
+      (img) => img.id == image.id,
+    );
 
-    context.push('/tripImageView', extra: {
-      'images': galleryImages,
-      'initialIndex': initialIndex >= 0 ? initialIndex : 0,
-      'tripId': tripId,
-    });
+    context.push(
+      '/tripImageView',
+      extra: {
+        'images': galleryImages,
+        'initialIndex': initialIndex >= 0 ? initialIndex : 0,
+        'tripId': tripId,
+      },
+    );
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -875,6 +968,25 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
     final locations =
         validImages.map((img) => NLatLng(img.latitude, img.longitude)).toList();
     await _fitCameraToLocations(locations);
+  }
+
+  Future<void> _showNoImageDialog() async {
+    if (!mounted || _showingNoImageDialog) return;
+    _showingNoImageDialog = true;
+    await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => const InfoDialog(
+            title: '사진이 없어요!',
+            content: '선택한 목적지에는 아직 등록된 사진이 없습니다.',
+            asset: 'asset/icon/no_picture.svg',
+          ),
+    ).whenComplete(() {
+      _showingNoImageDialog = false;
+    });
+    if (mounted) {
+      widget.onImageModeExit();
+    }
   }
 
   // 이미지 모드 종료
@@ -993,12 +1105,7 @@ class _MyLocationButtonState extends State<MyLocationButton> {
   }
 }
 
-Widget? _getPictureOptionBar(
-  WidgetRef ref,
-  int selectedDayIndex,
-  Map<String, List<String>> matchedOrUnmatchedPayload,
-  Map<String, List<String>> pendingPayload,
-) {
+Widget? _getPictureOptionBar(WidgetRef ref, int selectedDayIndex) {
   bool selectionMode = ref.watch(selectionModeProvider);
   if (selectionMode) {
     return BottomAppBarLayout(
@@ -1013,6 +1120,8 @@ class EndTripBottomSheet extends ConsumerStatefulWidget {
   final ScrollController scrollController;
   final List<String> days;
   final int selectedDayIndex;
+  final String? focusedPlaceId;
+  final bool isSheetAtMax;
   final ValueChanged<int> onDayChanged;
   final Widget Function()? buildPlaceList;
   final Function(Map<String, List<String>>, Map<String, List<String>>)?
@@ -1023,6 +1132,8 @@ class EndTripBottomSheet extends ConsumerStatefulWidget {
     required this.scrollController,
     required this.days,
     required this.selectedDayIndex,
+    this.focusedPlaceId,
+    this.isSheetAtMax = false,
     required this.onDayChanged,
     this.buildPlaceList,
     this.onSelectionPayloadChanged,
@@ -1096,6 +1207,7 @@ class _EndTripBottomSheetState extends ConsumerState<EndTripBottomSheet> {
                 sliverMode: false,
                 showDaySelector: false,
                 selectedDayIndex: _selectedDayIndex,
+                focusedPlaceId: widget.focusedPlaceId,
                 onDayIndexChanged: (index) {
                   if (mounted) {
                     setState(() {

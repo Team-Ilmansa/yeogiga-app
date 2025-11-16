@@ -29,12 +29,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String password = '';
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoadingDialogVisible = false;
 
   @override
   void dispose() {
     _idController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _openLoadingDialog(BuildContext context) {
+    if (_isLoadingDialogVisible) return;
+    _isLoadingDialogVisible = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => LoginLoadingDialog(),
+    ).whenComplete(() {
+      _isLoadingDialogVisible = false;
+    });
+  }
+
+  void _closeLoadingDialog(BuildContext context) {
+    if (!_isLoadingDialogVisible) return;
+    final navigator = Navigator.of(context, rootNavigator: true);
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+    _isLoadingDialogVisible = false;
   }
 
   @override
@@ -72,12 +94,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final uri = Uri.parse(location);
                         final redirect = uri.queryParameters['redirect'];
 
-                        // 로딩 다이얼로그 표시
-                        showDialog(
-                          context: currentContext,
-                          barrierDismissible: false,
-                          builder: (context) => LoginLoadingDialog(),
-                        );
+                        if (!mounted) return;
+                        _openLoadingDialog(currentContext);
 
                         try {
                           //TODO: await하는 동안 버튼 비활성화 안되나? (이미 함)
@@ -91,12 +109,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           //   return;
                           // }
 
-                          // 로딩 다이얼로그 닫기
-                          if (!mounted) return;
-                          Navigator.of(currentContext).pop();
-
-                          if (!mounted) return;
-
                           // 로그인 성공 시 redirect 처리 (딥링크에서 온 경우)
                           if (user is UserResponseModel && user.code == 200) {
                             if (redirect != null && redirect.isNotEmpty) {
@@ -108,16 +120,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             }
                           }
 
+                          if (!mounted) return;
                           setState(() {
                             loginFailed = user is UserModelError;
                           });
                         } catch (e) {
-                          // 에러 발생 시에도 로딩 다이얼로그 닫기
                           if (!mounted) return;
-                          Navigator.of(currentContext).pop();
                           setState(() {
                             loginFailed = true;
                           });
+                        } finally {
+                          if (mounted) {
+                            _closeLoadingDialog(currentContext);
+                          }
                         }
                       },
               style: ElevatedButton.styleFrom(
@@ -149,9 +164,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 71.h),
+                  SizedBox(height: 85.h),
                   Logo(),
-                  SizedBox(height: 36.h),
+                  SizedBox(height: 50.h),
 
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
                   // ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
@@ -333,13 +348,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     : await UserApi.instance
                                         .loginWithKakaoAccount();
 
-                            // 로딩 다이얼로그 표시
                             if (!mounted) return;
-                            showDialog(
-                              context: currentContext,
-                              barrierDismissible: false,
-                              builder: (context) => LoginLoadingDialog(),
-                            );
+                            _openLoadingDialog(currentContext);
 
                             final user = await ref
                                 .read(userMeProvider.notifier)
@@ -349,32 +359,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   platform: 'KAKAO',
                                 );
 
-                            // 로딩 다이얼로그 닫기
-                            if (!mounted) return;
-                            Navigator.of(currentContext).pop();
-
                             if (!mounted) return;
                             setState(() {
                               loginFailed = user is UserModelError;
                             });
                           } on DioException catch (e) {
                             print('카카오톡 회원가입 실패: ${e.response}');
-                            // 로딩 다이얼로그 닫기
-                            if (!mounted) return;
-                            Navigator.of(currentContext).pop();
-                            if (!mounted) return;
-                            setState(() {
-                              loginFailed = true;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                loginFailed = true;
+                              });
+                            }
                           } catch (i) {
                             print('카카오톡 회원가입 실패: ${i}');
-                            // 로딩 다이얼로그 닫기
-                            if (!mounted) return;
-                            Navigator.of(currentContext).pop();
-                            if (!mounted) return;
-                            setState(() {
-                              loginFailed = true;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                loginFailed = true;
+                              });
+                            }
+                          } finally {
+                            if (mounted) {
+                              _closeLoadingDialog(currentContext);
+                            }
                           }
                         },
                         child: Center(
@@ -385,36 +391,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 13.w),
+                      // SizedBox(width: 13.w),
+                      // TODO: 버튼 주석들 지우면 안됨.
+                      // // 네이버 로그인 버튼
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     // TODO: 네이버 로그인 로직
+                      //   },
+                      //   child: Center(
+                      //     child: Image.asset(
+                      //       'asset/img/oauth/naver.png',
+                      //       width: 46.sp,
+                      //       height: 46.sp,
+                      //     ),
+                      //   ),
+                      // ),
+                      // SizedBox(width: 13.w),
 
-                      // 네이버 로그인 버튼
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: 네이버 로그인 로직
-                        },
-                        child: Center(
-                          child: Image.asset(
-                            'asset/img/oauth/naver.png',
-                            width: 46.sp,
-                            height: 46.sp,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 13.w),
-
-                      // 애플 로그인 버튼
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: 애플 로그인 로직
-                        },
-                        child: Center(
-                          child: Image.asset(
-                            'asset/img/oauth/apple.png',
-                            width: 46.sp,
-                            height: 46.sp,
-                          ),
-                        ),
-                      ),
+                      // // 애플 로그인 버튼
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     // TODO: 애플 로그인 로직
+                      //   },
+                      //   child: Center(
+                      //     child: Image.asset(
+                      //       'asset/img/oauth/apple.png',
+                      //       width: 46.sp,
+                      //       height: 46.sp,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
 

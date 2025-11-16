@@ -9,9 +9,10 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: true,
+      top: false,
       bottom: shouldUseSafeAreaBottom(context),
       child: Scaffold(
+        backgroundColor: Color(0xfffafafa),
         body: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Column(

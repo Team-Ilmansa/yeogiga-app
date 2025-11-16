@@ -55,10 +55,30 @@ class GalleryImage {
   }
 }
 
+class GalleryFilter {
+  final int selectedDay;
+  final String? placeId;
+
+  const GalleryFilter({required this.selectedDay, this.placeId});
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is GalleryFilter &&
+        other.selectedDay == selectedDay &&
+        other.placeId == placeId;
+  }
+
+  @override
+  int get hashCode => Object.hash(selectedDay, placeId);
+}
+
 /// 필터링된 갤러리 이미지 (matched + unmatched)
 /// selectedDay가 0이면 전체, 그 외에는 해당 day만
 final filteredGalleryImagesProvider =
-    Provider.family<List<GalleryImage>, int>((ref, selectedDay) {
+    Provider.family<List<GalleryImage>, GalleryFilter>((ref, filter) {
+  final selectedDay = filter.selectedDay;
+  final targetPlaceId = filter.placeId;
   // AsyncValue에서 데이터 추출, 로딩/에러 시 빈 리스트 반환
   final matchedImages = ref.watch(matchedTripImagesProvider).valueOrNull ?? [];
   final unmatchedImages = ref.watch(unmatchedTripImagesProvider).valueOrNull ?? [];
@@ -72,6 +92,9 @@ final filteredGalleryImagesProvider =
       for (final place in dayPlace.placeImagesList) {
         if (place != null) {
           for (final img in place.placeImages) {
+            if (targetPlaceId != null && place.id != targetPlaceId) {
+              continue;
+            }
             allImages.add(
               GalleryImage(
                 id: img.id,
@@ -92,6 +115,9 @@ final filteredGalleryImagesProvider =
     // unmatched
     for (final dayPlace in unmatchedImages) {
       for (final img in dayPlace.unmatchedImages) {
+        if (targetPlaceId != null) {
+          continue;
+        }
         allImages.add(
           GalleryImage(
             id: img.id,
@@ -113,6 +139,9 @@ final filteredGalleryImagesProvider =
         for (final place in dayPlace.placeImagesList) {
           if (place != null) {
             for (final img in place.placeImages) {
+              if (targetPlaceId != null && place.id != targetPlaceId) {
+                continue;
+              }
               allImages.add(
                 GalleryImage(
                   id: img.id,
@@ -135,6 +164,9 @@ final filteredGalleryImagesProvider =
     for (final dayPlace in unmatchedImages) {
       if (dayPlace.day == selectedDay) {
         for (final img in dayPlace.unmatchedImages) {
+          if (targetPlaceId != null) {
+            continue;
+          }
           allImages.add(
             GalleryImage(
               id: img.id,
