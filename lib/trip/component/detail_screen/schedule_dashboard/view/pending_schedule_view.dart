@@ -49,7 +49,9 @@ class _PendingScheduleViewState extends State<PendingScheduleView> {
                   .fetchAll(tripId.toString(), days);
             });
           }
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xff8287ff)),
+          );
         }
         return CustomScrollView(
           slivers: [

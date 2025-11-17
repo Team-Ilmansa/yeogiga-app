@@ -148,7 +148,7 @@ class _ProfileManageDialogState extends ConsumerState<ProfileManageDialog> {
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                Color(0xff8287ff),
                               ),
                             ),
                           )
@@ -210,11 +210,7 @@ class _ProfileManageDialogState extends ConsumerState<ProfileManageDialog> {
   Future<void> _pickProfileImage() async {
     final granted = await _ensureMediaPermission();
     if (!granted) {
-      showAppSnackBar(
-        context,
-        '사진 접근 권한을 허용해주세요.',
-        isError: true,
-      );
+      showAppSnackBar(context, '사진 접근 권한을 허용해주세요.', isError: true);
       return;
     }
 
@@ -227,11 +223,7 @@ class _ProfileManageDialogState extends ConsumerState<ProfileManageDialog> {
 
     final path = result.files.single.path;
     if (path == null) {
-      showAppSnackBar(
-        context,
-        '이미지를 불러오지 못했어요.',
-        isError: true,
-      );
+      showAppSnackBar(context, '이미지를 불러오지 못했어요.', isError: true);
       return;
     }
 
@@ -329,5 +321,4 @@ class _ProfileManageDialogState extends ConsumerState<ProfileManageDialog> {
     final storageResult = await Permission.storage.request();
     return storageResult.isGranted;
   }
-
 }

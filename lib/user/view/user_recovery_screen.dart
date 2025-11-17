@@ -20,7 +20,11 @@ class UserRecoveryScreen extends ConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.go('/login');
       });
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xff8287ff)),
+        ),
+      );
     }
 
     final userData = state.data;
@@ -30,60 +34,60 @@ class UserRecoveryScreen extends ConsumerWidget {
       top: false,
       bottom: shouldUseSafeAreaBottom(context),
       child: Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: true,
 
-      // 계정 복구하기 버튼 섹션
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(21.r),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              spreadRadius: 0,
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.fromLTRB(
-          11.w,
-          11.h,
-          11.w,
-          MediaQuery.of(context).viewInsets.bottom + 22.h,
-        ),
-        child: ElevatedButton(
-          onPressed: () async {
-            // 계정 복구 API 호출
-            final success =
-                await ref.read(userMeProvider.notifier).restoreAccount();
+        // 계정 복구하기 버튼 섹션
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(21.r),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                spreadRadius: 0,
+                blurRadius: 4,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.fromLTRB(
+            11.w,
+            11.h,
+            11.w,
+            MediaQuery.of(context).viewInsets.bottom + 22.h,
+          ),
+          child: ElevatedButton(
+            onPressed: () async {
+              // 계정 복구 API 호출
+              final success =
+                  await ref.read(userMeProvider.notifier).restoreAccount();
 
-            if (success) {
-              _showRecoverySuccessDialog(context, ref);
-            } else {
-              _showRecoveryFailDialog(context, ref);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xff8287ff),
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(vertical: 14.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(11.r),
+              if (success) {
+                _showRecoverySuccessDialog(context, ref);
+              } else {
+                _showRecoveryFailDialog(context, ref);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xff8287ff),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(11.r),
+              ),
+              elevation: 0,
             ),
-            elevation: 0,
-          ),
-          child: Text(
-            '계정 복구하기',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.3,
+            child: Text(
+              '계정 복구하기',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.3,
+              ),
             ),
           ),
         ),
-      ),
 
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

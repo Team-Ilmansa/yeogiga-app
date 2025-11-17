@@ -36,7 +36,9 @@ class _ConfirmedScheduleViewState extends State<ConfirmedScheduleView> {
               ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
             });
           }
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xff8287ff)),
+          );
         }
         return CustomScrollView(
           slivers: [

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:yeogiga/common/component/nested_refresh_indicator.dart';
 import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
@@ -165,7 +165,10 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
           ],
         ),
         body: settlementAsync.when(
-          loading: () => Center(child: CircularProgressIndicator()),
+          loading:
+              () => Center(
+                child: CircularProgressIndicator(color: Color(0xff8287ff)),
+              ),
           error:
               (error, stack) => Center(
                 child: Text(
@@ -251,12 +254,8 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   // 미정산 탭
-                  LiquidPullToRefresh(
+                  NestedRefreshIndicator(
                     onRefresh: _refreshSettlementDetail,
-                    animSpeedFactor: 7.0,
-                    color: const Color(0xfffafafa),
-                    backgroundColor: const Color(0xff8287ff),
-                    showChildOpacityTransition: true,
                     child: ListView.separated(
                       padding: EdgeInsets.symmetric(
                         horizontal: 16.w,
@@ -281,12 +280,8 @@ class _SettlementDetailScreenState extends ConsumerState<SettlementDetailScreen>
                     ),
                   ),
                   // 정산 완료 탭
-                  LiquidPullToRefresh(
+                  NestedRefreshIndicator(
                     onRefresh: _refreshSettlementDetail,
-                    animSpeedFactor: 7.0,
-                    color: const Color(0xfffafafa),
-                    backgroundColor: const Color(0xff8287ff),
-                    showChildOpacityTransition: true,
                     child: ListView.separated(
                       padding: EdgeInsets.symmetric(
                         horizontal: 16.w,

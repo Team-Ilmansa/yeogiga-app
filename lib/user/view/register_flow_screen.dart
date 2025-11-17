@@ -766,7 +766,7 @@ class _RegisterFlowScreenState extends ConsumerState<RegisterFlowScreen> {
                                 width: 20.w,
                                 height: 20.h,
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: Color(0xff8287ff),
                                   strokeWidth: 2.w,
                                 ),
                               )

@@ -33,7 +33,12 @@ class _W2MOverlapCalendarScreenState
       tripId = tripState.tripId;
     } else {
       // tripProvider가 비어있을 일은 없으나, 안전하게 처리
-      return const Scaffold(body: Center(child: Text('trip 정보가 필요합니다.')));
+      return const Scaffold(
+        backgroundColor: Color(0xfffafafa),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xff8287ff)),
+        ),
+      );
     }
 
     if (!_hasInvalidated) {
@@ -44,8 +49,12 @@ class _W2MOverlapCalendarScreenState
 
     return tripW2mAsync.when(
       loading:
-          () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
+          () => const Scaffold(
+            backgroundColor: Color(0xfffafafa),
+            body: Center(
+              child: CircularProgressIndicator(color: Color(0xff8287ff)),
+            ),
+          ),
       error: (e, _) => Scaffold(body: Center(child: Text('에러: $e'))),
       data: (tripW2m) {
         final now = DateTime.now();
@@ -145,79 +154,76 @@ class _W2MOverlapCalendarScreenState
               ],
             ),
             bottomNavigationBar:
-              (_startDate != null && _endDate != null)
-                  ? Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(21.r),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          offset: const Offset(0, -2),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff8287ff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
+                (_startDate != null && _endDate != null)
+                    ? Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(21.r),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            offset: const Offset(0, -2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
                           ),
-                          minimumSize: Size.fromHeight(53.h),
-                          elevation: 0,
-                        ),
-                        onPressed: () async {
-                          if (_startDate != null && _endDate != null) {
-                            try {
-                              await ref
-                                  .read(tripProvider.notifier)
-                                  .updateTripTime(
-                                    start: _startDate!,
-                                    end: _endDate!,
+                        ],
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(11.w, 11.h, 11.w, 22.h),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff8287ff),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.r),
+                            ),
+                            minimumSize: Size.fromHeight(53.h),
+                            elevation: 0,
+                          ),
+                          onPressed: () async {
+                            if (_startDate != null && _endDate != null) {
+                              try {
+                                await ref
+                                    .read(tripProvider.notifier)
+                                    .updateTripTime(
+                                      start: _startDate!,
+                                      end: _endDate!,
+                                    );
+                                if (context.mounted) {
+                                  showAppSnackBar(context, '여행 일정이 저장되었습니다.');
+                                  GoRouter.of(context).pop();
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  showAppSnackBar(
+                                    context,
+                                    e.toString(),
+                                    isError: true,
                                   );
-                              if (context.mounted) {
-                                showAppSnackBar(
-                                  context,
-                                  '여행 일정이 저장되었습니다.',
-                                );
-                                GoRouter.of(context).pop();
+                                }
                               }
-                            } catch (e) {
+                            } else {
                               if (context.mounted) {
                                 showAppSnackBar(
                                   context,
-                                  e.toString(),
+                                  '시작/종료 날짜를 선택해주세요.',
                                   isError: true,
                                 );
                               }
                             }
-                          } else {
-                            if (context.mounted) {
-                              showAppSnackBar(
-                                context,
-                                '시작/종료 날짜를 선택해주세요.',
-                                isError: true,
-                              );
-                            }
-                          }
-                        },
-                        child: Text(
-                          '${_startDate != null && _endDate != null ? '${_startDate!.year}.${_startDate!.month.toString().padLeft(2, '0')}.${_startDate!.day.toString().padLeft(2, '0')} - ${_endDate!.year}.${_endDate!.month.toString().padLeft(2, '0')}.${_endDate!.day.toString().padLeft(2, '0')} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일' : ''}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
+                          },
+                          child: Text(
+                            '${_startDate != null && _endDate != null ? '${_startDate!.year}.${_startDate!.month.toString().padLeft(2, '0')}.${_startDate!.day.toString().padLeft(2, '0')} - ${_endDate!.year}.${_endDate!.month.toString().padLeft(2, '0')}.${_endDate!.day.toString().padLeft(2, '0')} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일' : ''}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  )
-                  : null,
+                    )
+                    : null,
           ),
         );
       },

@@ -69,6 +69,7 @@ dependencies:
   # 이쁜 새로고침
   liquid_pull_to_refresh: ^3.0.0
   pull_to_refresh: ^2.0.0
+  custom_refresh_indicator: ^3.1.0
 
   # 갤러리에 저장
   image_gallery_saver_plus: ^4.0.1
@@ -144,6 +145,7 @@ flutter:
     - asset/img/weather/
     - asset/img/logo/
     - asset/img/oauth/
+    - asset/img/tripcard/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

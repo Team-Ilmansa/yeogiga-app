@@ -146,7 +146,7 @@ class _CreateTripDialogState extends ConsumerState<CreateTripDialog> {
                                 height: 20.h,
                                 child: const CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: Color(0xff8287ff),
                                 ),
                               ),
                             ),

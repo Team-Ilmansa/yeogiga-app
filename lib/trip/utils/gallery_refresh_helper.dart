@@ -20,7 +20,10 @@ class GalleryRefreshHelper {
     if (isCompleted) {
       await ref.read(completedScheduleProvider.notifier).fetch(tripId);
       final completed = ref.read(completedScheduleProvider).valueOrNull;
-      if (completed == null || completed.data.isEmpty) return;
+      if (completed == null || completed.data.isEmpty) {
+        _resetGalleryProviders(ref);
+        return;
+      }
 
       final pendingInfos = completed.data
           .map(
@@ -60,7 +63,10 @@ class GalleryRefreshHelper {
     } else {
       await ref.read(confirmScheduleProvider.notifier).fetchAll(tripId);
       final confirmed = ref.read(confirmScheduleProvider).valueOrNull;
-      if (confirmed == null || confirmed.schedules.isEmpty) return;
+      if (confirmed == null || confirmed.schedules.isEmpty) {
+        _resetGalleryProviders(ref);
+        return;
+      }
 
       final matchedInfos = confirmed.schedules
           .map(
@@ -98,5 +104,11 @@ class GalleryRefreshHelper {
           .read(pendingDayTripImagesProvider.notifier)
           .fetchAll(tripId, pendingInfos);
     }
+  }
+
+  static void _resetGalleryProviders(WidgetRef ref) {
+    ref.read(matchedTripImagesProvider.notifier).clear();
+    ref.read(unmatchedTripImagesProvider.notifier).clear();
+    ref.read(pendingDayTripImagesProvider.notifier).clear();
   }
 }

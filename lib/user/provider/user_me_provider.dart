@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,6 +15,7 @@ import 'package:yeogiga/user/repository/auth_repository.dart';
 import 'package:yeogiga/user/repository/user_me_repository.dart';
 import 'package:yeogiga/user/repository/fcm_token_repository.dart';
 import 'package:yeogiga/common/model/login_response.dart';
+import 'package:yeogiga/common/utils/avatar_generator.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
@@ -61,12 +63,69 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
     try {
       final resp = await repository.getMe();
-      state = resp;
+
       if (resp is UserResponseModel && resp.data != null) {
-        await registerFcmToken(ref);
+        // 프로필 사진이 없으면 자동으로 아바타 생성 및 업로드
+        if (resp.data!.imageUrl == null || resp.data!.imageUrl!.isEmpty) {
+          if (kDebugMode) {
+            print('[Avatar] 프로필 사진 없음, 아바타 생성 시작');
+          }
+          // 아바타 생성 전에 먼저 state 설정 (로딩 상태 해제)
+          state = resp;
+          await registerFcmToken(ref);
+          // 아바타 생성 및 업로드 (state는 함수 내부에서 업데이트됨)
+          await _generateAndUploadAvatar(resp.data!.nickname);
+        } else {
+          // 프로필 사진이 있으면 바로 state 설정
+          state = resp;
+          await registerFcmToken(ref);
+        }
+      } else {
+        state = resp;
       }
     } on DioException catch (e) {
       state = UserModelError(message: '유저 정보 불러오기 실패');
+    }
+  }
+
+  /// 닉네임 기반 아바타 생성 및 자동 업로드
+  Future<void> _generateAndUploadAvatar(String nickname) async {
+    // 아바타 이미지 생성
+    final avatarFile = await AvatarGenerator.generateAvatarImage(nickname);
+
+    // 서버에 업로드
+    await repository.updateProfileImage(image: avatarFile);
+
+    // S3 저장 및 DB 업데이트 대기 (재시도 로직)
+    const maxRetries = 5;
+    const retryDelay = Duration(seconds: 1);
+
+    for (int i = 0; i < maxRetries; i++) {
+      await Future.delayed(retryDelay);
+
+      // 업로드 완료 후 사용자 정보 새로고침
+      final refreshed = await repository.getMe();
+
+      // imageUrl이 업데이트되었는지 확인
+      if (refreshed.data?.imageUrl != null &&
+          refreshed.data!.imageUrl!.isNotEmpty) {
+        // 이미지 캐시 무효화 (새 이미지가 표시되도록)
+        _evictImageCache(refreshed.data!.imageUrl);
+
+        state = refreshed;
+
+        // 임시 파일 삭제
+        if (await avatarFile.exists()) {
+          await avatarFile.delete();
+        }
+
+        return;
+      }
+    }
+
+    // 임시 파일 삭제
+    if (await avatarFile.exists()) {
+      await avatarFile.delete();
     }
   }
 
@@ -88,9 +147,11 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       print('로그인 응답: ${resp.code} / ${resp.message} / ${resp.data}');
       print('코드 타입: ${resp.code.runtimeType}');
 
-      // U003: 탈퇴한 사용자 - 복구 페이지로 리다이렉트  
+      // U003: 탈퇴한 사용자 - 복구 페이지로 리다이렉트
       if (resp.code.toString() == "U003") {
-        final deletedData = UserDeletedData.fromJson(resp.data as Map<String, dynamic>);
+        final deletedData = UserDeletedData.fromJson(
+          resp.data as Map<String, dynamic>,
+        );
         state = UserDeleteModel(
           code: resp.code.toString(),
           message: resp.message,
@@ -105,7 +166,9 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
         return state!;
       }
 
-      final loginData = LoginResponse.fromJson(resp.data as Map<String, dynamic>);
+      final loginData = LoginResponse.fromJson(
+        resp.data as Map<String, dynamic>,
+      );
       await storage.write(
         key: REFRESH_TOKEN_KEY,
         value: loginData.refreshToken,
@@ -122,9 +185,12 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       if (e.response?.data != null) {
         final responseData = e.response!.data;
         print('DioException 응답: $responseData');
-        
-        if (responseData is Map<String, dynamic> && responseData['code'] == 'U003') {
-          final deletedData = UserDeletedData.fromJson(responseData['data'] as Map<String, dynamic>);
+
+        if (responseData is Map<String, dynamic> &&
+            responseData['code'] == 'U003') {
+          final deletedData = UserDeletedData.fromJson(
+            responseData['data'] as Map<String, dynamic>,
+          );
           state = UserDeleteModel(
             code: responseData['code'].toString(),
             message: responseData['message'] ?? '이미 회원탈퇴한 사용자입니다.',
@@ -133,7 +199,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
           return state!;
         }
       }
-      
+
       state = UserModelError(message: '로그인에 실패했습니다.');
       return state!;
     } catch (e) {
@@ -188,7 +254,8 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
       //shouldSignUp이 true이면 guest
       if (response.data['data']['shouldSignup'] == true) {
-        final tempToken = response.data['data']['token']['accessToken'] as String?;
+        final tempToken =
+            response.data['data']['token']['accessToken'] as String?;
         if (tempToken != null) {
           await storage.write(key: SOCIAL_TEMP_TOKEN, value: tempToken);
         }
@@ -197,9 +264,11 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       }
 
       // shouldSignup이 false일 때만 토큰 추출
-      final accessToken = response.data['data']['token']['accessToken'] as String?;
-      final refreshToken = response.data['data']['token']['refreshToken'] as String?;
-      
+      final accessToken =
+          response.data['data']['token']['accessToken'] as String?;
+      final refreshToken =
+          response.data['data']['token']['refreshToken'] as String?;
+
       if (accessToken == null || refreshToken == null) {
         state = UserModelError(message: '토큰 정보가 올바르지 않습니다.');
         return state!;
@@ -306,10 +375,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       }
       return response.message;
     } on DioException catch (e) {
-      return _extractErrorMessage(
-        e,
-        fallback: '프로필 사진을 수정할 수 없습니다.',
-      );
+      return _extractErrorMessage(e, fallback: '프로필 사진을 수정할 수 없습니다.');
     } catch (_) {
       return '프로필 사진을 수정할 수 없습니다.';
     }
@@ -329,10 +395,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
       }
       return response.message;
     } on DioException catch (e) {
-      return _extractErrorMessage(
-        e,
-        fallback: '닉네임을 수정할 수 없습니다.',
-      );
+      return _extractErrorMessage(e, fallback: '닉네임을 수정할 수 없습니다.');
     } catch (_) {
       return '닉네임을 수정할 수 없습니다.';
     }
@@ -352,8 +415,7 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
 
   void _evictImageCache(String? imageUrl) {
     if (imageUrl == null || imageUrl.isEmpty) return;
-    PaintingBinding.instance.imageCache
-        .evict(NetworkImage(imageUrl));
+    PaintingBinding.instance.imageCache.evict(NetworkImage(imageUrl));
   }
 
   Future<void> _waitAndRefreshUser() async {
@@ -436,5 +498,4 @@ class UserMeStateNotifier extends StateNotifier<UserModelBase?> {
     }
     return fallback;
   }
-
 }

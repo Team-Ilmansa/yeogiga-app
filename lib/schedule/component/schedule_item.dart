@@ -126,7 +126,10 @@ class _ScheduleItemListMainState extends ConsumerState<ScheduleItemListMain>
   Widget build(BuildContext context) {
     final mainTripAsync = ref.watch(mainTripFutureProvider);
     return mainTripAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading:
+          () => const Center(
+            child: CircularProgressIndicator(color: Color(0xff8287ff)),
+          ),
       error: (e, _) => Center(child: Text('일정 정보를 불러올 수 없습니다.')),
       data: (mainTrip) {
         if (mainTrip == null) {

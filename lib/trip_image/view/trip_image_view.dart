@@ -78,11 +78,7 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
     final current = _images[_currentIndex];
     final tripDayPlaceId = current.tripDayPlaceId;
     if (tripDayPlaceId == null || widget.tripId == 0) {
-      showAppSnackBar(
-        context,
-        '여행 정보를 불러오는 중입니다. 다시 시도해주세요.',
-        isError: true,
-      );
+      showAppSnackBar(context, '여행 정보를 불러오는 중입니다. 다시 시도해주세요.', isError: true);
       return;
     }
 
@@ -327,6 +323,7 @@ class _TripImageViewState extends ConsumerState<TripImageView> {
                     if (loadingProgress == null) return child;
                     return Center(
                       child: CircularProgressIndicator(
+                        color: Color(0xff8287ff),
                         value:
                             loadingProgress.expectedTotalBytes != null
                                 ? loadingProgress.cumulativeBytesLoaded /

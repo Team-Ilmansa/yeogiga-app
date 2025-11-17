@@ -124,100 +124,106 @@ class _TripDateRangePickerScreenState
         ),
         //하단 바 (날짜 선택 시 노출)
         bottomNavigationBar:
-          (_startDate != null && _endDate != null)
-              ? BottomAppBarLayout(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff8287ff),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
+            (_startDate != null && _endDate != null)
+                ? BottomAppBarLayout(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff8287ff),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        minimumSize: Size.fromHeight(53.h),
+                        elevation: 0,
                       ),
-                      minimumSize: Size.fromHeight(53.h),
-                      elevation: 0,
-                    ),
-                    onPressed:
-                        //TODO: w2m을 수정하는 상황도 만들어야함.
-                        _isLoading
-                            ? null
-                            : () async {
-                              if (_startDate == null || _endDate == null) {}
+                      onPressed:
+                          //TODO: w2m을 수정하는 상황도 만들어야함.
+                          _isLoading
+                              ? null
+                              : () async {
+                                if (_startDate == null || _endDate == null) {}
 
-                              setState(() {
-                                _isLoading = true;
-                                _error = null;
-                              });
-                              try {
-                                // tripProvider에서 tripId 가져오기
-                                final tripState =
-                                    ref.read(tripProvider).valueOrNull;
-                                int? tripId;
-                                if (tripState is TripModel) {
-                                  tripId = tripState.tripId;
-                                } else {
+                                setState(() {
+                                  _isLoading = true;
+                                  _error = null;
+                                });
+                                try {
+                                  // tripProvider에서 tripId 가져오기
+                                  final tripState =
+                                      ref.read(tripProvider).valueOrNull;
+                                  int? tripId;
+                                  if (tripState is TripModel) {
+                                    tripId = tripState.tripId;
+                                  } else {
+                                    setState(() {
+                                      _error = '잘못된 접근입니다.';
+                                      _isLoading = false;
+                                    });
+                                    return;
+                                  }
+                                  // 날짜 리스트 생성
+                                  final days =
+                                      _endDate!.difference(_startDate!).inDays +
+                                      1;
+                                  final availableDates = List.generate(days, (
+                                    i,
+                                  ) {
+                                    final d = _startDate!.add(
+                                      Duration(days: i),
+                                    );
+                                    return DateFormat('yyyy-MM-dd').format(d);
+                                  });
+                                  final userW2m = await ref
+                                      .read(userW2mProvider.notifier)
+                                      .postUserW2m(
+                                        tripId: tripId,
+                                        availableDates: availableDates,
+                                      );
+                                  if (userW2m is UserW2mModel) {
+                                    if (context.mounted) {
+                                      GoRouter.of(context).pushReplacement(
+                                        '/tripDetailScreen/$tripId',
+                                      );
+                                    }
+                                  } else {
+                                    setState(() {
+                                      _error = '날짜 저장에 실패했습니다.';
+                                    });
+                                  }
+                                } catch (e) {
                                   setState(() {
-                                    _error = '잘못된 접근입니다.';
+                                    _error = '에러가 발생했습니다.';
+                                  });
+                                } finally {
+                                  setState(() {
                                     _isLoading = false;
                                   });
-                                  return;
                                 }
-                                // 날짜 리스트 생성
-                                final days =
-                                    _endDate!.difference(_startDate!).inDays +
-                                    1;
-                                final availableDates = List.generate(days, (i) {
-                                  final d = _startDate!.add(Duration(days: i));
-                                  return DateFormat('yyyy-MM-dd').format(d);
-                                });
-                                final userW2m = await ref
-                                    .read(userW2mProvider.notifier)
-                                    .postUserW2m(
-                                      tripId: tripId,
-                                      availableDates: availableDates,
-                                    );
-                                if (userW2m is UserW2mModel) {
-                                  if (context.mounted) {
-                                    GoRouter.of(context).pushReplacement('/tripDetailScreen/$tripId');
-                                  }
-                                } else {
-                                  setState(() {
-                                    _error = '날짜 저장에 실패했습니다.';
-                                  });
-                                }
-                              } catch (e) {
-                                setState(() {
-                                  _error = '에러가 발생했습니다.';
-                                });
-                              } finally {
-                                setState(() {
-                                  _isLoading = false;
-                                });
-                              }
-                            },
-                    child:
-                        _isLoading
-                            ? SizedBox(
-                              height: 21.h,
-                              width: 21.w,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
+                              },
+                      child:
+                          _isLoading
+                              ? SizedBox(
+                                height: 21.h,
+                                width: 21.w,
+                                child: CircularProgressIndicator(
+                                  color: Color(0xff8287ff),
+                                  strokeWidth: 3,
+                                ),
+                              )
+                              : Text(
+                                '${DateFormat('yyyy.MM.dd').format(_startDate!)} - ${DateFormat('yyyy.MM.dd').format(_endDate!)} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            )
-                            : Text(
-                              '${DateFormat('yyyy.MM.dd').format(_startDate!)} - ${DateFormat('yyyy.MM.dd').format(_endDate!)} / ${_endDate!.difference(_startDate!).inDays}박 ${_endDate!.difference(_startDate!).inDays + 1}일',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                    ),
                   ),
-                ),
-              )
-              : null,
+                )
+                : null,
       ),
     );
   }

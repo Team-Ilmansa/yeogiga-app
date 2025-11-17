@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/common/component/trip_name_card.dart';
 import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
+import 'package:yeogiga/common/utils/trip_card_background_helper.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 
 class TripCardList extends StatelessWidget {
@@ -88,8 +89,10 @@ class TripCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String cityText =
-        (city == null || city!.isEmpty) ? '아직 정해지지 않았어요' : city!.join(', ');
+    final hasCity = city != null && city!.isNotEmpty;
+    final firstCity = hasCity ? city!.first : null;
+    final backgroundAsset = getTripCardBackgroundAsset(firstCity);
+    String cityText = hasCity ? city!.join(', ') : '아직 정해지지 않았어요';
     String dateText;
     if (startedAt == null || endedAt == null) {
       dateText = '아직 정해지지 않았어요';
@@ -98,118 +101,141 @@ class TripCard extends StatelessWidget {
     }
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18.r),
-        child: Container(
-          width: 286.w,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('asset/img/home/sky.jpg'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
-            padding: EdgeInsets.all(14.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 25.sp,
-                    letterSpacing: -0.1,
+      child: SizedBox(
+        width: 286.w,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18.r),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(backgroundAsset, fit: BoxFit.cover),
+              ),
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.0),
+                        Colors.black.withOpacity(0.75),
+                      ],
+                      stops: const [0.6, 1.0],
+                    ),
                   ),
                 ),
-                SizedBox(height: 4.h),
-                TripNameCardByAsset(
-                  assetUrl: 'asset/icon/marker-pin-01.svg',
-                  name: cityText,
-                  color: Colors.white,
-                ),
-                TripNameCardByAsset(
-                  assetUrl: 'asset/icon/calendar.svg',
-                  name: dateText,
-                  color: Colors.white,
-                ),
-
-                SizedBox(height: 3.h),
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      'asset/icon/user-02.svg',
-                      width: 18.w,
-                      height: 18.h,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 8.w),
-                    if (members.isEmpty)
-                      Icon(
-                        Icons.person_outline,
-                        size: 18.sp,
-                        color: Colors.white,
-                      )
-                    else ...[
-                      ...members.take(4).map((member) {
-                        final hasImage =
-                            member.imageUrl != null &&
-                            member.imageUrl!.isNotEmpty;
-                        return Padding(
-                          padding: EdgeInsets.only(right: 4.w),
-                          child: ClipOval(
-                            child: SizedBox(
-                              width: 18.w,
-                              height: 18.w,
-                              child:
-                                  hasImage
-                                      ? Image.network(
-                                        member.imageUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                buildProfileAvatarPlaceholder(
-                                                  nickname: member.nickname,
-                                                  size: 16.w,
-                                                  backgroundColor:
-                                                      Colors.white24,
-                                                  textColor: Colors.white,
-                                                ),
-                                      )
-                                      : buildProfileAvatarPlaceholder(
-                                        nickname: member.nickname,
-                                        size: 16.w,
-                                        backgroundColor: Colors.white24,
-                                        textColor: Colors.white,
-                                      ),
-                            ),
-                          ),
-                        );
-                      }),
-                      if (members.length > 4)
-                        Container(
-                          width: 22.w,
-                          height: 16.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '+${members.length - 4}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.all(14.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 25.sp,
+                          letterSpacing: -0.1,
                         ),
+                      ),
+                      SizedBox(height: 4.h),
+                      TripNameCardByAsset(
+                        assetUrl: 'asset/icon/marker-pin-01.svg',
+                        name: cityText,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 3.h),
+                      TripNameCardByAsset(
+                        assetUrl: 'asset/icon/calendar.svg',
+                        name: dateText,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 3.h),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'asset/icon/user-02.svg',
+                            width: 18.w,
+                            height: 18.h,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 8.w),
+                          if (members.isEmpty)
+                            Icon(
+                              Icons.person_outline,
+                              size: 18.sp,
+                              color: Colors.white,
+                            )
+                          else ...[
+                            ...members.take(4).map((member) {
+                              final hasImage =
+                                  member.imageUrl != null &&
+                                  member.imageUrl!.isNotEmpty;
+                              return Padding(
+                                padding: EdgeInsets.only(right: 4.w),
+                                child: ClipOval(
+                                  child: SizedBox(
+                                    width: 18.w,
+                                    height: 18.w,
+                                    child:
+                                        hasImage
+                                            ? Image.network(
+                                              member.imageUrl!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) =>
+                                                      buildProfileAvatarPlaceholder(
+                                                        nickname:
+                                                            member.nickname,
+                                                        size: 16.w,
+                                                        backgroundColor:
+                                                            Colors.white24,
+                                                        textColor: Colors.white,
+                                                      ),
+                                            )
+                                            : buildProfileAvatarPlaceholder(
+                                              nickname: member.nickname,
+                                              size: 16.w,
+                                              backgroundColor: Colors.white24,
+                                              textColor: Colors.white,
+                                            ),
+                                  ),
+                                ),
+                              );
+                            }),
+                            if (members.length > 4)
+                              Container(
+                                width: 22.w,
+                                height: 16.h,
+                                decoration: BoxDecoration(
+                                  color: Colors.white24,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '+${members.length - 4}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ],
+                      ),
                     ],
-                  ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

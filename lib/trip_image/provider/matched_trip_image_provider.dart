@@ -29,6 +29,10 @@ class MatchedDayTripImageNotifier
 
   MatchedDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
+  void clear() {
+    state = const AsyncValue.data([]);
+  }
+
   /// 모든 일차-장소별 매칭 이미지 fetch
   Future<void> fetchAll(
     int tripId,

@@ -138,7 +138,9 @@ class _MoveTripImageViewState extends ConsumerState<MoveTripImageView> {
         ),
         body:
             confirmed == null
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                  child: CircularProgressIndicator(color: Color(0xff8287ff)),
+                )
                 : Stack(
                   children: [
                     Column(
