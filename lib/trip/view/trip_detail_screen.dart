@@ -31,6 +31,8 @@ import 'package:yeogiga/trip/provider/trip_provider.dart';
 import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/component/tab_bar_header_delegate.dart';
 import 'package:yeogiga/common/component/bottom_app_bar_layout.dart';
+import 'package:yeogiga/w2m/provider/user_w2m_provider.dart';
+import 'package:yeogiga/w2m/model/user_w2m_model.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   final int tripId;
@@ -119,6 +121,29 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
             }
 
             final tripValue = next.valueOrNull;
+
+            // W2M 리다이렉트 체크: trip이 Setting 상태이고 W2M을 안했으면 리다이렉트
+            if (tripValue is SettingTripModel &&
+                tripValue.tripId == widget.tripId) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                if (!mounted) return;
+
+                // W2M 상태 확인
+                final userW2m = await ref
+                    .read(userW2mProvider.notifier)
+                    .getUserW2m(tripId: widget.tripId);
+
+                if (!mounted) return;
+
+                // W2M을 안했으면 날짜 선택 화면으로 리다이렉트
+                if (userW2m is NoUserW2mModel) {
+                  GoRouter.of(context).pushReplacement('/dateRangePicker');
+                  return;
+                }
+              });
+              return;
+            }
+
             if (tripValue is TripModel && tripValue.tripId == widget.tripId) {
               if (_lastRefreshedTripId != tripValue.tripId) {
                 _lastRefreshedTripId = tripValue.tripId;

@@ -144,6 +144,7 @@ class _W2MOverlapCalendarScreenState
                                       month,
                                       overlapMap,
                                       tripW2m.availabilities,
+                                      isFirstMonth: index == 0,
                                     ),
                                   );
                                 },
@@ -233,8 +234,9 @@ class _W2MOverlapCalendarScreenState
   Widget _buildMonthCalendar(
     DateTime month,
     Map<DateTime, int> overlapMap,
-    List availabilities,
-  ) {
+    List availabilities, {
+    bool isFirstMonth = false,
+  }) {
     // 모든 유저의 availableDates를 유저별로 연속 구간(range)으로 변환
     Map<int, List<List<DateTime>>> userRanges = {};
     if (overlapMap.isNotEmpty) {
@@ -305,6 +307,12 @@ class _W2MOverlapCalendarScreenState
           row.add(const Expanded(child: SizedBox()));
         } else {
           final thisDay = DateTime(month.year, month.month, day);
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+
+          // 오늘 이전 날짜인지 확인 (첫 번째 월에만 적용)
+          final isPastDate = isFirstMonth && thisDay.isBefore(today);
+
           final overlap = overlapMap[thisDay] ?? 0;
           final isSelected =
               _startDate != null &&
@@ -327,10 +335,15 @@ class _W2MOverlapCalendarScreenState
           }
 
           final isRangeEdge = (thisDay == _startDate) || (thisDay == _endDate);
-          row.add(
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
+
+          // 과거 날짜면 빈 공간으로 표시
+          if (isPastDate) {
+            row.add(const Expanded(child: SizedBox()));
+          } else {
+            row.add(
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
                   setState(() {
                     if (_startDate == null ||
                         (_startDate != null && _endDate != null)) {
@@ -420,10 +433,11 @@ class _W2MOverlapCalendarScreenState
                       ),
                     ),
                   ),
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          }
           day++;
         }
       }

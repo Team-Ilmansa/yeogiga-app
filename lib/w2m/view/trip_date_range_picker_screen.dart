@@ -115,7 +115,7 @@ class _TripDateRangePickerScreenState
                   final month = DateTime(now.year, now.month + index);
                   return Padding(
                     padding: EdgeInsets.only(bottom: 25.h),
-                    child: _buildMonthCalendar(month),
+                    child: _buildMonthCalendar(month, isFirstMonth: index == 0),
                   );
                 },
               ),
@@ -228,7 +228,7 @@ class _TripDateRangePickerScreenState
     );
   }
 
-  Widget _buildMonthCalendar(DateTime month) {
+  Widget _buildMonthCalendar(DateTime month, {bool isFirstMonth = false}) {
     final firstDayOfMonth = DateTime(month.year, month.month, 1);
     final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
@@ -274,16 +274,27 @@ class _TripDateRangePickerScreenState
           row.add(const Expanded(child: SizedBox()));
         } else {
           final thisDay = DateTime(month.year, month.month, day);
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+
+          // 오늘 이전 날짜인지 확인 (첫 번째 월에만 적용)
+          final isPastDate = isFirstMonth && thisDay.isBefore(today);
+
           final isSelected =
               _startDate != null &&
               _endDate != null &&
               !thisDay.isBefore(_startDate!) &&
               !thisDay.isAfter(_endDate!);
           final isRangeEdge = (thisDay == _startDate) || (thisDay == _endDate);
-          row.add(
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
+
+          // 과거 날짜면 빈 공간으로 표시
+          if (isPastDate) {
+            row.add(const Expanded(child: SizedBox()));
+          } else {
+            row.add(
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
                   setState(() {
                     if (_startDate == null ||
                         (_startDate != null && _endDate != null)) {
@@ -355,10 +366,11 @@ class _TripDateRangePickerScreenState
                       ),
                     ),
                   ),
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          }
           day++;
         }
       }
