@@ -3,15 +3,34 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:yeogiga/trip/model/trip_model.dart';
 
-class SettingTripCardList extends StatelessWidget {
+class SettingTripCardList extends StatefulWidget {
   final List<TripModel?> trips;
   final void Function(int tripId)? onTap;
 
   const SettingTripCardList({super.key, required this.trips, this.onTap});
 
   @override
+  State<SettingTripCardList> createState() => _SettingTripCardListState();
+}
+
+class _SettingTripCardListState extends State<SettingTripCardList> {
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.9);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (trips.isEmpty) {
+    if (widget.trips.isEmpty) {
       return Center(
         child: Text(
           '설정 중인 여행이 없습니다.',
@@ -19,28 +38,28 @@ class SettingTripCardList extends StatelessWidget {
         ),
       );
     }
+    final halfGap = (11.w) / 2;
     return SizedBox(
       height: 113.h,
-      child: ListView.separated(
-        primary: false,
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
-        itemCount: trips.length,
-        separatorBuilder: (_, __) => SizedBox(width: 11.w),
+      child: PageView.builder(
+        controller: _pageController,
+        padEnds: false,
+        itemCount: widget.trips.length,
         itemBuilder: (context, index) {
-          final trip = trips[index];
+          final trip = widget.trips[index];
           if (trip == null) return const SizedBox.shrink();
-          return SettingTripCard(
-            title: trip.title,
-            city: trip.city,
-            startedAt: trip.startedAt,
-            endedAt: trip.endedAt,
-            onTap: () {
-              if (onTap != null && trip.tripId != null) {
-                onTap!(trip.tripId!);
-              }
-            },
+          final leftPadding = index == 0 ? 14.w : halfGap;
+          final rightPadding =
+              index == widget.trips.length - 1 ? 14.w : halfGap;
+          return Padding(
+            padding: EdgeInsets.fromLTRB(leftPadding, 2.h, rightPadding, 2.h),
+            child: SettingTripCard(
+              title: trip.title,
+              city: trip.city,
+              startedAt: trip.startedAt,
+              endedAt: trip.endedAt,
+              onTap: () => widget.onTap?.call(trip.tripId),
+            ),
           );
         },
       ),

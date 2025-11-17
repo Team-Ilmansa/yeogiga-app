@@ -308,10 +308,10 @@ class _W2MOverlapCalendarScreenState
         } else {
           final thisDay = DateTime(month.year, month.month, day);
           final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
+          final nextDay = DateTime(now.year, now.month, now.day + 1);
 
           // 오늘 이전 날짜인지 확인 (첫 번째 월에만 적용)
-          final isPastDate = isFirstMonth && thisDay.isBefore(today);
+          final isPastDate = isFirstMonth && thisDay.isBefore(nextDay);
 
           final overlap = overlapMap[thisDay] ?? 0;
           final isSelected =
@@ -344,95 +344,99 @@ class _W2MOverlapCalendarScreenState
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                  setState(() {
-                    if (_startDate == null ||
-                        (_startDate != null && _endDate != null)) {
-                      _startDate = thisDay;
-                      _endDate = null;
-                    } else if (_startDate != null && _endDate == null) {
-                      if (thisDay.isBefore(_startDate!)) {
+                    setState(() {
+                      if (_startDate == null ||
+                          (_startDate != null && _endDate != null)) {
                         _startDate = thisDay;
-                      } else if (thisDay == _startDate) {
-                        _endDate = thisDay;
-                      } else {
-                        _endDate = thisDay;
+                        _endDate = null;
+                      } else if (_startDate != null && _endDate == null) {
+                        if (thisDay.isBefore(_startDate!)) {
+                          _startDate = thisDay;
+                        } else if (thisDay == _startDate) {
+                          _endDate = thisDay;
+                        } else {
+                          _endDate = thisDay;
+                        }
                       }
-                    }
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 7.h),
-                  decoration:
-                      isSelected
-                          ? BoxDecoration(
-                            color: const Color(0xffe3e5ff),
-                            borderRadius: BorderRadius.horizontal(
-                              left:
-                                  isRangeEdge && thisDay == _startDate
-                                      ? Radius.circular(45.r)
-                                      : Radius.zero,
-                              right:
-                                  isRangeEdge && thisDay == _endDate
-                                      ? Radius.circular(45.r)
-                                      : Radius.zero,
-                            ),
-                          )
-                          : null,
+                    });
+                  },
                   child: Container(
-                    width: 34.w,
-                    height: 34.h,
+                    margin: EdgeInsets.symmetric(vertical: 7.h),
                     decoration:
-                        overlapMap[thisDay] != null && overlapMap[thisDay]! > 0
+                        isSelected
                             ? BoxDecoration(
-                              color: const Color(0xffe3e5ff).withOpacity(
-                                _getOverlapOpacity(overlapMap[thisDay]!),
-                              ),
+                              color: const Color(0xffe3e5ff),
                               borderRadius: BorderRadius.horizontal(
                                 left:
-                                    _isOverlapRangeStart(thisDay, overlapMap)
+                                    isRangeEdge && thisDay == _startDate
                                         ? Radius.circular(45.r)
                                         : Radius.zero,
                                 right:
-                                    _isOverlapRangeEnd(thisDay, overlapMap)
+                                    isRangeEdge && thisDay == _endDate
                                         ? Radius.circular(45.r)
                                         : Radius.zero,
                               ),
                             )
                             : null,
-                    child: Center(
-                      child: Container(
-                        width: 34.w,
-                        height: 34.h,
-                        decoration:
-                            isRangeEdge
-                                ? BoxDecoration(
-                                  color: const Color(0xff8287ff),
-                                  shape: BoxShape.circle,
-                                )
-                                : null,
-                        child: Center(
-                          child: Text(
-                            '$day',
-                            style: TextStyle(
-                              color:
-                                  isRangeEdge
-                                      ? Colors.white
-                                      : (isSelected
-                                          ? const Color(0xff8287ff)
-                                          : (thisDay.weekday == DateTime.sunday
-                                              ? const Color(0xfff65a5a)
-                                              : (thisDay.weekday ==
-                                                      DateTime.saturday
-                                                  ? const Color(0xff6d8fff)
-                                                  : const Color(0xff313131)))),
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
+                    child: Container(
+                      width: 34.w,
+                      height: 34.h,
+                      decoration:
+                          overlapMap[thisDay] != null &&
+                                  overlapMap[thisDay]! > 0
+                              ? BoxDecoration(
+                                color: const Color(0xffe3e5ff).withOpacity(
+                                  _getOverlapOpacity(overlapMap[thisDay]!),
+                                ),
+                                borderRadius: BorderRadius.horizontal(
+                                  left:
+                                      _isOverlapRangeStart(thisDay, overlapMap)
+                                          ? Radius.circular(45.r)
+                                          : Radius.zero,
+                                  right:
+                                      _isOverlapRangeEnd(thisDay, overlapMap)
+                                          ? Radius.circular(45.r)
+                                          : Radius.zero,
+                                ),
+                              )
+                              : null,
+                      child: Center(
+                        child: Container(
+                          width: 34.w,
+                          height: 34.h,
+                          decoration:
+                              isRangeEdge
+                                  ? BoxDecoration(
+                                    color: const Color(0xff8287ff),
+                                    shape: BoxShape.circle,
+                                  )
+                                  : null,
+                          child: Center(
+                            child: Text(
+                              '$day',
+                              style: TextStyle(
+                                color:
+                                    isRangeEdge
+                                        ? Colors.white
+                                        : (isSelected
+                                            ? const Color(0xff8287ff)
+                                            : (thisDay.weekday ==
+                                                    DateTime.sunday
+                                                ? const Color(0xfff65a5a)
+                                                : (thisDay.weekday ==
+                                                        DateTime.saturday
+                                                    ? const Color(0xff6d8fff)
+                                                    : const Color(
+                                                      0xff313131,
+                                                    )))),
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   ),
                 ),
               ),
