@@ -145,6 +145,7 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
+                                    textInputAction: TextInputAction.search,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: '...을 검색해보세요',
@@ -158,6 +159,10 @@ class _NaverPlaceMapScreenState extends ConsumerState<NaverPlaceMapScreen> {
                                     ),
                                     onChanged: (value) {
                                       setState(() => _searchQuery = value);
+                                    },
+                                    onSubmitted: (_) {
+                                      FocusScope.of(context).unfocus();
+                                      _searchAndShowMarkers();
                                     },
                                   ),
                                 ),

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/setting_trip_card.dart';
 import 'package:yeogiga/common/dio/dio.dart';
-import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
+import 'package:yeogiga/schedule/component/uprising_place_card.dart';
 import 'package:yeogiga/schedule/component/schedule_item.dart';
 import 'package:yeogiga/common/component/trip_card.dart';
 import 'package:yeogiga/schedule/component/recommend_card.dart';
@@ -23,6 +23,7 @@ import 'package:yeogiga/common/route_observer.dart';
 import 'package:yeogiga/common/service/fcm_token_manager.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/common/utils/snackbar_helper.dart';
+import 'package:yeogiga/common/provider/uprising_place_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -51,18 +52,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
     ref.read(mainTripFutureProvider);
     ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
     ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
+    ref.read(uprisingPlaceProvider.notifier).fetchUprisingPlaces();
+    ref.read(weatherProvider.notifier).fetchWeather();
     super.didPopNext();
   }
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      if (!mounted) return;
-      ref.read(mainTripFutureProvider);
-      ref.read(pastTripListProvider.notifier).fetchAndSetPastTrips();
-      ref.read(settingTripListProvider.notifier).fetchAndSetSettingTrips();
-    });
+    // SplashScreen에서 이미 모든 데이터를 로딩했으므로 여기서는 불필요
+    // 필요 시 didPopNext()에서만 새로고침
   }
 
   @override
@@ -159,9 +158,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                   // ),
                   // RecommendScheduleCardList(),
                   // SizedBox(height: 27.h),
-                  // SectionTitle("인기급상승 여행스팟"),
-                  // HotScheduleCardGridList(),
-                  // SizedBox(height: 27.h),
+                  SectionTitle("인기급상승 여행스팟"),
+                  UprisingCardGridList(),
+                  SizedBox(height: 27.h),
                   SectionTitle("지난여행 돌아보기"),
                   Consumer(
                     builder: (context, ref, _) {
@@ -170,7 +169,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                         loading:
                             () => SizedBox(
                               height: 321.h,
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xff8287ff),
+                                ),
+                              ),
                             ),
                         error:
                             (e, _) => SizedBox(
@@ -307,7 +310,10 @@ class _HomeAppBar extends ConsumerWidget {
     return SizedBox(
       height: 240.h,
       child: weatherAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading:
+            () => const Center(
+              child: CircularProgressIndicator(color: Color(0xff8287ff)),
+            ),
         error: (e, _) => Stack(children: [Center(child: Text(e.toString()))]),
         data: (weather) {
           final weatherMain =

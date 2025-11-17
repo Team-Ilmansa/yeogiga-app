@@ -70,7 +70,11 @@ class _MyPageState extends ConsumerState<MyPage> with RouteAware {
                   loading:
                       () => SizedBox(
                         height: 321.h,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xff8287ff),
+                          ),
+                        ),
                       ),
                   error:
                       (e, _) => SizedBox(

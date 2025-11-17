@@ -132,7 +132,10 @@ class _CompletedScheduleViewState extends State<CompletedScheduleView> {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading:
+              () => const Center(
+                child: CircularProgressIndicator(color: Color(0xff8287ff)),
+              ),
           error:
               (error, stackTrace) => Center(
                 child: Text(

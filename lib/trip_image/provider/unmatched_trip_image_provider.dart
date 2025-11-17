@@ -23,6 +23,10 @@ class UnmatchedDayTripImageNotifier
 
   UnmatchedDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
+  void clear() {
+    state = const AsyncValue.data([]);
+  }
+
   /// TODO: 모든 일차별 매칭되지 않은 이미지 fetch
   Future<void> fetchAll(
     int tripId,

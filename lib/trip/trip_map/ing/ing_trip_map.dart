@@ -323,7 +323,9 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
               builder: (context, ref, _) {
                 // fetch가 모두 끝날 때까지 로딩만 보여줌
                 if (!_allDaysFetched) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xff8287ff)),
+                  );
                 }
                 final scheduleAsync =
                     ref.watch(confirmScheduleProvider).valueOrNull;
@@ -659,7 +661,9 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
                                   });
                                 }
                                 return const Center(
-                                  child: CircularProgressIndicator(),
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xff8287ff),
+                                  ),
                                 );
                               }
                               final schedules = scheduleAsync.schedules;

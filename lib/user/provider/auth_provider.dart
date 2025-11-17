@@ -133,9 +133,7 @@ class AuthProvider extends ChangeNotifier {
         if (extra is MoveTripImageArgs) {
           return MoveTripImageView(args: extra);
         }
-        return const Scaffold(
-          body: Center(child: Text('잘못된 접근입니다.')),
-        );
+        return const Scaffold(body: Center(child: Text('잘못된 접근입니다.')));
       },
     ),
     GoRoute(

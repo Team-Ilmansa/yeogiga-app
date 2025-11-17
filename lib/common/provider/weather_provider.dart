@@ -25,7 +25,7 @@ Future<Position> getCurrentPosition() async {
 }
 
 /// 날씨 API 호출 (OpenWeatherMap)
-Future<Map<String, dynamic>> fetchWeather(
+Future<Map<String, dynamic>> _fetchWeatherFromApi(
   double lat,
   double lon,
   String apiKey,
@@ -42,9 +42,35 @@ Future<Map<String, dynamic>> fetchWeather(
 }
 
 /// 날씨 상태 Provider
-
-final weatherProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final position = await getCurrentPosition();
-  final apiKey = dotenv.env['WEATHER_API_KEY']!;
-  return await fetchWeather(position.latitude, position.longitude, apiKey);
+final weatherProvider = StateNotifierProvider<
+    WeatherNotifier,
+    AsyncValue<Map<String, dynamic>>
+>((ref) {
+  return WeatherNotifier();
 });
+
+class WeatherNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>>> {
+  WeatherNotifier() : super(const AsyncValue.data({}));
+
+  /// 날씨 정보 가져오기
+  Future<void> fetchWeather() async {
+    state = const AsyncValue.loading();
+    try {
+      final position = await getCurrentPosition();
+      final apiKey = dotenv.env['WEATHER_API_KEY']!;
+      final weatherData = await _fetchWeatherFromApi(
+        position.latitude,
+        position.longitude,
+        apiKey,
+      );
+      state = AsyncValue.data(weatherData);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  /// 상태 초기화
+  void clear() {
+    state = const AsyncValue.data({});
+  }
+}

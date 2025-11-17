@@ -27,6 +27,10 @@ class PendingDayTripImageNotifier
 
   PendingDayTripImageNotifier(this.repo) : super(const AsyncValue.data([]));
 
+  void clear() {
+    state = const AsyncValue.data([]);
+  }
+
   // 임시 저장 이미지 전부 불러오기
   Future<void> fetchAll(
     int tripId,

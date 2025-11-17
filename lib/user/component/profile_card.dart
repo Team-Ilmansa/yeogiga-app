@@ -6,13 +6,21 @@ import 'package:yeogiga/user/model/user_model.dart';
 import 'package:yeogiga/user/provider/user_me_provider.dart';
 import 'package:yeogiga/common/utils/profile_placeholder_util.dart';
 
-class ProfileCard extends ConsumerWidget {
+class ProfileCard extends ConsumerStatefulWidget {
   final VoidCallback? onManageProfile;
 
   const ProfileCard({super.key, this.onManageProfile});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends ConsumerState<ProfileCard> {
+  String? _lastImageUrl;
+  int _imageKey = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final userState = ref.watch(userMeProvider);
     final user =
         userState is UserResponseModel
@@ -22,6 +30,12 @@ class ProfileCard extends ConsumerWidget {
             : null;
     final isSocialLogin =
         user != null && (user.username == null || user.username!.isEmpty);
+
+    // imageUrl이 변경되면 Key를 업데이트하여 이미지 위젯 강제 재생성
+    if (user?.imageUrl != _lastImageUrl) {
+      _lastImageUrl = user?.imageUrl;
+      _imageKey++;
+    }
     return Container(
       width: 361.w,
       height: 104.h,
@@ -37,13 +51,37 @@ class ProfileCard extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            user != null && user.imageUrl != null
+            user != null && user.imageUrl != null && user.imageUrl!.isNotEmpty
                 ? ClipOval(
+                  key: ValueKey('profile_image_$_imageKey'), // Key로 강제 재생성
                   child: Image.network(
                     user.imageUrl!,
                     width: 80.w,
                     height: 80.w,
                     fit: BoxFit.cover,
+                    cacheWidth: (80.w * 3).toInt(),
+                    errorBuilder: (context, error, stackTrace) {
+                      return buildProfileAvatarPlaceholder(
+                        nickname: user.nickname,
+                        size: 80.w,
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return SizedBox(
+                        width: 80.w,
+                        height: 80.w,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                            color: Color(0xff8287ff),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 )
                 : buildProfileAvatarPlaceholder(
@@ -117,7 +155,7 @@ class ProfileCard extends ConsumerWidget {
                             ),
                           ),
                         GestureDetector(
-                          onTap: onManageProfile,
+                          onTap: widget.onManageProfile,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

@@ -40,7 +40,7 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
   final GlobalKey<_EndTripNaverMapState> _mapKey =
       GlobalKey<_EndTripNaverMapState>();
   static const List<double> _sheetSnapPoints = [0.2, 0.4, 0.8];
-  static const double _midSnapPoint = 0.8;
+  static const double _midSnapPoint = 0.2;
 
   // Optimistic UI: 이미지 마커 즉시 제거 (외부에서 호출 가능)
   Future<void> removeImageMarkers(List<String> imageIds) async {
@@ -293,7 +293,9 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
                   onMapInteraction: _collapseSheet,
                 )
               else
-                const Center(child: CircularProgressIndicator()),
+                const Center(
+                  child: CircularProgressIndicator(color: Color(0xff8287ff)),
+                ),
               // TODO: 뒤로 가기 버튼
               Positioned(
                 top: 15.h,
@@ -374,7 +376,9 @@ class EndTripMapScreenState extends ConsumerState<EndTripMapScreen> {
 
                         if (completedAsync == null) {
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator(
+                              color: Color(0xff8287ff),
+                            ),
                           );
                         }
                         final schedules = completedAsync.data;
@@ -1179,18 +1183,17 @@ class _EndTripBottomSheetState extends ConsumerState<EndTripBottomSheet> {
     final parentHeight = widget.sheetController.sizeToPixels(1);
     if (parentHeight == 0) return;
     final deltaSize = delta / parentHeight;
-    final target = (widget.sheetController.size - deltaSize)
-        .clamp(widget.minChildSize, widget.maxChildSize);
+    final target = (widget.sheetController.size - deltaSize).clamp(
+      widget.minChildSize,
+      widget.maxChildSize,
+    );
     widget.sheetController.jumpTo(target);
   }
 
   void _onHandleDragEnd(DragEndDetails details) {
     if (!widget.sheetController.isAttached) return;
     final currentSize = widget.sheetController.size;
-    final target = _resolveSnapTarget(
-      currentSize,
-      details.primaryVelocity,
-    );
+    final target = _resolveSnapTarget(currentSize, details.primaryVelocity);
     widget.sheetController.animateTo(
       target,
       duration: const Duration(milliseconds: 200),

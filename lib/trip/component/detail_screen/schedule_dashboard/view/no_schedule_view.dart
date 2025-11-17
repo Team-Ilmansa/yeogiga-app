@@ -9,6 +9,7 @@ class NoScheduleView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: 50.h),
         SvgPicture.asset(
@@ -18,12 +19,14 @@ class NoScheduleView extends StatelessWidget {
           color: const Color(0xffc6c6c6),
         ),
         SizedBox(height: 7.h),
-        Text(
-          '날짜 확정 후 일정을 추가할 수 있어요',
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xffc6c6c6),
-            fontWeight: FontWeight.w500,
+        Center(
+          child: Text(
+            '날짜 확정 후 일정을 추가할 수 있어요',
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xffc6c6c6),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],

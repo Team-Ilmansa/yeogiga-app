@@ -130,8 +130,10 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper>
     return permissionStatus.when(
       loading:
           () => const Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: Color(0xfffafafa),
+            body: Center(
+              child: CircularProgressIndicator(color: Color(0xff8287ff)),
+            ),
           ),
       error:
           (error, _) => PermissionRequestScreen(
@@ -145,8 +147,8 @@ class _ScreenWrapperState extends ConsumerState<ScreenWrapper>
         final mainTripState = ref.watch(mainTripFutureProvider);
         return mainTripState.when(
           loading: () => const SplashScreen(),
-          error: (error, stackTrace) =>
-              _buildInitialErrorView(error, stackTrace),
+          error:
+              (error, stackTrace) => _buildInitialErrorView(error, stackTrace),
           data: (_) => _buildMainScaffold(context),
         );
       },

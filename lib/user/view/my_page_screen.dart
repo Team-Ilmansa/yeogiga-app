@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yeogiga/common/component/trip_card.dart';
-import 'package:yeogiga/schedule/component/hot_schedule_card.dart';
+import 'package:yeogiga/schedule/component/uprising_place_card.dart';
 import 'package:yeogiga/schedule/provider/completed_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/confirm_schedule_provider.dart';
 import 'package:yeogiga/schedule/provider/pending_schedule_provider.dart';
@@ -182,7 +182,11 @@ class _MyWidgetState extends ConsumerState<MyPageScreen> with RouteAware {
                   loading:
                       () => SizedBox(
                         height: 321.h,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xff8287ff),
+                          ),
+                        ),
                       ),
                   error:
                       (e, _) => SizedBox(

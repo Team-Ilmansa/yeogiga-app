@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:yeogiga/common/component/nested_refresh_indicator.dart';
 import 'package:yeogiga/common/provider/util_state_provider.dart';
 import 'package:yeogiga/common/utils/system_ui_helper.dart';
 import 'package:yeogiga/notice/provider/notice_provider.dart';
@@ -44,7 +44,6 @@ class TripDetailScreen extends ConsumerStatefulWidget {
 class TripDetailScreenState extends ConsumerState<TripDetailScreen>
     with SingleTickerProviderStateMixin, RouteAware {
   // static 메서드로 분리
-  // TODO: 존나 중요
 
   int _selectedDayIndex = 0;
 
@@ -428,20 +427,12 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(), // 가로 스와이프(스크롤) 전환 막기
             children: [
-              LiquidPullToRefresh(
+              NestedRefreshIndicator(
                 onRefresh: refreshSchedule,
-                animSpeedFactor: 7.0,
-                color: const Color(0xfffafafa),
-                backgroundColor: const Color(0xff8287ff),
-                showChildOpacityTransition: true, // child 투명도 트랜지션 사용 여부
-                child: ScheduleDashboardTab(),
+                child: const ScheduleDashboardTab(),
               ),
-              LiquidPullToRefresh(
+              NestedRefreshIndicator(
                 onRefresh: refreshAll,
-                animSpeedFactor: 7.0,
-                color: const Color(0xfffafafa),
-                backgroundColor: const Color(0xff8287ff),
-                showChildOpacityTransition: true, // child 투명도 트랜지션 사용 여부
                 child: GalleryTab(
                   sliverMode: true,
                   selectedDayIndex: _selectedDayIndex,
