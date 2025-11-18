@@ -537,6 +537,7 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
   NLocationOverlay? _locationOverlay;
   List<NMarker> _imageMarkers = [];
   List<MatchedImage> _currentPlaceImages = [];
+  final Set<String> _prefetchedImageMarkerUrls = {};
   int _currentDay = 1;
   String? _currentPlaceName;
   String? _currentTripDayPlaceId;
@@ -867,6 +868,24 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
       loading: () {},
       error: (_, __) {},
     );
+
+    final hostRouteCoords = _getHostRouteForDay(widget.selectedDayIndex);
+    // 방장 경로 폴리라인
+    if (hostRouteCoords != null && hostRouteCoords.length >= 2) {
+      final hostPolyline = NPolylineOverlay(
+        id: 'host_route_polyline',
+        coords: hostRouteCoords,
+        color: const Color(0xff2ac308),
+        width: 4.w,
+        lineCap: NLineCap.round,
+        lineJoin: NLineJoin.round,
+      );
+      try {
+        await mapController!.addOverlay(hostPolyline);
+      } catch (e) {
+        return;
+      }
+    }
   }
 
   // 이미지를 마커로 표시
@@ -877,6 +896,8 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
     _currentPlaceImages = images;
 
     for (final image in images) {
+      await _precacheImageMarker(image.url);
+
       final iconWidget = Container(
         width: 40.w,
         height: 40.h,
@@ -924,6 +945,17 @@ class _EndTripNaverMapState extends ConsumerState<_EndTripNaverMap> {
 
     if (images.isNotEmpty) {
       await _fitMapToImages(images);
+    }
+  }
+
+  Future<void> _precacheImageMarker(String url) async {
+    if (!mounted || url.isEmpty) return;
+    if (_prefetchedImageMarkerUrls.contains(url)) return;
+    try {
+      await precacheImage(NetworkImage(url), context);
+      _prefetchedImageMarkerUrls.add(url);
+    } catch (_) {
+      // Ignore failures, fallback UI will be used
     }
   }
 

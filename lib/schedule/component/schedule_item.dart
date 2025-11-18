@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yeogiga/main_trip/provider/main_trip_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:yeogiga/common/utils/category_icon_util.dart';
+import 'package:yeogiga/trip/view/trip_detail_screen.dart';
 
 class ScheduleItem extends StatelessWidget {
   final String title;
@@ -228,74 +230,84 @@ class _ScheduleItemListMainState extends ConsumerState<ScheduleItemListMain>
                             height: calculatedHeight,
                             child: Stack(
                               children: [
-                                ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  itemCount:
-                                      places.isEmpty ? 2 : places.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (places.isEmpty && index == 0) {
-                                      // 안내문구 + 일정 담으러 가기 버튼 (둘 다 보여줌)
-                                      return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Center(
-                                            child: Text(
-                                              '아직 예정된 일정이 없어요.',
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFFB0B0B0),
+                                GestureDetector(
+                                  onTap: () {
+                                    context.pushNamed(
+                                      TripDetailScreen.routeName,
+                                      pathParameters: {
+                                        'tripId': mainTrip.tripId.toString(),
+                                      },
+                                    );
+                                  },
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.zero,
+                                    itemCount:
+                                        places.isEmpty ? 2 : places.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (places.isEmpty && index == 0) {
+                                        // 안내문구 + 일정 담으러 가기 버튼 (둘 다 보여줌)
+                                        return Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Center(
+                                              child: Text(
+                                                '아직 예정된 일정이 없어요.',
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFFB0B0B0),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(height: 10.h),
-                                          // Center(
-                                          //   child: TextButton(
-                                          //     onPressed: () {},
-                                          //     child: Text(
-                                          //       '+ 일정 담으러 가기',
-                                          //       style: TextStyle(
-                                          //         fontSize: 14.sp,
-                                          //         fontWeight: FontWeight.bold,
-                                          //         color: Color(0xFF8287ff),
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                        ],
-                                      );
-                                    } else if (index < places.length &&
-                                        places.isNotEmpty) {
-                                      final place = places[index];
-                                      if (index == places.length - 1) {
-                                        return Column(
-                                          children: [
-                                            ScheduleItem(
-                                              title: place.name,
-                                              category:
-                                                  place
-                                                      .placeType, // TODO: place에서 카테고리 가져오기
-                                              time: null,
-                                              done: place.isVisited,
-                                            ),
-                                            SizedBox(height: 21.h),
+                                            SizedBox(height: 10.h),
+                                            // Center(
+                                            //   child: TextButton(
+                                            //     onPressed: () {},
+                                            //     child: Text(
+                                            //       '+ 일정 담으러 가기',
+                                            //       style: TextStyle(
+                                            //         fontSize: 14.sp,
+                                            //         fontWeight: FontWeight.bold,
+                                            //         color: Color(0xFF8287ff),
+                                            //       ),
+                                            //     ),
+                                            //   ),
+                                            // ),
                                           ],
                                         );
+                                      } else if (index < places.length &&
+                                          places.isNotEmpty) {
+                                        final place = places[index];
+                                        if (index == places.length - 1) {
+                                          return Column(
+                                            children: [
+                                              ScheduleItem(
+                                                title: place.name,
+                                                category:
+                                                    place
+                                                        .placeType, // TODO: place에서 카테고리 가져오기
+                                                time: null,
+                                                done: place.isVisited,
+                                              ),
+                                              SizedBox(height: 21.h),
+                                            ],
+                                          );
+                                        } else {
+                                          return ScheduleItem(
+                                            title: place.name,
+                                            category:
+                                                place
+                                                    .placeType, // TODO: place에서 카테고리 가져오기
+                                            time: null,
+                                            done: place.isVisited,
+                                          );
+                                        }
                                       } else {
-                                        return ScheduleItem(
-                                          title: place.name,
-                                          category:
-                                              place
-                                                  .placeType, // TODO: place에서 카테고리 가져오기
-                                          time: null,
-                                          done: place.isVisited,
-                                        );
+                                        return const SizedBox.shrink();
                                       }
-                                    } else {
-                                      return const SizedBox.shrink();
-                                    }
-                                  },
+                                    },
+                                  ),
                                 ),
                                 if (true)
                                   Positioned(

@@ -27,10 +27,6 @@ class SettlementItem extends ConsumerWidget {
     final completedPayers =
         settlement.payers.where((p) => p.isCompleted).length;
 
-    // 완료 여부에 따른 투명도 설정
-    final isCompleted = settlement.isCompleted;
-    final opacity = isCompleted ? 0.4 : 1.0;
-
     final userState = ref.watch(userMeProvider);
     String? myNickname;
     if (userState is UserResponseModel && userState.data != null) {
@@ -50,7 +46,7 @@ class SettlementItem extends ConsumerWidget {
     final bool showCompletedText =
         isMySettlement
             ? settlement.isCompleted
-            : (myPayer?.isCompleted ?? false);
+            : (myPayer?.isCompleted ?? settlement.isCompleted);
     final Color badgeColor;
     if (isMySettlement) {
       badgeColor =
@@ -64,6 +60,9 @@ class SettlementItem extends ConsumerWidget {
         badgeColor = Colors.white;
       }
     }
+
+    // 완료 여부에 따른 투명도 설정
+    final opacity = showCompletedText ? 0.4 : 1.0;
 
     return GestureDetector(
       onTap: () {

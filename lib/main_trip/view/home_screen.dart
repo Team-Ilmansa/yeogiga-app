@@ -510,6 +510,7 @@ class AppBarTop extends StatelessWidget {
                               'asset/icon/settlement.svg',
                               height: 24.sp,
                               width: 24.sp,
+                              color: iconColor,
                             ),
                           ),
                         ),

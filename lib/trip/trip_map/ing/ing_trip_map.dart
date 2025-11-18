@@ -142,6 +142,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   NMarker? _pingMarker;
   NPolylineOverlay? _polyline;
   NLocationOverlay? _locationOverlay;
+  final Set<String> _prefetchedMemberImageUrls = {};
 
   // 지도 카메라를 마커들에 맞게 fit 시키기
   Future<void> _fitMapToPlaces(List<ConfirmedPlaceModel> places) async {
@@ -224,7 +225,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       final pingMarker = NMarker(
         id: 'ping_marker',
         position: NLatLng(ping.latitude, ping.longitude),
-        icon: NOverlayImage.fromAssetImage('asset/icon/ping.png'),
+        icon: NOverlayImage.fromAssetImage('asset/icon/red_place.png'),
         size: Size(32.w, 32.h),
         caption: NOverlayCaption(text: '집결지: ${ping.place}'),
       );
@@ -279,6 +280,7 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
   }
 
   Future<NMarker> _createMemberMarker(TripMemberLocation member) async {
+    await _precacheMemberMarkerImage(member.imageUrl);
     final style = MemberMarkerStyle();
     final markerWidget = MemberMarkerWidget(member: member, style: style);
     final overlayImage = await NOverlayImage.fromWidget(
@@ -294,6 +296,17 @@ class _IngTripMapScreenState extends ConsumerState<IngTripMapScreen> {
       size: Size(style.width, style.height),
       caption: NOverlayCaption(text: member.nickname),
     );
+  }
+
+  Future<void> _precacheMemberMarkerImage(String? imageUrl) async {
+    if (!mounted || imageUrl == null || imageUrl.isEmpty) return;
+    if (_prefetchedMemberImageUrls.contains(imageUrl)) return;
+    try {
+      await precacheImage(NetworkImage(imageUrl), context);
+      _prefetchedMemberImageUrls.add(imageUrl);
+    } catch (_) {
+      // ignore failures and keep placeholder
+    }
   }
 
   // 여행에서 날짜 뽑기

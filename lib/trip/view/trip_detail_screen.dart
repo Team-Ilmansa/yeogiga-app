@@ -99,8 +99,7 @@ class TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
         // Deeplink 진입 대비: TripProvider 체크 후 필요시에만 fetch
         final current = ref.read(tripProvider).valueOrNull;
-        if (current == null ||
-            (current is TripModel && current.tripId != widget.tripId)) {
+        if (current == null || (current is TripModel)) {
           _lastRefreshedTripId = null;
           ref.read(tripProvider.notifier).getTrip(tripId: widget.tripId);
         }
