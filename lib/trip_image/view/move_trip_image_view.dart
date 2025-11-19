@@ -55,7 +55,7 @@ class _MoveTripImageViewState extends ConsumerState<MoveTripImageView> {
     final confirmed = ref.watch(confirmScheduleProvider).valueOrNull;
 
     // 최초 진입 시 데이터 로드
-    if (confirmed == null && tripState is TripModel) {
+    if (tripState is TripModel) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(confirmScheduleProvider.notifier).fetchAll(tripState.tripId);
       });
